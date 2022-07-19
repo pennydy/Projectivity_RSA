@@ -1,0 +1,106 @@
+var stringify = function(x){return JSON.stringify(x)}
+
+var quds = ["predicate", "content"]
+var entailedQud = ["content"]
+// var qud = ["predicate", "content", "polar_content", "neg_polar_content"]
+
+var predicates = ["know", "suggest"]
+var contents = ["dances", "doesn't dance"]
+var utterances = ["know dances", "suggest dances", 
+                 "know doesn't dance", "suggest doesn't dance",
+                "dances", "doesn't dance"]
+
+
+// the prob of the content and not the content should be: [a, 1-a]
+// where a can be obtained from behavioral result
+var contentPrior = function() {
+  return categorical({
+    vs: contents,
+    ps: [0.7, 0.3]
+  })
+}
+
+
+var meaning = function(utterance, content) {
+  var firstWord = utterance.substring(0, utterance.indexOf(' '))
+  if(_.includes(predicates, firstWord)) {
+    return utterance.substring(utterance.indexOf(' ') + 1) == content
+  } else {
+    return utterance == content
+  } 
+}
+
+// 
+var cost = function(utterance) {
+  var utteranceList = utterance.trim().split(/\s+/)
+  return _.includes(utteranceList, "doesn't") ?  utteranceList.length - 1 : utteranceList.length
+}
+
+
+var compatibility = function(qud, utterance, content) {
+  if (qud == "content") {
+//     display(utterance + " " + content + " " + meaning(utterance, content))
+    return meaning(utterance, content)
+  } else if (qud == "predicate")
+//     display(utterance + " " + content + " " +_.includes(["know dances", "suggest dances"], utterance))
+  return _.includes(["know dances", "suggest dances", "know doesn't dance", "suggest doesn't dance"], utterance) ? flip() : flip(0.01) 
+}
+
+
+var qudPrior = function(predicate) {
+  if (predicate == "suggest") {
+//     display("in qudPrior suggest")
+    return categorical({vs: quds, ps: [0.1, 0.9]}) 
+  } else if (predicate == "know")  {
+//     display("in qudPrior know")
+    return categorical({vs:quds, ps:[0.8, 0.2]}) 
+  } else  {
+    return categorical({vs:quds, ps:[0.5, 0.5]})
+  }
+}
+
+
+// Speaker optimality parameter
+var alpha = 3
+
+
+//  Literal listener
+var literalListener = function(utterance, qud) {
+  Infer({model: function() {
+    var content = uniformDraw(contents)
+    condition(compatibility(qud, utterance, content))
+    return content
+  }})
+}
+
+
+viz(literalListener("know dances", "content"))
+
+
+// Pragmatic speaker
+var speaker = function(content, qud) {
+  Infer({model: function() {
+    var utterance = uniformDraw(utterances)
+    factor(alpha * literalListener(utterance, qud).score(content))
+    return utterance
+  }})
+}
+
+viz(speaker("doesn't dance", "predicate"))
+viz(speaker("doesn't dance", "content"))
+
+// Define a pragmatic listener
+var pragmaticListener = function(utterance) {
+  Infer({model: function() {
+    var content = contentPrior()
+    var predicate = utterance.substring(0, utterance.indexOf(' '))
+    display(predicate)
+    var qud = qudPrior(predicate) 
+    observe(speaker(content, qud), utterance)
+    return content
+  }})
+}
+
+viz.table(pragmaticListener("suggest dances"))
+viz.table(pragmaticListener("know dances"))
+
