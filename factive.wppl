@@ -1,106 +1,147 @@
-var stringify = function(x){return JSON.stringify(x)}
-
 var quds = ["predicate", "content"]
-var entailedQud = ["content"]
-// var qud = ["predicate", "content", "polar_content", "neg_polar_content"]
 
-var predicates = ["know", "suggest"]
+var predicates = ["knew", "didn't know"]
 var contents = ["dances", "doesn't dance"]
-var utterances = ["know dances", "suggest dances", 
-                 "know doesn't dance", "suggest doesn't dance",
+var utterances = ["knew dances", "didn't know dances", 
+                 "knew doesn't dance", "didn't know doesn't dance",
                 "dances", "doesn't dance"]
+var states = ["knew dances", "didn't know dances", "knew doesn't dance", "didn't know doesn't dance"]
 
 
-// the prob of the content and not the content should be: [a, 1-a]
+// the prob of the content and not the content should be: [a, 1-a] 
 // where a can be obtained from behavioral result
 var contentPrior = function() {
   return categorical({
     vs: contents,
-    ps: [0.7, 0.3]
+    ps: [0.6, 0.4]
   })
 }
 
+var statePrior = function() {
+  return categorical({
+    vs: states,
+    ps: [0.4, 0.2, 0.26, 0.14]
+  })
+}
+
+var extractContent = function(utterance) {
+  var firstWord = utterance.substring(0, utterance.indexOf(' '))
+  if (firstWord == "knew") {
+    return utterance.substring(utterance.indexOf(' ') + 1)
+  } else if (firstWord == "didn't") {
+    var neg = utterance.substring(utterance.indexOf(' '))
+    return neg.substring(utterance.indexOf(' '))
+  } else {
+    return utterance
+  }
+}
+
+
+var extractPredicate = function(utterance) {
+  var firstWord = utterance.substring(0, utterance.indexOf(' '))
+  if (firstWord == "knew") {
+    return firstWord
+  } else if (firstWord == "didn't") {
+    var neg = utterance.substring(0, utterance.indexOf(' '))
+    return neg + " know"
+  } else {
+    return ""
+  }
+}
 
 var meaning = function(utterance, content) {
-  var firstWord = utterance.substring(0, utterance.indexOf(' '))
-  if(_.includes(predicates, firstWord)) {
-    return utterance.substring(utterance.indexOf(' ') + 1) == content
-  } else {
-    return utterance == content
-  } 
+  var extractedContent = extractContent(utterance)
+  return extractedContent == content
 }
 
-// 
-var cost = function(utterance) {
-  var utteranceList = utterance.trim().split(/\s+/)
-  return _.includes(utteranceList, "doesn't") ?  utteranceList.length - 1 : utteranceList.length
+var qud_compatible = {
+  content: utterances,
+  predicate: states
 }
 
-
-var compatibility = function(qud, utterance, content) {
+// if the qud is predicate, then first check if it is compatible,  then check 
+// if the predicate is the same as the state.
+var compatibility_listener = function(qud, utterance, state) {
+  var content = extractContent(state)
   if (qud == "content") {
-//     display(utterance + " " + content + " " + meaning(utterance, content))
     return meaning(utterance, content)
-  } else if (qud == "predicate")
-//     display(utterance + " " + content + " " +_.includes(["know dances", "suggest dances"], utterance))
-  return _.includes(["know dances", "suggest dances", "know doesn't dance", "suggest doesn't dance"], utterance) ? flip() : flip(0.01) 
+  } else {
+//     return _.includes(["knew dances", "didn't know dances", "knew doesn't dance", "didn't know doesn't dance"], utterance)
+    return !_.includes(["dances", "doesn't dance"], utterance) ? extractPredicate(utterance) == extractPredicate(state) ? true : flip(0.01) : flip(0.01)
+  }
 }
-
 
 var qudPrior = function(predicate) {
-  if (predicate == "suggest") {
+  if (predicate == "didn't know") {
 //     display("in qudPrior suggest")
-    return categorical({vs: quds, ps: [0.1, 0.9]}) 
-  } else if (predicate == "know")  {
-//     display("in qudPrior know")
-    return categorical({vs:quds, ps:[0.8, 0.2]}) 
+    return categorical({vs: quds, ps: [0.6, 0.4]}) 
+  } else if (predicate == "knew")  {
+//     display("in qudPrior knew")
+    return categorical({vs:quds, ps:[0.6, 0.4]}) 
   } else  {
     return categorical({vs:quds, ps:[0.5, 0.5]})
   }
 }
 
+display("qudPrior " + qudPrior("knew"))
 
 // Speaker optimality parameter
-var alpha = 3
+var alpha = 1
 
 
-//  Literal listener
+//  Literal listener: infers about the state, given utterance and qud
 var literalListener = function(utterance, qud) {
   Infer({model: function() {
-    var content = uniformDraw(contents)
-    condition(compatibility(qud, utterance, content))
-    return content
+//     var content = uniformDraw(contents)
+//     var utterance = uniformDraw(utterances)
+    var state = uniformDraw(states)
+//     var qudFn = qudFns[qud]
+//     var qudAnswer = qudFn(state)
+    condition(compatibility_listener(qud, utterance, state))
+    return state
   }})
 }
 
+// viz(literalListener("dances", "content"))
+// viz(literalListener("knew dances", "predicate"))
 
-viz(literalListener("know dances", "content"))
 
-
-// Pragmatic speaker
-var speaker = function(content, qud) {
+// Pragmatic speaker: infers about the utterance, given state and qud
+// if qud is predicate, then will be more likely to leave out the predicate
+// than saying the incorrect one (given the state)
+var speaker = function(state, qud) {
   Infer({model: function() {
+//     var possible_utterances = qud_compatible[qud]
+//     var utterance = uniformDraw(possible_utterances)
     var utterance = uniformDraw(utterances)
-    factor(alpha * literalListener(utterance, qud).score(content))
+    display(utterance + " " + literalListener(utterance, qud))
+//     condition(compatibility(qud, utterance))
+//     var predicate = uniformDraw(predicates)
+//     var state = predicate + " " + content
+//     display(state)
+    factor(alpha * literalListener(utterance, qud).score(state))
     return utterance
   }})
 }
 
-viz(speaker("doesn't dance", "predicate"))
-viz(speaker("doesn't dance", "content"))
+// viz(speaker("knew dances", "predicate"))
+viz(speaker("didn't know doesn't dance", "content"))
 
 // Define a pragmatic listener
 var pragmaticListener = function(utterance) {
   Infer({model: function() {
     var content = contentPrior()
-    var predicate = utterance.substring(0, utterance.indexOf(' '))
-    display(predicate)
-    var qud = qudPrior(predicate) 
-    observe(speaker(content, qud), utterance)
-    return content
+    var predicate = extractPredicate(utterance)
+//     display(predicate)
+    var qud = qudPrior(predicate)
+//     display(qud)
+    var p = uniformDraw(predicates)
+    var state = predicate + " " + content
+//     display(state)
+//     var state = statePrior()
+    observe(speaker(state, qud), utterance)
+    return extractContent(state)
   }})
 }
 
-viz.table(pragmaticListener("suggest dances"))
-viz.table(pragmaticListener("know dances"))
-
+// viz.table(pragmaticListener("didn't know doesn't dance"))
