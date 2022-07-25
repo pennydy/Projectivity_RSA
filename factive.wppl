@@ -60,15 +60,20 @@ var qud_compatible = {
   predicate: states
 }
 
-// if the qud is content, then only check the content
-// if the qud is predicate, then check if both the predicate and the content are the same
+// if the qud is content: (all utterances are compatibile w/ the qud) check the content, 
+// if matches then check if the predicate is the same, if not then false (w/ noise1)
+
+// if the qud is predicate: check if it is compatible (involves a predicate). If compatible,
+// then check if the predicate is the same, if not then flase (w/ noise2). After checking
+// the predicate, then check if the meaning is the same, if not then false (w/ noise1, same
+// as the noise in the content qud)
 var compatibility_listener = function(qud, utterance, state) {
   var content = extractContent(state)
   if (qud == "content") {
-    return meaning(utterance, content)  ? flip(0.9) : flip(0.1) 
+    return meaning(utterance, content) ? extractPredicate(utterance)==extractPredicate(state) : flip(0.1)
   } else {
 //     return _.includes(["knew dances", "didn't know dances", "knew doesn't dance", "didn't know doesn't dance"], utterance)
-    return !_.includes(["dances", "doesn't dance"], utterance) ? utterance == state ? flip(0.99) : flip(0.01) : flip(0.1)
+    return !_.includes(["dances", "doesn't dance"], utterance) ? extractPredicate(utterance)==extractPredicate(state) ? meaning(utterance, content) : flip(0.1) : flip(0.01)
   }
 }
 
