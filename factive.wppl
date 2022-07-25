@@ -6,6 +6,7 @@ var utterances = ["knew dances", "didn't know dances",
                  "knew doesn't dance", "didn't know doesn't dance",
                 "dances", "doesn't dance"]
 var states = ["knew dances", "didn't know dances", "knew doesn't dance", "didn't know doesn't dance"]
+// var states = utterances
 
 
 // the prob of the content and not the content should be: [a, 1-a] 
@@ -17,10 +18,10 @@ var contentPrior = function() {
   })
 }
 
-var statePrior = function() {
+var predicatePrior = function() {
   return categorical({
-    vs: states,
-    ps: [0.4, 0.2, 0.26, 0.14]
+    vs: predicates,
+    ps: [0.7, 0.3]
   })
 }
 
@@ -59,22 +60,21 @@ var qud_compatible = {
   predicate: states
 }
 
-// if the qud is predicate, then first check if it is compatible,  then check 
-// if the predicate is the same as the state.
+
 var compatibility_listener = function(qud, utterance, state) {
   var content = extractContent(state)
   if (qud == "content") {
-    return meaning(utterance, content)
+    return meaning(utterance, content)  ? flip(0.9) : flip(0.1) 
   } else {
 //     return _.includes(["knew dances", "didn't know dances", "knew doesn't dance", "didn't know doesn't dance"], utterance)
-    return !_.includes(["dances", "doesn't dance"], utterance) ? extractPredicate(utterance) == extractPredicate(state) ? true : flip(0.01) : flip(0.01)
+    return !_.includes(["dances", "doesn't dance"], utterance) ? utterance == state ? flip(0.99) : flip(0.01) : flip(0.1)
   }
 }
 
 var qudPrior = function(predicate) {
   if (predicate == "didn't know") {
 //     display("in qudPrior suggest")
-    return categorical({vs: quds, ps: [0.6, 0.4]}) 
+    return categorical({vs: quds, ps: [0.7, 0.3]}) 
   } else if (predicate == "knew")  {
 //     display("in qudPrior knew")
     return categorical({vs:quds, ps:[0.6, 0.4]}) 
@@ -89,7 +89,7 @@ display("qudPrior " + qudPrior("knew"))
 var alpha = 1
 
 
-//  Literal listener: infers about the state, given utterance and qud
+//  Literal listener
 var literalListener = function(utterance, qud) {
   Infer({model: function() {
 //     var content = uniformDraw(contents)
@@ -102,30 +102,28 @@ var literalListener = function(utterance, qud) {
   }})
 }
 
-// viz(literalListener("dances", "content"))
-// viz(literalListener("knew dances", "predicate"))
+viz(literalListener("dances", "content"))
+viz(literalListener("knew dances", "predicate"))
 
 
-// Pragmatic speaker: infers about the utterance, given state and qud
-// if qud is predicate, then will be more likely to leave out the predicate
-// than saying the incorrect one (given the state)
+// Pragmatic speaker
 var speaker = function(state, qud) {
   Infer({model: function() {
 //     var possible_utterances = qud_compatible[qud]
 //     var utterance = uniformDraw(possible_utterances)
     var utterance = uniformDraw(utterances)
-    display(utterance + " " + literalListener(utterance, qud))
+//     display(utterance + " " + literalListener(utterance, qud))
 //     condition(compatibility(qud, utterance))
 //     var predicate = uniformDraw(predicates)
-//     var state = predicate + " " + content
+//     var state = predicate + content
 //     display(state)
     factor(alpha * literalListener(utterance, qud).score(state))
     return utterance
   }})
 }
 
-// viz(speaker("knew dances", "predicate"))
-viz(speaker("didn't know doesn't dance", "content"))
+viz(speaker("knew dances", "predicate"))
+// viz(speaker("didin't know doesn't dance", "content"))
 
 // Define a pragmatic listener
 var pragmaticListener = function(utterance) {
@@ -144,4 +142,4 @@ var pragmaticListener = function(utterance) {
   }})
 }
 
-// viz.table(pragmaticListener("didn't know doesn't dance"))
+viz.table(pragmaticListener("didn't know doesn't dance"))
