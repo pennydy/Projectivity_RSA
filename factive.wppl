@@ -60,7 +60,8 @@ var qud_compatible = {
   predicate: states
 }
 
-
+// if the qud is content, then only check the content
+// if the qud is predicate, then check if both the predicate and the content are the same
 var compatibility_listener = function(qud, utterance, state) {
   var content = extractContent(state)
   if (qud == "content") {
