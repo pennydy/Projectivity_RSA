@@ -1,0 +1,76 @@
+// Listener's prior knowledge about the content
+var contentPriorListener = function() {
+  return categorical({vs: ["dances", "doesn't dance"], ps:[1, 1]})
+}
+
+
+// Pragmatic speaker
+
+// allowing 
+// certainty: how certain the speaker is about the content, 
+// 1: very certain that the content is true
+// 0.5: maximally uncertain about the content (the chance of the content being either true or false is 0.5)
+// functions as threshold for selecting the predicates
+
+// believed: 
+// uncertain (0.5) about the certainty and uncertain (0.5) about the content: 
+// -> same prob. in all conditions
+
+// uncertain (0.5) about the certainty and slightly more certain (0.58) about the content than hearing the simple polar question:
+// -> more likely to use the intended content than the alternative, but the overall prob. of using "believed" needs to be 
+// the same across different certainty level (i.e. the sum of the probs. of using "believed dances" and "believed doesn't dance"
+// is the same when certainty == 0.5 and certainty == 0.8).
+
+// slightly more certain (0.57) that the speaker is certain and uncertain (0.5) about the content: 
+// (i.e. the listener thinks the speaker is more likely to be certain about the content, but still doesn't know which content 
+// is more likely)
+// -> more likely to use "believed" when the speaker is uncertain, but the overall prob. of using "believed" needs to be 
+// the same within each certainty level (i.e. the prob. of using "believed dances" and "believed doesn't dance"
+// is the same)
+
+var speaker = function(content, certainty) {
+  if (certainty==0.5) {
+      return Categorical({ps:[0.1, 0.2, 0.8, 0.1, 0.2], vs:["knew dances", "believed dances", "dances",
+                                                                 "knew doesn't dance", "believed doesn't dance"]}) 
+   } else if (certainty>0.5) {
+     if (content == "dances") {
+       // when the content is "dances" and the speaker is certain that it is TRUE
+        return Categorical({ps:[0.8, 0.4, 0.1, 0.1, 0.4], vs:["knew dances", "believed dances", "dances",
+                                                                 "knew doesn't dance", "believed doesn't dance"]}) 
+     } else {
+       return Categorical({ps:[0.1, 0.4, 0.1, 0.8, 0.4], vs:["knew dances", "believed dances", "dances",
+                                                                   "knew doesn't dance", "believed doesn't dance"]}) 
+     }
+  } 
+}
+
+viz(speaker("dances", 0.9))
+
+
+// certainty: the listener's belief about how CERTAIN the speaker is about the content
+// content: the listener's belief about how likely the listener thinks the content is true (certain-that rating)
+
+// Define a pragmatic listener
+var pragmaticListener = function(utterance) {
+  Infer({model: function() {
+    var content = contentPriorListener()
+    var certainty = uniformDraw([0.5, 0.8])
+    observe(speaker(content, certainty), utterance)
+    return {content, certainty}
+  }})
+}
+
+
+
+var listenerPosterior = pragmaticListener("believed dances")
+// listener's certainty
+viz.table(listenerPosterior)
+display("marginalize (listener's belief) about the content")
+viz.table(marginalize(listenerPosterior, "content"))
+
+// listener's expectation of the speaker's certainty
+// display("listener's expectation of the speaker's certainty")
+// display(expectation(marginalize(listenerPosterior, "certainty")))
+display("marginalize (listener's certainty about) speaker's certainty distribution")
+viz.table(marginalize(listenerPosterior, "certainty"))
+
