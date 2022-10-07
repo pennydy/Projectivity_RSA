@@ -6,27 +6,34 @@ var contentPriorListener = function() {
 
 // Pragmatic speaker
 
-// allowing 
 // certainty: how certain the speaker is about the content, 
 // 1: very certain that the content is true
 // 0.5: maximally uncertain about the content (the chance of the content being either true or false is 0.5)
-// functions as threshold for selecting the predicates
+// currently categorical (either certain or uncertain about the content)
 
 // believed: 
 // uncertain (0.5) about the certainty and uncertain (0.5) about the content: 
-// -> same prob. in all conditions
+// -> same prob. in all conditions (when the speaker is certain/uncertain about the content/negation content, the 
+// probability of using "knew" is the same)
 
-// uncertain (0.5) about the certainty and slightly more certain (0.58) about the content than hearing the simple polar question:
-// -> more likely to use the intended content than the alternative, but the overall prob. of using "believed" needs to be 
+// uncertain (0.5) about the certainty and slightly more certain (0.56) about the content than hearing the simple polar question:
+// -> more likely to use the intended content than the alternative, but the overall prob. of using "believed" is
 // the same across different certainty level (i.e. the sum of the probs. of using "believed dances" and "believed doesn't dance"
 // is the same when certainty == 0.5 and certainty == 0.8).
+// e.g. when the content is "dances", the prob. of using each utterance in ["knew dances", "believed dances", "dances", "knew doesn't dance", "believed doesn't dance"] 
+// certainty == 0.5: [0.1, 0.2, 0.8, 0.1, 0.2]
+// certainty == 0.8: [0.8, 0.25, 0.1, 0.1, 0.15]
 
-// slightly more certain (0.57) that the speaker is certain and uncertain (0.5) about the content: 
+// slightly more certain (0.61) that the speaker is certain and uncertain (0.5) about the content: 
 // (i.e. the listener thinks the speaker is more likely to be certain about the content, but still doesn't know which content 
 // is more likely)
-// -> more likely to use "believed" when the speaker is uncertain, but the overall prob. of using "believed" needs to be 
+// -> more likely to use "believed" when the speaker is uncertain, but the overall prob. of using "believed" is
 // the same within each certainty level (i.e. the prob. of using "believed dances" and "believed doesn't dance"
 // is the same)
+// e.g. when the content is "dances", the prob. of using each utterance in ["knew dances", "believed dances", "dances", "knew doesn't dance", "believed doesn't dance"] 
+// certainty == 0.5: [0.1, 0.2, 0.8, 0.1, 0.2]
+// certainty == 0.8: [0.8, 0.4, 0.1, 0.1, 0.4]
+
 
 var speaker = function(content, certainty) {
   if (certainty==0.5) {
