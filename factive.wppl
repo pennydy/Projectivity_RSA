@@ -17,12 +17,10 @@ var contentPrior = function() {
   })
 }
 
-
 var qud_compatible = {
   content: utterances,
-  predicate: states
+  predicate: ["knew dances", "didn't know dances", "knew doesn't dance", "didn't know doesn't dance"]
 }
-
 
 var extractContent = function(utterance) {
   var firstWord = utterance.substring(0, utterance.indexOf(' '))
@@ -60,22 +58,29 @@ var compatibility = function(qud, utterance, state) {
   if (qud == "content") {
     return meaning(utterance, content) ? flip(0.9) : flip()
   } else {
-    return  extractPredicate(utterance)==extractPredicate(state) && meaning(utterance, content) ? 
-      flip(0.9) : flip()
+    // "know": positive correlation between not-at-issueness and projectivity 
+    // i.e. the more not-at-issue the content is, the more likely it is to project
+    // need to check to the meaning of the content even when the qud is about the predicate
+    return extractPredicate(utterance)==extractPredicate(state) ? meaning(utterance, content) ? 
+      flip(0.9) : flip(0.3) : flip(0.1) 
+    
+    // "suggest": negative correlation between not-at-issueness and projectivity
+    // i.e. the more not-at-issue the content is, the less likely it is to project
+    // ignore the truth value of the content when the qud is predicate
+    // return extractPredicate(utterance)==extractPredicate(state)
+    //   flip(0.9) : flip(0.1) 
   }
 }
 
-
 var qudPrior = function(predicate) {
-  if (predicate == "didn't know") {
-    return categorical({vs: quds, ps: [0.8, 0.2]}) 
-  } else if (predicate == "knew")  {
-    return categorical({vs:quds, ps:[0.1, 0.9]}) 
+  if (predicate == "knew" || predicate == "didn't know") {
+    return categorical({vs: quds, ps: [0.8, 0.2]})
   } else  {
     return categorical({vs:quds, ps:[0.5, 0.5]})
   }
 }
 
+display("qudPrior " + qudPrior("knew"))
 
 // Speaker optimality parameter
 var alpha = 1
@@ -110,11 +115,12 @@ viz(speaker("knew dances", "predicate"))
 var pragmaticListener = function(utterance) {
   Infer({model: function() {
     var content = contentPrior()
+    var predicate = extractPredicate(utterance)
+    var qud = qudPrior(predicate)
     var p = uniformDraw(predicates)
-    var qud = qudPrior(p)
     var state = p + " " + content
     observe(speaker(state, qud), utterance)
-    return extractContent(state)
+    return content
   }})
 }
 
