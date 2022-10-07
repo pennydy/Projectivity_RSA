@@ -12,7 +12,7 @@ var contentPriorListener = function() {
 // currently categorical (either certain or uncertain about the content)
 
 // believed: 
-// uncertain (0.5) about the certainty and uncertain (0.5) about the content: 
+// current model: assume the speaker is uncertain (0.5) about the certainty and uncertain (0.5) about the content: 
 // -> same prob. in all conditions (when the speaker is certain/uncertain about the content/negation content, the 
 // probability of using "knew" is the same)
 
@@ -42,10 +42,10 @@ var speaker = function(content, certainty) {
    } else if (certainty>0.5) {
      if (content == "dances") {
        // when the content is "dances" and the speaker is certain that it is TRUE
-        return Categorical({ps:[0.8, 0.4, 0.1, 0.1, 0.4], vs:["knew dances", "believed dances", "dances",
+        return Categorical({ps:[0.8, 0.2, 0.1, 0.1, 0.2], vs:["knew dances", "believed dances", "dances",
                                                                  "knew doesn't dance", "believed doesn't dance"]}) 
      } else {
-       return Categorical({ps:[0.1, 0.4, 0.1, 0.8, 0.4], vs:["knew dances", "believed dances", "dances",
+       return Categorical({ps:[0.1, 0.2, 0.1, 0.8, 0.2], vs:["knew dances", "believed dances", "dances",
                                                                    "knew doesn't dance", "believed doesn't dance"]}) 
      }
   } 
