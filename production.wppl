@@ -35,6 +35,18 @@ var contentPriorListener = function() {
 // certainty == 0.8: [0.8, 0.4, 0.1, 0.1, 0.4]
 
 
+// not including the negation of the polar question ("doesn't dance") -> the speaker seems to have a different motivation for saying it
+// (other than asking the attitude/belief or asking about the embedded content as assumed by the qud), either in the form of high negation
+// (i.e. "Doesn't Julian dance Salsa") or in the form of low negation (i.e. "Does Julian not dance Salsa").
+
+// Relavent studies by Hartung (2006): Forms of Negation in Polar Questions
+// high negation: presupposes the positive proposition (more natural to be combined with "too", which is a positive polarity item) 
+// and requires the postive belief of the speaker (i.e. the truth of the proposition) 
+// -> the listener is certain about the content, and (the listener thinks) the speaker also believes in the truth of the content
+// low negation: presupposes the negative proposition (more natural to be combined with "either", which is a negative polarity item)
+// and doesn't require the speaker's belief in the truth of the proposition
+
+
 var speaker = function(content, certainty) {
   if (certainty==0.5) {
       return Categorical({ps:[0.1, 0.2, 0.8, 0.1, 0.2], vs:["knew dances", "believed dances", "dances",
