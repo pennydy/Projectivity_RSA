@@ -597,7 +597,7 @@ function init() {
         },
         "josie": {
             "question":"Josie went on vacation to France",
-            "negation":"Josie didn't go on vacation to France.",
+            "negation":"Josie didn't go on vacation to France",
             "simple_polar1":"Did Josie go on vacation to France?",
             "simple_polar2":"Did Josie go on vacation to France?",
             "know":"Does Sarah know that Josie went on vacation to France?",
