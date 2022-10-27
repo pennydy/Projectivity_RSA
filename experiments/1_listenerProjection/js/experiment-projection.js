@@ -115,12 +115,12 @@ function make_slides(f) {
             $(".rightLabel").html(rightLabel);
 
             // allows the content question to match with the utterance (i.e. not p in question when the embedded  is not p)
-            // if (this.stim.trigger.includes("_neg")) {
-            //     var question = "Does "+this.stim.name+" believe that "+this.stim.negation+"?";
-            // } else {
-            //     var question = "Does "+this.stim.name+" believe that "+this.stim.question+"?";
-            // }
-            var question = "Does "+this.stim.name+" believe that "+this.stim.question+"?";
+            if (this.stim.trigger.includes("_neg")) {
+                var question = "Does "+this.stim.name+" believe that "+this.stim.negation+"?";
+            } else {
+                var question = "Does "+this.stim.name+" believe that "+this.stim.question+"?";
+            }
+            // var question = "Does "+this.stim.name+" believe that "+this.stim.question+"?";
             
             $(".question").html(question);	  
         },
@@ -135,16 +135,17 @@ function make_slides(f) {
                     $(".belief_slider_table").hide(); // hide the belief slider
                     
                     // use this if the content question matches with the utterance (i.e. not p in question when the embedded  is not p)
-                    // if ((exp.belief_sliderPost > 0.5 && this.stim.trigger.includes("_neg")) || exp.belief_sliderPost < 0.5 && !this.stim.trigger.includes("_neg")) { // 0: no, 1: yes
-                    //     certainty_question = "How certain is " + this.stim.name+" about the fact that "+this.stim.negation+"?";
-                    // } else { 
-                    //     certainty_question = "How certain is " + this.stim.name+" about the fact that "+this.stim.question+"?";
-                    // }
-                    if (exp.belief_sliderPost > 0.5) {
-                        certainty_question = "How certain is " + this.stim.name+" about the fact that "+this.stim.question+"?";
-                    } else { 
+                    // if certain about not p or uncertain about p
+                    if ((exp.belief_sliderPost > 0.5 && this.stim.trigger.includes("_neg")) || exp.belief_sliderPost < 0.5 && !this.stim.trigger.includes("_neg")) { // 0: no, 1: yes
                         certainty_question = "How certain is " + this.stim.name+" about the fact that "+this.stim.negation+"?";
+                    } else { 
+                        certainty_question = "How certain is " + this.stim.name+" about the fact that "+this.stim.question+"?";
                     }
+                    // if (exp.belief_sliderPost > 0.5) {
+                    //     certainty_question = "How certain is " + this.stim.name+" about the fact that "+this.stim.question+"?";
+                    // } else { 
+                    //     certainty_question = "How certain is " + this.stim.name+" about the fact that "+this.stim.negation+"?";
+                    // }
 
                     $(".certainty_question").show();
                     $(".certainty_question").html(certainty_question);
@@ -775,7 +776,7 @@ function init() {
         },
         "charley": {
             "question":"Charley speaks Spanish",
-            "neagtion":"Charley doesn't speak Spanish",
+            "negation":"Charley doesn't speak Spanish",
             "simple_polar1":"Does Charley speak Spanish?",
             "simple_polar2":"Does Charley speak Spanish?",
             "know":"Does Anton know that Charley speaks Spanish?",
@@ -977,29 +978,19 @@ function init() {
 
     // I don't understand why here the block type and the prior type are already fixed	  
     
-    // half of the stimuli will be paired with low probability fact
-    for (var k=0; k<items.length/2; k++) {
+    // use the same fact (high prob) of each content
+
+    for (var k=0; k<items.length; k++) {
         var content = exp.stims_block1[k].content;
-        exp.stims_block1[k].prior = "low_prior";
+        exp.stims_block1[k].prior_fact = contents[content]["high_prior"]
         if (exp.stims_block1[k].trigger.includes("_neg")) {
             // for negated content, the original high prob fact becomes the low prior fact
             // if we assume that P(not p) = 1 - P(p)
-            exp.stims_block1[k].prior_fact = contents[content]["high_prior"]	
+            exp.stims_block1[k].prior = "low_prior";
         } else {
-            exp.stims_block1[k].prior_fact = contents[content]["low_prior"]	
+            exp.stims_block1[k].prior = "high_prior";	
         }
     }  
-    
-    // the other half will be paired with hight probability fact
-    for (var j=items.length/2; j<items.length; j++) {
-        var content = exp.stims_block1[j].content;
-        exp.stims_block1[j].prior = "high_prior";
-        if (exp.stims_block1[k].trigger.includes("_neg")) {
-            exp.stims_block1[j].prior_fact = contents[content]["low_prior"]
-        } else {
-            exp.stims_block1[j].prior_fact = contents[content]["high_prior"]
-        }
-    }    
 
     // add the control items
     for (var l=0; l<mcitemnames.length; l++) {
@@ -1033,7 +1024,7 @@ function init() {
     };
     //blocks of the experiment:
     exp.structure=["bot", "i0", "instructions1", "block1", 'questionaire', 'finished'];
-    console.log(exp.structure);
+    // console.log(exp.structure);
 
     exp.data_trials = [];
     //make corresponding slides:
