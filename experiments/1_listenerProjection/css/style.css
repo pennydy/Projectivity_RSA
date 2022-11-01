@@ -130,9 +130,13 @@ form {
 
 
 #legal {
+	width: 90%;
+	height: 90%;
+	width: 600px;
+  text-align: center;
   margin: 0 auto;
   margin-top: 1.5em;
-  font-size: 0.8em;
+  font-size: 1em;
 }
 
 /* prog bar */

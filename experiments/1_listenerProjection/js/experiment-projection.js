@@ -118,7 +118,7 @@ function make_slides(f) {
             if (this.stim.trigger.includes("_neg")) {
                 var question = "Does "+this.stim.name+" believe that "+this.stim.negation+"?";
             } else {
-                var question = "Does "+this.stim.name+" believe that "+this.stim.question+"?";
+                var question = "Does "+this.stim.name+" believe that "+this.stim.statement+"?";
             }
             // var question = "Does "+this.stim.name+" believe that "+this.stim.question+"?";
             
@@ -137,14 +137,14 @@ function make_slides(f) {
                     // use this if the content question matches with the utterance (i.e. not p in question when the embedded  is not p)
                     // if certain about not p or uncertain about p
                     if ((exp.belief_sliderPost > 0.5 && this.stim.trigger.includes("_neg")) || exp.belief_sliderPost < 0.5 && !this.stim.trigger.includes("_neg")) { // 0: no, 1: yes
-                        certainty_question = "How certain is " + this.stim.name+" about the fact that "+this.stim.negation+"?";
+                        certainty_question = "How certain is " + this.stim.name+" that "+this.stim.negation+"?";
                     } else { 
-                        certainty_question = "How certain is " + this.stim.name+" about the fact that "+this.stim.question+"?";
+                        certainty_question = "How certain is " + this.stim.name+" that "+this.stim.statement+"?";
                     }
                     // if (exp.belief_sliderPost > 0.5) {
-                    //     certainty_question = "How certain is " + this.stim.name+" about the fact that "+this.stim.question+"?";
+                    //     certainty_question = "How certain is " + this.stim.name+" that "+this.stim.statement+"?";
                     // } else { 
-                    //     certainty_question = "How certain is " + this.stim.name+" about the fact that "+this.stim.negation+"?";
+                    //     certainty_question = "How certain is " + this.stim.name+" that "+this.stim.negation+"?";
                     // }
 
                     $(".certainty_question").show();
@@ -189,12 +189,18 @@ function make_slides(f) {
         },
 
         log_responses : function() {
+            if (this.stim.trigger.includes("simple_polar")) {
+                trigger = "simple_polar"
+                console.log(trigger)
+            } else {
+                trigger = this.stim.trigger
+            }
             exp.data_trials.push({
-                "block" : "block1",
+                // "block" : "block1",
                 // "question_type" : this.stim.block, // only 1 block
                 "slide_number_in_experiment" : exp.phase, // trial number
-                "short_trigger": this.stim.short_trigger,
-                "trigger": this.stim.trigger,
+                // "short_trigger": this.stim.short_trigger,
+                "trigger": trigger,
                 "trigger_class": this.stim.trigger_class,
                 "content": this.stim.content,
                 // "utterance": this.stim.utterance, // record utterance for sanity check?
@@ -202,7 +208,7 @@ function make_slides(f) {
                 "prior_fact" : this.stim.prior_fact,
                 // "speakerName": this.stim.name,  // speaker's name doesn't matter	  
                 "belief_response" : exp.belief_sliderPost,
-                "certainty_respnose" : exp.certainty_sliderPost,
+                "certainty_response" : exp.certainty_sliderPost,
                 "rt" : Date.now() - this.stim.trial_start
             });
         }
@@ -528,322 +534,322 @@ function init() {
         
     var items = _.shuffle([
         {
-            "trigger":"know",
-            "trigger_class":"C"
+            "trigger":"know_pos",
+            "trigger_class":"Critical"
         }, 
         {
             "trigger":"know_neg",
-            "trigger_class":"C"
+            "trigger_class":"Critical"
         }, 
         {
-            "trigger":"say",
-            "trigger_class":"C"
+            "trigger":"say_pos",
+            "trigger_class":"Critical"
         },
         {
             "trigger":"say_neg",
-            "trigger_class":"C"
+            "trigger_class":"Critical"
         }, 
         {
-            "trigger":"think",
-            "trigger_class":"C"
+            "trigger":"think_pos",
+            "trigger_class":"Critical"
         },
         {
             "trigger":"think_neg",
-            "trigger_class":"C"
+            "trigger_class":"Critical"
         },
         {
-            "trigger":"confirm",
-            "trigger_class":"C"
+            "trigger":"confirm_pos",
+            "trigger_class":"Critical"
         },
         {
             "trigger":"confirm_neg",
-            "trigger_class":"C"
+            "trigger_class":"Critical"
         },
         {
-            "trigger":"inform",
-            "trigger_class":"C"
+            "trigger":"inform_pos",
+            "trigger_class":"Critical"
         },
         {
             "trigger":"inform_neg",
-            "trigger_class":"C"
+            "trigger_class":"Critical"
         },
         {
             "trigger":"simple_polar1",
-            "trigger_class":"Q"
+            "trigger_class":"Critical"
         },
         {
             "trigger":"simple_polar2",
-            "trigger_class":"Q"
+            "trigger_class":"Critical"
         }
     ]);
 
     var contents = {
         "mary": {
-            "question":"Mary is pregnant",
+            "statement":"Mary is pregnant",
             "negation":"Mary isn't pregnant",
             "simple_polar1":"Is Mary pregnant?",
             "simple_polar2":"Is Mary pregnant?",
-            "know":"Does Mandy know that Mary is pregnant?",
+            "know_pos":"Does Mandy know that Mary is pregnant?",
             "know_neg":"Does Manday know that Mary isn't pregnant?",
-            "say":"Did Mandy say that Mary is pregnant?",
+            "say_pos":"Did Mandy say that Mary is pregnant?",
             "say_neg":"Did Manday say that Mary isn't pregnant?",
-            "think":"Does Mandy think that Mary is pregnant?",
+            "think_pos":"Does Mandy think that Mary is pregnant?",
             "think_neg":"Does Mandy think that Mary isn't pregnant?",
-            "confirm":"Did Mandy confirm that Mary is pregnant?",
+            "confirm_pos":"Did Mandy confirm that Mary is pregnant?",
             "confirm_neg":"Did Mandy confirm that Mary isn't pregnant?",
-            "inform":"Did Mandy inform Sam that Mary is pregnant?",
+            "inform_pos":"Did Mandy inform Sam that Mary is pregnant?",
             "inform_neg":"Did Mandy inform Sam that Mary isn't pregnant?",
-            "low_prior": "Mary is a middle school student",
-            "high_prior": "Mary is taking a prenatal yoga class"
+            "prior_fact": "Mary is taking a prenatal yoga class",
+            "prior":0.815167785234899
         },
         "josie": {
-            "question":"Josie went on vacation to France",
+            "statement":"Josie went on vacation to France",
             "negation":"Josie didn't go on vacation to France",
             "simple_polar1":"Did Josie go on vacation to France?",
             "simple_polar2":"Did Josie go on vacation to France?",
-            "know":"Does Sarah know that Josie went on vacation to France?",
+            "know_pos":"Does Sarah know that Josie went on vacation to France?",
             "know_neg":"Does Sarah know that Josie didn't go on vacation to France?",
-            "say":"Did Sarah say that Josie went on vacation to France?",
+            "say_pos":"Did Sarah say that Josie went on vacation to France?",
             "say_neg":"Did Sarah say that Josie didn't go on vacation to France?",
-            "think":"Does Sarah think that Josie went on vacation to France?",
+            "think_pos":"Does Sarah think that Josie went on vacation to France?",
             "think_neg":"Does Sarah think that Josie didn't go on vacation to France?",
-            "confirm":"Did Sarah confirm that Josie went on vacation to France?",
+            "confirm_pos":"Did Sarah confirm that Josie went on vacation to France?",
             "confirm_neg":"Did Sarah confirm that Josie didn't go on vacation to France?",
-            "inform":"Did Sarah inform Sam that Josie went on vacation to France?",
+            "inform_pos":"Did Sarah inform Sam that Josie went on vacation to France?",
             "inform_neg":"Did Sarah inform Sam that Josie didn't go on vacation to France?",
-            "low_prior": "Josie doesn't have a passport",
-            "high_prior": "Josie loves France"
+            "prior_fact": "Josie loves France",
+            "prior":0.73343949044586
         },
-        "olivia": {
-            "question":"Olivia sleeps until noon",
-            "negation":"Olivia doesn't sleep until noon",
-            "simple_polar1":"Does Olivia sleep until noon?",
-            "simple_polar2":"Does Olivia sleep until noon?",
-            "know":"Does Jane know that Olivia sleeps until noon?",
-            "know_neg":"Does Jane know that Olivia doesn't sleep until noon?",
-            "say":"Did Jane say that Olivia sleeps until noon?",
-            "say_neg":"Does Jane say that Olivia doesn't sleep until noon?",
-            "think":"Does Jane think that Olivia sleeps until noon?",
-            "think_neg":"Does Jane think that Olivia doesn't sleep until noon?",
-            "confirm":"Did Jane confirm that Olivia sleeps until noon?",
-            "confirm_neg":"Did Jane confirm that Olivia doesn't sleep until noon?",
-            "inform":"Did Jane inform Sam that Olivia sleeps until noon?",
-            "inform_neg":"Did Jane inform Sam that Olivia doesn't sleep until noon?",
-            "low_prior": "Olivia has two small children",
-            "high_prior": "Olivia works the third shift"
+        "danny": {
+            "statement":"Danny ate the last cupcake",
+            "negation":"Danny didn't eat the last cupcake",
+            "simple_polar1":"Did Danny eat the last cupcake?",
+            "simple_polar2":"Did Danny eat the last cupcake?",
+            "know_pos":"Does Kathryn know that Danny ate the last cupcake?",
+            "know_neg":"Does Kathryn know that Danny didn't eat the last cupcake?",
+            "say_pos":"Did Kathryn say that Danny ate the last cupcake?",
+            "say_neg":"Did Kathryn say that Danny didn't eat the last cupcake?",
+            "think_pos":"Does Kathryn think that Danny ate the last cupcake?",
+            "think_neg":"Does Kathryn think that Danny didn't eat the last cupcake?",
+            "confirm_pos":"Did Kathryn confirm that Danny ate the last cupcake?",
+            "confirm_neg":"Did Kathryn confirm that Danny didn't eat the last cupcake?",
+            "inform_pos":"Did Kathryn inform Sam that Danny ate the last cupcake?",
+            "inform_neg":"Did Kathryn inform Sam that Danny didn't eat the last cupcake?",
+            "prior_fact": "Danny loves cake",
+            "prior":0.697062937062937
         },
         "grace": {
-            "question":"Grace visited her sister",
+            "statement":"Grace visited her sister",
             "negation":"Grace didn't visit her sister",
             "simple_polar1":"Did Grace visit her sister?",
             "simple_polar2":"Did Grace visit her sister?",
-            "know":"Does Andrew know that Grace visited her sister?",
+            "know_pos":"Does Andrew know that Grace visited her sister?",
             "know_neg":"Does Andrew know that Grace didn't visit her sister?",
-            "say":"Did Andrew say that Grace visited her sister?",
+            "say_pos":"Did Andrew say that Grace visited her sister?",
             "say_neg":"Did Andrew say that Grace didn't visit her sister?",
-            "think":"Does Andrew think that Grace visited her sister?",
+            "think_pos":"Does Andrew think that Grace visited her sister?",
             "think_neg":"Does Andrew think that Grace didn't visit her sister?",
-            "confirm":"Did Andrew confirm that Grace visited her sister?",
+            "confirm_pos":"Did Andrew confirm that Grace visited her sister?",
             "confirm_neg":"Did Andrew confirm that Grace didn't visit her sister?",
-            "inform":"Did Andrew inform Sam that Grace visited her sister?",
+            "inform_pos":"Did Andrew inform Sam that Grace visited her sister?",
             "inform_neg":"Did Andrew inform Sam that Grace didn't visit her sister?",
-            "low_prior": "Grace hates her sister",
-            "high_prior": "Grace loves her sister"
+            "prior_fact": "Grace loves her sister",
+            "prior":0.790144927536232
         },
         "zoe": {
-            "question":"Zoe calculated the tip",
+            "statement":"Zoe calculated the tip",
             "negation":"Zoe didn't calculate the tip",
             "simple_polar1":"Did Zoe calculate the tip?",
             "simple_polar2":"Did Zoe calculate the tip?",
-            "know":"Does Mark know that Zoe calculated the tip?",
+            "know_pos":"Does Mark know that Zoe calculated the tip?",
             "know_neg":"Does Mark know that Zoe didn't calculate the tip?",
-            "say":"Did Mark say that Zoe calculated the tip?",
+            "say_pos":"Did Mark say that Zoe calculated the tip?",
             "say_neg":"Did Mark say that Zoe didn't calculate the tip?",
-            "think":"Does Mark think that Zoe calculated the tip?",
+            "think_pos":"Does Mark think that Zoe calculated the tip?",
             "think_neg":"Did Mark think that Zoe didn't calculate the tip?",
-            "confirm":"Did Mark confirm that Zoe calculated the tip?",
+            "confirm_pos":"Did Mark confirm that Zoe calculated the tip?",
             "confirm_neg":"Did Mark confirm that Zoe didn't calculate the tip?",
-            "inform":"Did Mark inform Sam that Zoe calculated the tip?",
+            "inform_pos":"Did Mark inform Sam that Zoe calculated the tip?",
             "inform_neg":"Did Mark inform Sam that Zoe didn't calculate the tip?",
-            "low_prior": "Zoe is 5 years old",
-            "high_prior": "Zoe is a math major"
+            "prior_fact": "Zoe is a math major",
+            "prior":0.745971223021583
         },
         "frank": {
-            "question":"Frank got a cat",
+            "statement":"Frank got a cat",
             "negation":"Frank didn't get a cat",
             "simple_polar1":"Did Frank get a cat?",
             "simple_polar2":"Did Frank get a cat?",
-            "know":"Does Walt know that Frank got a cat?",
+            "know_pos":"Does Walt know that Frank got a cat?",
             "know_neg":"Does Walt know that Frank didn't get a cat?",
-            "say":"Did Walt say that Frank got a cat?",
+            "say_pos":"Did Walt say that Frank got a cat?",
             "say_neg":"Did Walt say that Frank didn't get a cat?",
-            "think":"Does Walt think that Frank got a cat?",
+            "think_pos":"Does Walt think that Frank got a cat?",
             "think_neg":"Does Walt think that Frank didn't get a cat?",
-            "confirm":"Did Walt confirm that Frank got a cat?",
+            "confirm_pos":"Did Walt confirm that Frank got a cat?",
             "confirm_neg":"Did Walt confirm that Frank didn't get a cat?",
             "inform":"Did Walt inform Sam that Frank got a cat?",
             "inform_neg":"Did Walt inform Sam that Frank didn't get a cat?",
-            "low_prior": "Frank is allergic to cats",
-            "high_prior": "Frank has always wanted a pet"
+            "prior_fact": "Frank has always wanted a pet",
+            "prior":0.67972027972028
         },
         "jackson": {
-            "question":"Jackson ran 10 miles",
+            "statement":"Jackson ran 10 miles",
             "negation":"Jackson didn't run 10 miles",
             "simple_polar1":"Did Jackson run 10 miles?",
             "simple_polar2":"Did Jackson run 10 miles?",
-            "know":"Does Randy know that Jackson ran 10 miles?",
+            "know_pos":"Does Randy know that Jackson ran 10 miles?",
             "know_neg":"Does Randy know that Jackson didn't run 10 miles?",
-            "say":"Did Randy say that Jackson ran 10 miles?",
+            "say_pos":"Did Randy say that Jackson ran 10 miles?",
             "say_neg":"Did Randy say that Jackson didn't run 10 miles?",
-            "think":"Does Randy think that Jackson ran 10 miles?",
+            "think_pos":"Does Randy think that Jackson ran 10 miles?",
             "think_neg":"Did Randy think that Jackson didn't run 10 miles?",
-            "confirm":"Did Randy confirm that Jackson ran 10 miles?",
+            "confirm_pos":"Did Randy confirm that Jackson ran 10 miles?",
             "confirm_neg":"Did Randy confirm that Jackson didn't run 10 miles?",
-            "inform":"Did Randy inform Sam that Jackson ran 10 miles?",
+            "inform_pos":"Did Randy inform Sam that Jackson ran 10 miles?",
             "inform_neg":"Did Randy inform Sam that Jackson didn't run 10 miles?",
-            "low_prior": "Jackson is obese",
-            "high_prior": "Jackson is training for a marathon"
+            "prior_fact": "Jackson is training for a marathon",
+            "prior":0.774965034965035
         },
         "jayden": {
-            "question":"Jayden rented a car",
+            "statement":"Jayden rented a car",
             "negation":"Jayden didn't rent a car",
             "simple_polar1":"Did Jayden rent a car?",
             "simple_polar2":"Did Jayden rent a car?",
-            "know":"Does Herbert know that Jayden rented a car?",
+            "know_pos":"Does Herbert know that Jayden rented a car?",
             "know_neg":"Does Herbert know that Jayden didn't rent a car?",
-            "say":"Did Herbert say that Jayden rented a car?",
+            "say_pos":"Did Herbert say that Jayden rented a car?",
             "say_neg":"Did Herbert say that Jayden didn't rent a car?",
-            "think":"Does Herbert think that Jayden rented a car?",
+            "think_pos":"Does Herbert think that Jayden rented a car?",
             "think_neg":"Did Herbert think that Jayden didn't rent a car?",
-            "confirm":"Did Herbert confirm that Jayden rented a car?",
+            "confirm_pos":"Did Herbert confirm that Jayden rented a car?",
             "confirm_neg":"Did Herbert confirm that Jayden didn't rent a car?",
-            "inform":"Did Herbert inform Sam that Jayden rented a car?",
+            "inform_pos":"Did Herbert inform Sam that Jayden rented a car?",
             "inform_neg":"Did Herbert inform Sam that Jayden didn't rent a car?",
-            "low_prior": "Jayden doesn't have a driver's license",
-            "high_prior": "Jayden's car is in the shop"
+            "prior_fact": "Jayden's car is in the shop",
+            "prior":0.687794117647059
         },
         "tony": {
-            "question":"Tony had a drink last night",
+            "statement":"Tony had a drink last night",
             "negation":"Tony didn't have a drink last night",
             "simple_polar1":"Did Tony have a drink last night?",
             "simple_polar2":"Did Tony have a drink last night?",
-            "know":"Does Helen know that Tony had a drink last night?",
+            "know_pos":"Does Helen know that Tony had a drink last night?",
             "know_neg":"Does Helen know that Tony didn't have a drink last night?",
-            "say":"Did Helen say that Tony had a drink last night?",
+            "say_pos":"Did Helen say that Tony had a drink last night?",
             "say_neg":"Did Helen say that Tony didn't have a drink last night?",
-            "think":"Does Helen think that Tony had a drink last night?",
+            "think_pos":"Does Helen think that Tony had a drink last night?",
             "think_neg":"Does Helen think that Tony didn't have a drink last night?",
-            "confirm":"Did Helen confirm that Tony had a drink last night?",
+            "confirm_pos":"Did Helen confirm that Tony had a drink last night?",
             "confirm_neg":"Does Helen confirm that Tony didn't have a drink last night?",
-            "inform":"Did Helen inform Sam that Tony had a drink last night?",
+            "inform_pos":"Did Helen inform Sam that Tony had a drink last night?",
             "inform_neg":"Does Helen inform Sam that Tony didn't have a drink last night?",
-            "low_prior": "Tony has been sober for 20 years",
-            "high_prior": "Tony really likes to party with his friends"
+            "prior_fact": "Tony really likes to party with his friends",
+            "prior":0.747279411764706
         },
         "owen": {
-            "question":"Owen shoveled snow last winter",
+            "statement":"Owen shoveled snow last winter",
             "negation":"Owen didn't shovel snow last night",
             "simple_polar1":"Did Owen shovel snow last winter?",
             "simple_polar2":"Did Owen shovel snow last winter?",
-            "know":"Does Jordan know that Owen shoveled snow last winter?",
+            "know_pos":"Does Jordan know that Owen shoveled snow last winter?",
             "know_neg":"Does Jordan know that Owen didn't shoveled snow last winter?",
-            "say":"Did Jordan say that Owen shoveled snow last winter?",
+            "say_pos":"Did Jordan say that Owen shoveled snow last winter?",
             "say_neg":"Did Jordan say that Owen didn't shovel snow last winter?",
-            "confirm":"Did Jordan confirm that Owen shoveled snow last winter?",
+            "confirm_pos":"Did Jordan confirm that Owen shoveled snow last winter?",
             "confirm_neg":"Did Jordan confirm that Owen didn't shovel snow last winter?",
-            "inform":"Did Jordan inform Sam that Owen shoveled snow last winter?",
+            "inform_pos":"Did Jordan inform Sam that Owen shoveled snow last winter?",
             "inform_neg":"Did Jordan inform Sam that Owen didn't shovel snow last night?",
-            "low_prior": "Owen lives in New Orleans",
-            "high_prior": "Owen lives in Chicago"
+            "prior_fact": "Owen lives in Chicago",
+            "prior":0.74648275862069
         },
         "jon": {
-            "question":"Jon walks to work",
+            "statement":"Jon walks to work",
             "negation":"Jon doesn't walk to work",
             "simple_polar1":"Does Jon walk to work?",
             "simple_polar2":"Does Jon walk to work?",
-            "know":"Does Dexter know that Jon walks to work?",
+            "know_pos":"Does Dexter know that Jon walks to work?",
             "know_neg":"Does Dexter know that Jon doesn't walk to work?",
-            "say":"Did Dexter say that Jon walks to work?",
+            "say_pos":"Did Dexter say that Jon walks to work?",
             "say_neg":"Did Dexter say that Jon doesn't walk to work?",
-            "think":"Does Dexter think that Jon walks to work?",
+            "think_pos":"Does Dexter think that Jon walks to work?",
             "think_neg":"Does Dexter think that Jon doesn't walk to work?",
-            "confirm":"Did Dexter confirm that Jon walks to work?",
+            "confirm_pos":"Did Dexter confirm that Jon walks to work?",
             "confirm_neg":"Did Dexter confirm that Jon doesn't walk to work?",
-            "inform":"Did Dexter inform Sam that Jon walks to work?",
+            "inform_pos":"Did Dexter inform Sam that Jon walks to work?",
             "inform_neg":"Did Dexter inform Sam that Jon doesn't walk to work?",
-            "low_prior": "Jon lives 10 miles away from work",
-            "high_prior": "Jon lives 2 blocks away from work"
+            "prior_fact": "Jon lives 2 blocks away from work",
+            "prior":0.7559375
         },
         "charley": {
-            "question":"Charley speaks Spanish",
+            "statement":"Charley speaks Spanish",
             "negation":"Charley doesn't speak Spanish",
             "simple_polar1":"Does Charley speak Spanish?",
             "simple_polar2":"Does Charley speak Spanish?",
-            "know":"Does Anton know that Charley speaks Spanish?",
+            "know_pos":"Does Anton know that Charley speaks Spanish?",
             "know_neg":"Does Anton know that Charley doesn't speak Spanish?",
-            "say":"Did Anton say that Charley speaks Spanish?",
+            "say_pos":"Did Anton say that Charley speaks Spanish?",
             "say_neg":"Does Anton know that Charley doesn't speak Spanish?",
-            "think":"Does Anton think that Charley speaks Spanish?",
+            "think_pos":"Does Anton think that Charley speaks Spanish?",
             "think_neg":"Does Anton think that Charley doesn't speak Spanish?",
-            "confirm":"Did Anton confirm that Charley speaks Spanish?",
+            "confirm_pos":"Did Anton confirm that Charley speaks Spanish?",
             "confirm_neg":"Did Anton confirm that Charley doesn't speak Spanish?",
-            "inform":"Did Anton inform Sam that Charley speaks Spanish?",
+            "inform_pos":"Did Anton inform Sam that Charley speaks Spanish?",
             "inform_neg":"Did Anton inform Sam that Charley doesn't speak Spanish?",
-            "low_prior": "Charley lives in Korea",
-            "high_prior": "Charley lives in Mexico"
+            "prior_fact": "Charley lives in Mexico",
+            "prior":0.804632352941177,
         }
     }
 
     var items_content_mapping = {
-        "know":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
-        "know_neg":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
-        "say":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
-        "say_neg":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
-        "think":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
-        "think_neg":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
-        "confirm":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
-        "confirm_neg":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
-        "inform":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
-        "inform_neg":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
-        "simple_polar1":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
-        "simple_polar2":["mary","josie","olivia","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"]
+        "know_pos":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
+        "know_neg":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
+        "say_pos":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
+        "say_neg":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
+        "think_pos":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
+        "think_neg":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
+        "confirm_pos":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
+        "confirm_neg":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
+        "inform_pos":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
+        "inform_neg":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
+        "simple_polar1":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"],
+        "simple_polar2":["mary","josie","danny","grace","zoe","frank","jackson","jayden","tony","owen","jon","charley"]
     };
 
     // controls
     var mcitemnames = ["muffins","pizza","kids","ballet","garage","hat"];
     var mcitems = {
         "muffins": {
-            "question":"these muffins have blueberries in them",
+            "statement":"these muffins have blueberries in them",
             "negation":"these muffins don't have blueberries in them",
             "MCq":"Do these muffins have blueberries in them?",
             "MCa":"These muffins have blueberries in them.",
             "prior_fact": "Muffins are sold at the bakery"},
         "pizza": {
-            "question":"this pizza has mushrooms on it",
+            "statement":"this pizza has mushrooms on it",
             "negation":"this pizza doesn't have mushrooms on it",
             "MCq":"Does this pizza have mushrooms on it?",
             "MCa":"This pizza has mushrooms on it.",
             "prior_fact": "Pizza is sold at the pizzeria"},
         "kids": {
-            "question":"Jack was playing outside with the kids",
+            "statement":"Jack was playing outside with the kids",
             "negation":"Jack wasn't playing outside with the kids",
             "MCq":"Was Jack playing outside with the kids?",
             "MCa":"Jack was playing outside with the kids.",
             "prior_fact": "Many children like ice cream"},
         "ballet": {
-            "question":"Ann dances ballet",
+            "statement":"Ann dances ballet",
             "negation":"Ann doesn't dance ballet",
             "MCq":"Does Ann dance ballet?",
             "MCa":"Ann dances ballet.",
             "prior_fact": "Ballet is a type of dance"},
         "garage": {
-            "question":"Carl's kids were in the garage",
+            "statement":"Carl's kids were in the garage",
             "negation":"Carl's kids weren't in the garage",
             "MCq":"Were Carl's kids in the garage?",
             "MCa":"Carl's kids were in the garage.",
             "prior_fact": "Garages are used to store cars and other things"},
         "hat": {
-            "question":"Samantha has a new hat",
+            "statement":"Samantha has a new hat",
             "negation":"Samantha doesn't have a new hat",
             "MCq":"Does Samantha have a new hat?",
             "MCa":"Samantha has a new hat.",
@@ -861,9 +867,9 @@ function init() {
         // shuffle the list of contents for the corresponding trigger (predicate)
         items_content_mapping[trigger] = _.shuffle(items_content_mapping[trigger]);
         // get the first content (tag by the PERSON in content/embedded clause)
-        // each content includes: 1. the content itself ("question"), 2. the simple polar 
-        // 3-23. trigger+content (predicate), 24. low probability fact ("low_prior"),
-        // 25. high probability fact ("high_prior")
+        // each content includes: 1. the content itself ("statement"), 2. the simple polar 
+        // 3-23. trigger+content (predicate), 24. low probability prior_fact ("low_prior"),
+        // 25. high probability prior_fact ("prior_fact")
         var content = items_content_mapping[trigger].shift();  	
         for (var j in items_content_mapping) {
             var index = items_content_mapping[j].indexOf(content);  		
@@ -878,15 +884,15 @@ function init() {
 
 
     var trigger_contents = {
-        "know": getContent("know"),
+        "know_pos": getContent("know_pos"),
         "know_neg": getContent("know_neg"),  	   	
-        "say": getContent("say"),
+        "say_pos": getContent("say_pos"),
         "say_neg": getContent("say_neg"),
-        "think": getContent("think"),
+        "think_pos": getContent("think_pos"),
         "think_neg": getContent("think_neg"),
-        "confirm": getContent("confirm"),
+        "confirm_pos": getContent("confirm_pos"),
         "confirm_neg": getContent("confirm_neg"),
-        "inform": getContent("inform"),
+        "inform_pos": getContent("inform_pos"),
         "inform_neg": getContent("inform_neg"),
         "simple_polar1": getContent("simple_polar1"),
         "simple_polar2": getContent("simple_polar2")
@@ -895,8 +901,8 @@ function init() {
     // create the stimulus set
     // makeStim gets a trigger from items, gets a name to create the item
     // then it calls the getContent function for that trigger, which returns a unique content
-    // then it gets the utterance and question for that trigger/content combination
-    // and returns: name, gender, trigger, content, utterance, question for that trigger
+    // then it gets the utterance and statement for that trigger/content combination
+    // and returns: name, gender, trigger, content, utterance, statement for that trigger
     function makeStim(i) {
         //get item
         var item = items[i];
@@ -909,24 +915,27 @@ function init() {
         // get content
         var trigger_cont = trigger_contents[item.trigger];
         var trigger = item.trigger;
-        var short_trigger = trigger;
-        if (trigger.indexOf("MC") != -1) {
-            short_trigger = "MC";
-        }
-        var utterance = contents[trigger_cont][short_trigger];
-        if (trigger.includes("_neg")) {}
-        var question = contents[trigger_cont].question;
+        var utterance = contents[trigger_cont][trigger]
+        var statement = contents[trigger_cont].statement;
         var negation = contents[trigger_cont].negation;
+        var prior_fact = contents[trigger_cont].prior_fact;
+        var prior = contents[trigger_cont].prior;
+        if (trigger.includes("_neg")) {
+            prior = 1 - prior
+        }
+
         return {
             "name": name,
-            "gender": gender,	  
+            // "gender": gender,	  
             "trigger": item.trigger,
-            "short_trigger": short_trigger,	  // short_trigger is the same as trigger?
+            // "short_trigger": short_trigger,	  // short_trigger is the same as trigger?
             "trigger_class": item.trigger_class,
             "content": trigger_cont,
             "utterance": utterance,
-            "question": question,
-            "negation": negation
+            "statement": statement,
+            "negation": negation,
+            "prior":prior,
+            "prior_fact":prior_fact
         }
     }
 
@@ -944,23 +953,23 @@ function init() {
         // get content
         var trigger_cont = j;
         var trigger = "MC";
-        var short_trigger = "MC";
+        // var short_trigger = "MC";
 
         var utterance = mcitems[j].MCq;
-        var question = mcitems[j].question;  
+        var statement = mcitems[j].statement;  
         var negation = mcitems[j].negation;
         var prior_fact = mcitems[j].prior_fact; 
     //    console.log(contents[trigger_cont]); 
         return {
             "name": name,
-            "gender": gender,   
             "trigger": trigger,
-            "short_trigger": short_trigger,   
-            "trigger_class": "MC",
+            // "short_trigger": short_trigger,   
+            "trigger_class": "Control",
             "content": trigger_cont,
             "utterance": utterance,
-            "question": question,
+            "statement": statement,
             "negation": negation,
+            "prior":0,
             "prior_fact": prior_fact
         }
     }  
@@ -976,22 +985,6 @@ function init() {
 
 	exp.stims_block1 = _.shuffle(exp.stims_block1); 
 
-    // I don't understand why here the block type and the prior type are already fixed	  
-    
-    // use the same fact (high prob) of each content
-
-    for (var k=0; k<items.length; k++) {
-        var content = exp.stims_block1[k].content;
-        exp.stims_block1[k].prior_fact = contents[content]["high_prior"]
-        if (exp.stims_block1[k].trigger.includes("_neg")) {
-            // for negated content, the original high prob fact becomes the low prior fact
-            // if we assume that P(not p) = 1 - P(p)
-            exp.stims_block1[k].prior = "low_prior";
-        } else {
-            exp.stims_block1[k].prior = "high_prior";	
-        }
-    }  
-
     // add the control items
     for (var l=0; l<mcitemnames.length; l++) {
         var stim = makeMCStim(l,mcitemnames[l]);
@@ -1003,11 +996,6 @@ function init() {
     // randomize the items within each block
 	exp.stims_block1 = _.shuffle(exp.stims_block1); 
     console.log(exp.stims_block1) 
-
-    // only one block. doesn't matter
-    // for (var k=0; k<exp.stims_block1.length; k++) {  	
-    //     exp.stims_block1[k].block = "projective";
-    // }
 
     
     /// JT: HERE'S THE PART I DON'T UNDERSTAND
