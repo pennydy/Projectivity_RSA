@@ -752,7 +752,7 @@ function init() {
         },
         "owen": {
             "statement":"Owen shoveled snow last winter",
-            "negation":"Owen didn't shovel snow last night",
+            "negation":"Owen didn't shovel snow last winter",
             "simple_polar1":"Did Owen shovel snow last winter?",
             "simple_polar2":"Did Owen shovel snow last winter?",
             "know_pos":"Does Jordan know that Owen shoveled snow last winter?",
@@ -762,7 +762,7 @@ function init() {
             "confirm_pos":"Did Jordan confirm that Owen shoveled snow last winter?",
             "confirm_neg":"Did Jordan confirm that Owen didn't shovel snow last winter?",
             "inform_pos":"Did Jordan inform Sam that Owen shoveled snow last winter?",
-            "inform_neg":"Did Jordan inform Sam that Owen didn't shovel snow last night?",
+            "inform_neg":"Did Jordan inform Sam that Owen didn't shovel snow last winter?",
             "prior_fact": "Owen lives in Chicago",
             "prior":0.74648275862069
         },
