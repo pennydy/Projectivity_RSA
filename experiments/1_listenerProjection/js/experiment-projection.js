@@ -100,6 +100,7 @@ function make_slides(f) {
             $(".question").show();
             exp.belief_sliderPost = null;
             exp.certainty_sliderPost = null;
+            exp.certainty_question = null;
             $(".certainty_question").hide(); // hide the certainty question in the beginning
             $(".certainty_slider_table").hide(); // hide the certainty slider in the beginning
             $(".next_button").hide(); // hide the next botton
@@ -141,6 +142,8 @@ function make_slides(f) {
                     } else { 
                         certainty_question = "How certain is " + this.stim.name+" that "+this.stim.statement+"?";
                     }
+                    exp.certainty_question = certainty_question
+
                     // if (exp.belief_sliderPost > 0.5) {
                     //     certainty_question = "How certain is " + this.stim.name+" that "+this.stim.statement+"?";
                     // } else { 
@@ -203,6 +206,7 @@ function make_slides(f) {
                 "trigger": trigger,
                 "trigger_class": this.stim.trigger_class,
                 "content": this.stim.content,
+                "certainty_question": exp.certainty_question,
                 // "utterance": this.stim.utterance, // record utterance for sanity check?
                 "prior" : this.stim.prior,
                 "prior_fact" : this.stim.prior_fact,
