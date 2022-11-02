@@ -759,6 +759,8 @@ function init() {
             "know_neg":"Does Jordan know that Owen didn't shoveled snow last winter?",
             "say_pos":"Did Jordan say that Owen shoveled snow last winter?",
             "say_neg":"Did Jordan say that Owen didn't shovel snow last winter?",
+            "think_pos":"Does Jordan think that Owen shoveled snow last winter?",
+            "think_neg":"Does Jordan think that Owen didn't shovel snow last winter?",
             "confirm_pos":"Did Jordan confirm that Owen shoveled snow last winter?",
             "confirm_neg":"Did Jordan confirm that Owen didn't shovel snow last winter?",
             "inform_pos":"Did Jordan inform Sam that Owen shoveled snow last winter?",
@@ -1030,14 +1032,8 @@ function init() {
 
     $('.slide').hide(); //hide everything
 
-    // make sure turkers have accepted HIT (or you're not in mturk)
     $("#start_button").click(function() {
-        if (turk.previewMode) {
-            $("#mustaccept").show();
-        } else {
-            $("#start_button").click(function() {$("#mustaccept").show();});
-            exp.go();
-        }
+        exp.go();
     });
 
     exp.go(); //show first slide
