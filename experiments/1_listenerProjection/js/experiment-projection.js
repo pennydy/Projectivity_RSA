@@ -247,7 +247,8 @@ function make_slides(f) {
             "subject_information" : exp.subj_data,
             "time_in_minutes" : (Date.now() - exp.startT)/60000
         };
-        setTimeout(function() {turk.submit(exp.data);}, 1000);
+        // record data using proliferate
+        proliferate.submit(exp.data);
         }
     });
     console.log(slides);
