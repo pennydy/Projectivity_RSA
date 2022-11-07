@@ -137,7 +137,7 @@ function make_slides(f) {
                     
                     // use this if the content question matches with the utterance (i.e. not p in question when the embedded  is not p)
                     // if certain about not p or uncertain about p
-                    if ((exp.belief_sliderPost > 0.5 && this.stim.trigger.includes("_neg")) || exp.belief_sliderPost < 0.5 && !this.stim.trigger.includes("_neg")) { // 0: no, 1: yes
+                    if ((exp.belief_sliderPost > 0.5 && this.stim.trigger.includes("_neg")) || exp.belief_sliderPost <= 0.5 && !this.stim.trigger.includes("_neg")) { // 0: no, 1: yes
                         certainty_question = "How certain is " + this.stim.name+" that "+this.stim.negation+"?";
                     } else { 
                         certainty_question = "How certain is " + this.stim.name+" that "+this.stim.statement+"?";
