@@ -4,4 +4,5 @@
 proliferate/
 
 # data
-
+data/pilot/1_listenerProjection-workerids.csv
+data/pilot/1_listenerProjection-subject_information.csv
