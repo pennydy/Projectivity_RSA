@@ -54,9 +54,13 @@ utterance_labeller <- function(variable,value){
   return(utterance_label[value])
 }
 
-predicate_label <- list("confirm"="confirm", "inform"="inform", 
-                        "know"="know", "MC"="Control",
-                        "say"="say", "simple"="Polar", "think"="think")
+predicate_label <- list("MC"="Control",
+                        "simple"="Polar",
+                        "think"="think",
+                        "know"="know",
+                        "say"="say",
+                        "inform"="inform",
+                        "confirm"="confirm")
 predicate_labeller <- function(variable,value){
   return(predicate_label[value])
 }
@@ -70,7 +74,8 @@ belief_summary <- df.data.summary |>
 print(belief_summary)
 
 # by the type of embedded clause (pos, neg, or simple polar)
-belief_by_p <- ggplot(data = df.data.summary,
+belief_by_p <- ggplot(data = df.data.summary |>
+                        filter(belief_content == "p"),
        mapping = aes(x = belief_content,
                      y = belief_rating,
                      fill = predicate)) +
@@ -88,10 +93,13 @@ belief_by_p <- ggplot(data = df.data.summary,
        fill = "Predicate") +
   scale_fill_discrete(labels=c("confirm", "inform", "know", "Control", "say", "Polar", "think"))
 belief_by_p
-ggsave(belief_by_p, file="../../graphs/pilot/belief_by_p.pdf")
+iggsave(belief_by_p, file="../../graphs/pilot/belief_by_p.pdf")
+
+df.data.summary <- df.data.summary |> mutate(predicate = fct_relevel(predicate, "MC", "simple","think","know","say","confirm"))
 
 # by predicate
-belief_by_predicate <- ggplot(data = df.data.summary,
+belief_by_predicate <- ggplot(data = df.data.summary |>
+                                filter(belief_content == "p"),
        mapping = aes(x = belief_content,
                      y = belief_rating,
                      fill = utterance_type)) +
@@ -102,6 +110,9 @@ belief_by_predicate <- ggplot(data = df.data.summary,
                geom = "linerange",
                position = position_dodge(0.9),
                color = "black") +
+  geom_hline(yintercept = 0.5,
+             color = "grey",
+             linetype = "dashed") + 
   facet_grid(. ~ predicate,
              labeller = predicate_labeller) +
   labs(x = "Belief Content",
@@ -155,9 +166,8 @@ certainty_by_p <- ggplot(data = df.data.certainty |>
        mapping = aes(x = certainty_content,
                      y = certainty_response,
                      color = predicate)) +
-  geom_point(alpha = 0.5, 
-             position=position_jitterdodge(jitter.width = 0.15, 
-                                           dodge.width = 0.8)) +
+  stat_summary(fun.data = "mean", 
+               geom = "point") +
   facet_grid(. ~ utterance_type,
              labeller = utterance_labeller) +
   labs(x = "Certainty Content",
@@ -174,8 +184,7 @@ certainty_by_predicate <- ggplot(data = df.data.certainty |>
                      y = certainty_response,
                      color = utt_belief_comp)) +
   geom_point(alpha = 0.5, 
-             position=position_jitterdodge(jitter.width = 0.15, 
-                                           dodge.width = 0.8)) +
+             position=position_jitter(width = 0.1)) +
   facet_grid(. ~ predicate,
              labeller = predicate_labeller) +
   labs(x = "Certainty Content",
@@ -192,7 +201,7 @@ individual_predicate_certainty <- function(p){
                        y = certainty_response,
                        color = utt_belief_comp)) +
     geom_point(alpha = 0.5,
-               position = position_jitterdodge(jitter.width = 0.15,
+               position = position_jitterdodge(jitter.width = 0.1,
                                                dodge.width = 0.8)) +
     stat_summary(aes(color = utt_belief_comp),
                  fun.data="mean_cl_boot",
@@ -212,24 +221,24 @@ for (predicate in c("know", "think", "say", "inform", "confirm", "simple")) {
 }
 
 
-# relationship between certainty and belief
-individual_trigger_belief_certainty <- function(t) {
-  graph <- ggplot(data = df.data.certainty |>
-                    filter(trigger == t),
-                  mapping = aes(x = belief_rating,
-                                y = certainty_rating,
-                                color = trigger)) +
-    geom_point() +
-    geom_smooth(method = "lm", se = TRUE)
-  return(graph)
-}
-for (trigger in c("know_pos", "think_pos", "say_pos", "inform_pos", "confirm_pos", 
-                  "know_neg", "think_neg", "say_neg", "inform_neg", "confirm_neg",
-                  "simple")) {
-  graph <- individual_trigger_belief_certainty(trigger)
-  file_name <- paste("../../graphs/pilot/belief_certainty_", trigger, ".pdf", sep="")
-  ggsave(graph, file=file_name)
-}
+# # relationship between certainty and belief
+# individual_trigger_belief_certainty <- function(t) {
+#   graph <- ggplot(data = df.data.certainty |>
+#                     filter(trigger == t),
+#                   mapping = aes(x = belief_rating,
+#                                 y = certainty_rating,
+#                                 color = trigger)) +
+#     geom_point() +
+#     geom_smooth(method = "lm", se = TRUE)
+#   return(graph)
+# }
+# for (trigger in c("know_pos", "think_pos", "say_pos", "inform_pos", "confirm_pos", 
+#                   "know_neg", "think_neg", "say_neg", "inform_neg", "confirm_neg",
+#                   "simple")) {
+#   graph <- individual_trigger_belief_certainty(trigger)
+#   file_name <- paste("../../graphs/pilot/belief_certainty_", trigger, ".pdf", sep="")
+#   ggsave(graph, file=file_name)
+# }
 
 belief_certainty <- ggplot(data = df.data.certainty |>
          group_by(trigger) |>
@@ -241,4 +250,4 @@ belief_certainty <- ggplot(data = df.data.certainty |>
   geom_point()
 
 belief_certainty
-ggsave(belief_by_p, file="../../graphs/pilot/belief_certainty.pdf")
+ggsave(belief_certainty, file="../../graphs/pilot/belief_certainty.pdf")
