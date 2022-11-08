@@ -15,7 +15,6 @@ df.data.clean <- df.data |>
 # calculate the ratings for the alternative content and specify the belief
 # of the certainty rating
 df.data.summary <- df.data.clean |>
-  # filter(trigger_class == "Critical") |>
   mutate(utterance_type = gsub("[a-z]+_", "\\1", trigger)) |> # either p (pos) or not p (neg) 
   mutate(predicate = gsub("(.*)_[a-z]+", "\\1", trigger)) |>
   mutate(not_p = ifelse(utterance_type == "neg", 
@@ -31,15 +30,22 @@ df.data.summary <- df.data.clean |>
     belief_response <= 0.5 & utterance_type != "neg" ~ "not_p")) |>
   pivot_longer(cols = c(p, not_p),
                names_to = "belief_content",
-               values_to = "belief_rating")
+               values_to = "belief_rating") |>
+  # to reorder the predicate and utterance_type for graph
+  mutate(predicate = fct_relevel(predicate, "MC","simple","think","know","say","confirm"),
+         utterance_type = fct_relevel(utterance_type, "MC","polar","pos", "neg"))
 
-# for the certainty analysis:
+# summarize the data before visualization
+# judith, can you help me here? thanks!
+
+
+
+# for the certainty analysis -> don't think this is needed anymore:
 # this is a dataframe w/ a column of whether the inferred belief (p in the certainty
 # question) is the same as the embedded clause in the utterance.
 # The belief response is the belief rating for the inferred belief(either the belief 
 # rating, or 1-the belief rating, if the belief rating is < 0.5 for the embedded content)
 df.data.certainty <- df.data.summary |>
-  # distinct(content, workerid,.keep_all=TRUE) |> 
   mutate(utt_belief_comp = case_when(
     utterance_type == "polar" ~ "polar",
     utterance_type == "neg" & certainty_content == "not_p" ~ "same", 
@@ -49,7 +55,7 @@ df.data.certainty <- df.data.summary |>
 
 
 # additional helper functions/lists for graphs
-utterance_label <- list("MC"="Control","neg"="not p", "polar"="Polar", "pos"="p")
+utterance_label <- list("MC"="Control","polar"="Polar","pos"="p","neg"="not p")
 utterance_labeller <- function(variable,value){
   return(utterance_label[value])
 }
@@ -59,12 +65,11 @@ predicate_label <- list("MC"="Control",
                         "think"="think",
                         "know"="know",
                         "say"="say",
-                        "inform"="inform",
-                        "confirm"="confirm")
+                        "confirm"="confirm",
+                        "inform"="inform")
 predicate_labeller <- function(variable,value){
   return(predicate_label[value])
 }
-
 
 ## BELIEF RATINGS
 # summary of belief ratings
@@ -79,9 +84,13 @@ belief_by_p <- ggplot(data = df.data.summary |>
        mapping = aes(x = belief_content,
                      y = belief_rating,
                      fill = predicate)) +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.5,
+             color = "grey",
+             linetype = "dashed") + 
   stat_summary(fun = "mean",
-                      geom = "bar",
-                      position = position_dodge2(width=0.8, preserve = "total")) +
+               geom = "bar",
+               position = position_dodge2(width=0.8, preserve = "total")) +
   stat_summary(fun.data = "mean_cl_boot",
                geom = "linerange",
                position = position_dodge(0.9),
@@ -91,18 +100,21 @@ belief_by_p <- ggplot(data = df.data.summary |>
   labs(x = "Belief Content",
        y = "Belief Rating",
        fill = "Predicate") +
-  scale_fill_discrete(labels=c("confirm", "inform", "know", "Control", "say", "Polar", "think"))
+  scale_fill_discrete(labels=c("Control", "Polar", "think", "know", "say", "confirm", "inform"))
 belief_by_p
-iggsave(belief_by_p, file="../../graphs/pilot/belief_by_p.pdf")
-
-df.data.summary <- df.data.summary |> mutate(predicate = fct_relevel(predicate, "MC", "simple","think","know","say","confirm"))
+ggsave(belief_by_p, file="../../graphs/pilot/belief_by_p.pdf")
 
 # by predicate
 belief_by_predicate <- ggplot(data = df.data.summary |>
-                                filter(belief_content == "p"),
+                                filter(belief_content == "p") |>
+                                mutate(utterance_type = ifelse(as.character(utterance_type) %in% c("MC","polar"), "pos", as.character(utterance_type))),
        mapping = aes(x = belief_content,
                      y = belief_rating,
                      fill = utterance_type)) +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.5,
+             color = "grey",
+             linetype = "dashed") + 
   stat_summary(fun = "mean",
                geom = "bar",
                position = position_dodge2(width=0.8, preserve = "total")) +
@@ -110,17 +122,15 @@ belief_by_predicate <- ggplot(data = df.data.summary |>
                geom = "linerange",
                position = position_dodge(0.9),
                color = "black") +
-  geom_hline(yintercept = 0.5,
-             color = "grey",
-             linetype = "dashed") + 
   facet_grid(. ~ predicate,
              labeller = predicate_labeller) +
   labs(x = "Belief Content",
        y = "Belief Rating",
-       fill = "Embedded \n Content") +
-  scale_fill_discrete(labels=c("Control", "not p", "Polar", "p"))
+       fill = "Embedded \nContent \nin the \nutterance") +
+  scale_fill_discrete(labels=c("not p", "p"))
 belief_by_predicate
 ggsave(belief_by_predicate, file="../../graphs/pilot/belief_by_predicate.pdf")
+
 
 # create one graph for the certainty rating of each predicate
 individual_predicate_belief <- function(p) {
