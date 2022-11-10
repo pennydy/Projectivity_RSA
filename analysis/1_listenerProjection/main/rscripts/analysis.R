@@ -9,7 +9,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # getwd()
 source("../../../helpers.R")
 
-df.data <- read.csv("../../../../data/1_listenerProjection/pilot/1_listenerProjection-trials.csv", header=TRUE)
+df.data <- read.csv("../../../../data/1_listenerProjection/main/1_listenerProjection_main-trials.csv", header=TRUE)
 
 # exclude bot check and select only the relevant columns
 df.data.clean <- df.data |>
@@ -131,7 +131,6 @@ belief_by_predicate <- ggplot(data = belief_summary |>
                     guide="none") +
   theme(axis.text.x=element_blank(),
         axis.title.x=element_blank()) 
-
 belief_by_predicate
 ggsave(belief_by_predicate, file="../graphs/belief_by_predicate.pdf")
 
@@ -177,14 +176,13 @@ certainty_by_p <- ggplot(data = certainty_summary,
        fill = "Predicate") +
   # scale_alpha_discrete(range=c(.3,.9),name="Embedded\ncontent") +
   scale_fill_manual(values=cbPalette,
-                    labels=c("Control", "Polar", "think", "know", "say", "confirm", "inform"), 
-                    guide="none")
+                    labels=c("Control", "Polar", "think", "know", "say", "confirm", "inform")) # add guide="none" later
 certainty_by_p
 ggsave(certainty_by_p, file="../graphs/certainty_by_p.pdf")
 
 
 
-# by predicate -> need to fix the color
+# by predicate
 certainty_by_predicate <- ggplot(data = certainty_summary |>
                                    # filter(!utterance_type %in% c("MC")) |>
                                    mutate(utterance_type = ifelse(as.character(utterance_type) %in% c("MC","polar"), "pos", as.character(utterance_type))),

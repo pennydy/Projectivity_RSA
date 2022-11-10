@@ -1,7 +1,7 @@
 .DS_Store
 
 # data
-data/**.config
-data/**.exps
+data/*.config
+data/*.exps
 data/1_listenerProjection/all_original/
 
