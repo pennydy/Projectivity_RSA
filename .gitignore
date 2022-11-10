@@ -1,8 +1,7 @@
 .DS_Store
 
-# proliferate
-proliferate/
-
 # data
-data/pilot/1_listenerProjection-workerids.csv
-data/pilot/1_listenerProjection-subject_information.csv
+data/*.config
+data/*.exps
+data/1_listenerProjection/all_original/
+
