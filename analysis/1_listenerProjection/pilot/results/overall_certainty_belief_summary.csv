@@ -1,0 +1,8 @@
+"predicate","mean_certainty_rating","mean_belief_rating","count"
+"MC",0.40875,0.643333333333333,24
+"simple",0.535,0.65875,8
+"think",0.52625,0.71625,8
+"know",0.82,0.84125,8
+"say",0.52,0.7025,8
+"confirm",0.61125,0.735,8
+"inform",0.76,0.76375,8

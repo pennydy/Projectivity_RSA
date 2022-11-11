@@ -42,11 +42,13 @@ df.data.summary <- df.data.clean |>
 # additional helper functions/lists for graphs
 dodge = position_dodge(.9)
 
-utterance_label <- list("MC"="Control","polar"="Polar","pos"="Embedded: p","neg"="Embedded: not p")
+utterance_label <- list("MC"="Control",
+                        "polar"="Polar",
+                        "pos"="Embedded: p",
+                        "neg"="Embedded: not p")
 utterance_labeller <- function(variable,value){
   return(utterance_label[value])
 }
-
 predicate_label <- list("MC"="Control",
                         "simple"="Polar",
                         "think"="think",
@@ -56,6 +58,12 @@ predicate_label <- list("MC"="Control",
                         "inform"="inform")
 predicate_labeller <- function(variable,value){
   return(predicate_label[value])
+}
+
+content_label <- list("not_p"="Belief content: not p",
+                      "p"="Belief content: p")
+content_labeller <- function(variable,value){
+  return(content_label[value])
 }
 
 ## BELIEF RATINGS
@@ -184,7 +192,7 @@ ggsave(certainty_by_p, file="../graphs/certainty_by_p.pdf")
 
 
 
-# by predicate -> need to fix the color
+# by predicate
 certainty_by_predicate <- ggplot(data = certainty_summary |>
                                    # filter(!utterance_type %in% c("MC")) |>
                                    mutate(utterance_type = ifelse(as.character(utterance_type) %in% c("MC","polar"), "pos", as.character(utterance_type))),
@@ -207,7 +215,7 @@ certainty_by_predicate <- ggplot(data = certainty_summary |>
              linetype = "dashed") +
   facet_grid(. ~ predicate,
              labeller = predicate_labeller) +
-  scale_alpha_discrete(range=c(.3,.8), # include both p and not p (more opaque). 
+  scale_alpha_discrete(range=c(.3,.8), # include both p and not p (more opaque).
                        labels=c("not p", "p"),
                        name="Embedded\ncontent") +
   scale_color_manual(values=cbPalette,
@@ -220,92 +228,59 @@ certainty_by_predicate
 ggsave(certainty_by_predicate, file="../graphs/certainty_by_predicate.pdf")
 
 
-
-# # create one graph for the belief rating of each predicate
-# individual_predicate_belief <- function(p) {
-#   graph <- ggplot(data = df.data.summary |>
-#                     filter(predicate == p),
-#                   mapping = aes(x = belief_content,
-#                                 y = belief_rating,
-#                                 fill = utterance_type)) +
-#     geom_bar(stat="identity", 
-#              position=dodge) +
-#     geom_errorbar(aes(ymin=YMin,
-#                       ymax=YMax),
-#                   position=dodge,
-#                   width=.2) +
-#     geom_hline(yintercept = 0.5,
-#                alpha = 0.7,
-#                color = "grey",
-#                linetype = "dashed") +
-#     labs(x = "Belief Content",
-#          y = "Belief Rating",
-#          fill = "Embedded \n Content") +
-#     scale_fill_discrete(labels=c("Control", "not p", "Polar", "p"))
-#   return(graph)
-# }
-# 
-# for (predicate in c("know", "think", "say", "inform", "confirm", "simple")) {
-#   graph <- individual_predicate_belief(predicate)
-#   file_name <- paste("../graphs/pilot/belief_", predicate, ".pdf", sep="")
-#   ggsave(graph, file=file_name)
-# }
-# 
-# # create one graph for the certainty rating of each predicate
-# individual_predicate_certainty <- function(p){
-#   graph <- ggplot(data = df.data.certainty |>
-#                     filter(predicate == p),
-#                   mapping = aes(x = certainty_content,
-#                                 y = certainty_response,
-#                                 color = utt_belief_comp)) +
-#     geom_point(alpha = 0.5,
-#                position = position_jitterdodge(jitter.width = 0.1,
-#                                                dodge.width = 0.8)) +
-#     stat_summary(aes(color = utt_belief_comp),
-#                  fun.data="mean_cl_boot",
-#                  geom = "pointrange",
-#                  size = 0.4,
-#                  position = position_dodge(0.8)) + 
-#     labs(x = "Certainty Content",
-#          y = "Certainty Rating",
-#          color = "Accordence between \n utterance and \n belief") 
-#   return(graph)
-# }  
-# 
-# for (predicate in c("know", "think", "say", "inform", "confirm", "simple")) {
-#   graph <- individual_predicate_certainty(predicate)
-#   file_name <- paste("../graphs/pilot/certainty_", predicate, ".pdf", sep="")
-#   ggsave(graph, file=file_name)
-# }
+overall_certainty_belief_summary <- df.data.summary |>
+  filter(certainty_content == belief_content) |>
+  group_by(predicate) |>
+  summarize(mean_certainty_rating = mean(certainty_response),
+            mean_belief_rating = mean(belief_rating),
+            count = n()) |>
+  ungroup()
+print(overall_certainty_belief_summary)
+write.csv(overall_certainty_belief_summary, "../results/overall_certainty_belief_summary.csv" , row.names = FALSE)
+overall_belief_certainty <- ggplot(data = overall_certainty_belief_summary,
+                                   mapping = aes(x = mean_belief_rating,
+                                                 y = mean_certainty_rating,
+                                                 color = predicate)) +
+  geom_point(size=4) +
+  scale_color_manual(values=cbPalette,
+                     labels=c("Control", "Polar", "think", "know", "say", "confirm", "inform")) + 
+  labs(x = "Mean belief of the content",
+       y = "Mean certainty of the rated content") 
+overall_belief_certainty
+ggsave(overall_belief_certainty, file="../graphs/overall_belief_certainty.pdf")
 
 
-# # relationship between certainty and belief
-# individual_trigger_belief_certainty <- function(t) {
-#   graph <- ggplot(data = df.data.certainty |>
-#                     filter(trigger == t),
-#                   mapping = aes(x = belief_rating,
-#                                 y = certainty_rating,
-#                                 color = trigger)) +
-#     geom_point() +
-#     geom_smooth(method = "lm", se = TRUE)
-#   return(graph)
-# }
-# for (trigger in c("know_pos", "think_pos", "say_pos", "inform_pos", "confirm_pos", 
-#                   "know_neg", "think_neg", "say_neg", "inform_neg", "confirm_neg",
-#                   "simple")) {
-#   graph <- individual_trigger_belief_certainty(trigger)
-#   file_name <- paste("../../graphs/pilot/belief_certainty_", trigger, ".pdf", sep="")
-#   ggsave(graph, file=file_name)
-# }
 
-# belief_certainty <- ggplot(data = df.data.certainty |>
-#                              group_by(trigger) |>
-#                              summarize(mean_belief_rating = mean(belief_rating),
-#                                        mean_certainty_rating = mean(certainty_response)),
-#                            mapping = aes(x = mean_belief_rating,
-#                                          y = mean_certainty_rating,
-#                                          color = trigger)) +
-#   geom_point()
-# 
-# belief_certainty
-# ggsave(belief_certainty, file="../graphs/pilot/belief_certainty.pdf")
+certainty_belief_summary <- df.data.summary |>
+  filter(certainty_content == belief_content) |>
+  group_by(predicate, utterance_type, certainty_content) |>
+  # group_by(predicate) |>
+  summarize(mean_certainty_rating = mean(certainty_response),
+            mean_belief_rating = mean(belief_rating),
+            count = n()) |>
+  ungroup()
+print(certainty_belief_summary)
+write.csv(certainty_belief_summary, "../results/certainty_belief_summary.csv" , row.names = FALSE)
+
+
+belief_certainty <- ggplot(data = certainty_belief_summary |>
+                             mutate(utterance_type = ifelse(as.character(utterance_type) %in% c("MC","polar"), "pos", as.character(utterance_type))),
+                           mapping = aes(x = mean_belief_rating,
+                                         y = mean_certainty_rating,
+                                         alpha = utterance_type,
+                                         color = predicate)) +
+  geom_point(aes(size=count)) +
+  scale_alpha_discrete(range=c(.3,.8), # include both p and not p (more opaque).
+                       labels=c("polar", "pos", "neg"),
+                       name="Embedded\ncontent") +
+  facet_grid(. ~ certainty_content,
+             labeller = content_labeller) +
+  scale_color_manual(values=cbPalette,
+                     labels=c("Control", "Polar", "think", "know", "say", "confirm", "inform")) + 
+  scale_size(guide="none") +
+  labs(x = "Mean belief of the content",
+       y = "Mean certainty of the rated content") 
+  
+belief_certainty
+ggsave(belief_certainty, file="../graphs/belief_certainty.pdf")
+
