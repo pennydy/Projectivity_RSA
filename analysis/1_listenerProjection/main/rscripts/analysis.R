@@ -40,7 +40,6 @@ df.data.all <- df.data.clean |>
          utterance_type = fct_relevel(utterance_type, "MC","polar","pos", "neg"))
 
 ## Data exclusion
-
 group_mc_mean <- mean(df.data.all$belief_response[df.data.all$trigger == "MC"])
 group_mc_sd <- sd(df.data.all$belief_response[df.data.all$trigger == "MC"])
 exclusion_criteria <- group_mc_mean + 2*group_mc_sd
@@ -51,6 +50,7 @@ excludeid <- df.data.all |>
   mutate(exclude = ifelse(mean_belief_response >= exclusion_criteria, "yes", "no")) |>
   filter(exclude == "yes") 
 
+# workerid 59 did not respond to the native language question, but since we used to the prescreening question, we still include their data The overall results do not change.
 df.data.summary <- df.data.all |>
   filter(!workerid %in% excludeid$workerid)
 
