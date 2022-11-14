@@ -4,12 +4,22 @@ var contentPriorListener = function() {
 }
 
 
+var certaintyPriorListener = function() {
+  var predicate = uniformDraw(["knew", "thought", ""])
+  predicate == "knew" ? gaussian(0.8, 0.1) :
+  predicate == "thought" ? gaussian(0.5, 0.5) :
+  predicate == "" ? gaussian(0.5, 0.1) :
+  true
+}
+
+
 // Pragmatic speaker
 
 // certainty: how certain the speaker is about the content, 
+// currently categorical (either certain or uncertain about the content)
+// TODO: treat certainty as a continous variable, where:
 // 1: very certain that the content is true
 // 0.5: maximally uncertain about the content (the chance of the content being either true or false is 0.5)
-// currently categorical (either certain or uncertain about the content)
 
 // believed: 
 // current model: assume the speaker is uncertain (0.5) about the certainty and uncertain (0.5) about the content: 
@@ -19,7 +29,7 @@ var contentPriorListener = function() {
 // uncertain (0.5) about the certainty and slightly more certain (0.56) about the content than hearing the simple polar question:
 // -> more likely to use the intended content than the alternative, but the overall prob. of using "believed" is
 // the same across different certainty level (i.e. the sum of the probs. of using "believed dances" and "believed doesn't dance"
-// is the same when certainty == 0.5 and certainty == 0.8).
+// is the same when certainty == "uncertain" and certainty == "certain").
 // e.g. when the content is "dances", the prob. of using each utterance in ["knew dances", "believed dances", "dances", "knew doesn't dance", "believed doesn't dance"] 
 // certainty == 0.5: [0.1, 0.2, 0.8, 0.1, 0.2]
 // certainty == 0.8: [0.8, 0.25, 0.1, 0.1, 0.15]
@@ -31,8 +41,8 @@ var contentPriorListener = function() {
 // the same within each certainty level (i.e. the prob. of using "believed dances" and "believed doesn't dance"
 // is the same)
 // e.g. when the content is "dances", the prob. of using each utterance in ["knew dances", "believed dances", "dances", "knew doesn't dance", "believed doesn't dance"] 
-// certainty == 0.5: [0.1, 0.2, 0.8, 0.1, 0.2]
-// certainty == 0.8: [0.8, 0.4, 0.1, 0.1, 0.4]
+// certainty == uncertain: [0.1, 0.2, 0.8, 0.1, 0.2]
+// certainty == certain: [0.8, 0.4, 0.1, 0.1, 0.4]
 
 
 // not including the negation of the polar question ("doesn't dance") -> the speaker seems to have a different motivation for saying it
@@ -48,22 +58,25 @@ var contentPriorListener = function() {
 
 
 var speaker = function(content, certainty) {
-  if (certainty==0.5) {
-      return Categorical({ps:[0.1, 0.2, 0.8, 0.1, 0.2], vs:["knew dances", "believed dances", "dances",
-                                                                 "knew doesn't dance", "believed doesn't dance"]}) 
-   } else if (certainty>0.5) {
+  if (certainty=="uncertain") {
+    // doesn't make sense to use the extact value if certainty is continuous
+//   if (certainty == 0.5) {
+      return Categorical({ps:[0.1, 0.2, 0.8, 0.1, 0.2], vs:["knew dances", "thought dances", "dances",
+                                                                 "knew doesn't dance", "thought doesn't dance"]}) 
+   } else if (certainty=="certain") {
+//     } else if (certainty>0.8) {
      if (content == "dances") {
        // when the content is "dances" and the speaker is certain that it is TRUE
-        return Categorical({ps:[0.8, 0.2, 0.1, 0.1, 0.2], vs:["knew dances", "believed dances", "dances",
-                                                                 "knew doesn't dance", "believed doesn't dance"]}) 
+        return Categorical({ps:[0.8, 0.2, 0.1, 0.1, 0.2], vs:["knew dances", "thought dances", "dances",
+                                                                 "knew doesn't dance", "thought doesn't dance"]}) 
      } else {
-       return Categorical({ps:[0.1, 0.2, 0.1, 0.8, 0.2], vs:["knew dances", "believed dances", "dances",
-                                                                   "knew doesn't dance", "believed doesn't dance"]}) 
-     }
-  } 
+       return Categorical({ps:[0.1, 0.2, 0.1, 0.8, 0.2], vs:["knew dances", "thought dances", "dances",
+                                                                   "knew doesn't dance", "thought doesn't dance"]}) 
+     } 
+  }
 }
 
-viz(speaker("dances", 0.9))
+viz(speaker("dances", "certain"))
 
 
 // certainty: the listener's belief about how CERTAIN the speaker is about the content
@@ -73,7 +86,8 @@ viz(speaker("dances", 0.9))
 var pragmaticListener = function(utterance) {
   Infer({model: function() {
     var content = contentPriorListener()
-    var certainty = uniformDraw([0.5, 0.8])
+    var certainty = uniformDraw(["uncertain", "certain"])
+//     var certainty = certaintyPriorListener()
     observe(speaker(content, certainty), utterance)
     return {content, certainty}
   }})
@@ -81,7 +95,7 @@ var pragmaticListener = function(utterance) {
 
 
 
-var listenerPosterior = pragmaticListener("believed dances")
+var listenerPosterior = pragmaticListener("thought dances")
 // listener's certainty
 viz.table(listenerPosterior)
 display("marginalize (listener's belief) about the content")
