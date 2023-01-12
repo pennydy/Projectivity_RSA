@@ -93,16 +93,16 @@ function make_slides(f) {
             this.stim = stim;
             this.stim.trial_start = Date.now();      
             $(".err").hide();   
-            $(".ah_err").hide() 	
+            $(".second_err").hide() 	
             this.init_sliders();
             $(".continue_button").show(); // show the belief button
-            $(".speaker_slider_table").show(); // show the belief slider
-            $(".speaker_question").show();
-            exp.speaker_sliderPost = null;
-            exp.ah_sliderPost = null;
+            $(".first_slider_table").show(); // show the belief slider
+            $(".first_question").show();
+            exp.first_sliderPost = null;
+            exp.second_sliderPost = null;
             exp.ah_question = null;
-            $(".ah_question").hide(); // hide the ah question in the beginning
-            $(".ah_slider_table").hide(); // hide the ah slider in the beginning
+            $(".second_question").hide(); // hide the ah question in the beginning
+            $(".second_slider_table").hide(); // hide the second slider in the beginning
             $(".next_button").hide(); // hide the next botton
 
             console.log(this.stim);    
@@ -115,86 +115,94 @@ function make_slides(f) {
             }
             $(".sentence").html(utterance);
 
-            var leftLabel =  "definitely no";
-            $(".leftLabel").html(leftLabel);
-            var rightLabel = "definitely yes";
-            $(".rightLabel").html(rightLabel);
+            exp.leftLabel =  "definitely no";
+            $(".leftLabel").html(exp.leftLabel);
+            exp.rightLabel = "definitely yes";
+            $(".rightLabel").html(exp.rightLabel);
 
             // allows the content question to match with the utterance (i.e. not p in question when the embedded is not p)
             if (this.stim.trigger.includes("_neg")) {
-                var speaker_question = "Is <strong>"+this.stim.speaker_name+"</strong> certain that "+this.stim.negation+"?";
-                // var ah_question = "Is <strong>"+this.stim.ah_name+"</strong> certain that "+this.stim.negation+"?";
+                exp.speaker_question = "Is <strong>"+this.stim.speaker_name+"</strong> certain that "+this.stim.negation+"?";
+                // if there is no attitude holder
+                if (this.stim.ah_name == "NA") {
+                    exp.ah_question = "NA";
+                } else {
+                    exp.ah_question = "Is <strong>"+this.stim.ah_name+"</strong> certain that "+this.stim.negation+"?";
+                }
             } else {
-                var speaker_question = "Is <strong>"+this.stim.speaker_name+"</strong> certain that "+this.stim.statement+"?";
-                // var ah_question = "Is <strong>"+this.stim.ah_name+"</strong> certain that "+this.stim.statement+"?";
+                exp.speaker_question = "Is <strong>"+this.stim.speaker_name+"</strong> certain that "+this.stim.statement+"?";
+                if (this.stim.ah_name == "NA") {
+                    exp.ah_question = "NA";
+                } else {
+                    exp.ah_question = "Is <strong>"+this.stim.ah_name+"</strong> certain that "+this.stim.statement+"?";
+                }
             }
-            exp.speaker_question = speaker_question
-            $(".speaker_question").html(speaker_question);	  
+            var question_list = _.shuffle([exp.speaker_question, exp.ah_question]);
+            console.log("question list: "+question_list);
+            exp.first_question = question_list.pop();
+            exp.second_question = question_list.pop();
+            if (exp.first_question == "NA") {
+                exp.first_question = exp.second_question;
+                exp.second_question = "NA";
+            }
+            $(".first_question").html(exp.first_question);	  
+            console.log("first question: "+exp.first_question); 
         },
         
         // the continue button is pressed to forward to the next question
-        belief_button : function() {
-            console.log("speaker belief rating: "+exp.speaker_sliderPost);
-            console.log("default ah rating: "+exp.ah_sliderPost);
+        first_button : function() {
+            console.log("first rating: "+exp.first_sliderPost);
+            console.log("default second rating: "+exp.second_sliderPost);
 
-            
-            if (exp.speaker_sliderPost != null) {
-                    $(".err").hide(); // have a rating, so hide the error message
-                    $(".speaker_question").hide(); // hide the speaker belief question
-                    $(".speaker_slider_table").hide(); // hide the speaker belief slider
+            if (exp.first_sliderPost != null) {
+                $(".err").hide(); // have a rating, so hide the error message
+                $(".first_question").hide(); // hide the speaker belief question
+                $(".first_slider_table").hide(); // hide the speaker belief slider
+
+                console.log("second question: "+exp.second_question);
+                if (exp.second_question != "NA") {
+                    $(".second_question").show();
+                    $(".second_question").html(exp.second_question);
                     
-                    // only show the ah question if there is an attitude holder (not simple polar or MC)
-                    if (this.stim.ah_name != "NA") {
-                        if (this.stim.trigger.includes("_neg")) {
-                            ah_question = "Is <strong>"+this.stim.ah_name+"</strong> certain that "+this.stim.negation+"?";
-                        } else {
-                            ah_question = "Is <strong>"+this.stim.ah_name+"</strong> certain that "+this.stim.statement+"?";
-                        }
-                        exp.ah_question = ah_question
-                        $(".ah_question").show();
-                        $(".ah_question").html(ah_question);
-                        
-                        this.init_ah_slider();
-                        exp.ah_sliderPost = null;
-                        var ah_leftLabel = "definitely no";
-                        $(".ah_leftLabel").html(ah_leftLabel);
-                        var ah_rightLabel = "definitely yes";
-                        $(".ah_rightLabel").html(ah_rightLabel);
-                        
-                        $(".continue_button").hide();
-                        $(".ah_slider_table").show();
-                        $(".next_button").show()
-                    } else {
-                        exp.ah_sliderPost == "NA";
-                        this.log_responses();
-                        _stream.apply(this); // exp.go()
-                    }
+                    this.init_second_slider();
+                    exp.second_sliderPost = null;
+                    $(".leftLabel").html(exp.leftLabel);
+                    $(".rightLabel").html(exp.rightLabel);
+                    
+                    $(".continue_button").hide();
+                    $(".second_slider_table").show();
+                    $(".next_button").show()
+                } else {
+                    // exp.second_sliderPost = "NA";
+                    this.log_responses();
+                    _stream.apply(this); // exp.go()
+                }
 
             } else { //  no speaker belief rating
                 $(".err").show();
             }
         },
         
-        button : function() {
-            console.log("ah belief rating: "+exp.ah_sliderPost);
-            console.log("double check speaker belief rating: "+exp.speaker_sliderPost);
-            if (exp.ah_sliderPost != null | (this.stim.ah_name == "NA" & exp.ah_sliderPost == null)) {
+        second_button : function() {
+            console.log("second rating: "+exp.second_sliderPost);
+            console.log("double check first rating: "+exp.first_sliderPost);
+            if (exp.second_sliderPost != null | (exp.second_question == "NA" & exp.second_sliderPost == null)) {
                 this.log_responses();
                 _stream.apply(this); //use exp.go() if and only if there is no "present" data.
             } else {
-                $(".ah_err").show();
+                $(".second_err").show();
             }
         },
 
         init_sliders : function() {
             utils.make_slider("#single_slider1", function(event, ui) {
-                exp.speaker_sliderPost = ui.value;
+                exp.first_sliderPost = ui.value;
             });
         },
 
-        init_ah_slider : function() {
+        init_second_slider : function() {
             utils.make_slider("#single_slider2", function(event_1, ui_1) {
-                exp.ah_sliderPost = ui_1.value;
+                exp.second_sliderPost = ui_1.value;
             });
         },
 
@@ -206,7 +214,14 @@ function make_slides(f) {
                 trigger = this.stim.trigger;
             }
 
-            
+            if (exp.first_question == exp.speaker_question) {
+                exp.speaker_sliderPost = exp.first_sliderPost;
+                exp.ah_sliderPost = exp.second_sliderPost;
+            } else {
+                exp.speaker_sliderPost = exp.second_sliderPost;
+                exp.ah_sliderPost = exp.first_sliderPost;
+            }
+
             exp.data_trials.push({
                 "slide_number_in_experiment" : exp.phase, // trial number
                 "trigger": trigger,
@@ -214,6 +229,7 @@ function make_slides(f) {
                 "trigger_class": this.stim.trigger_class,
                 // "content": this.stim.content,
                 "speaker_question": exp.speaker_question,
+                "ah_question":exp.ah_question,
                 "utterance": this.stim.utterance, // record utterance for sanity check
                 "prior_rating" : this.stim.prior_rating,
                 "prior_fact" : this.stim.prior_fact,
