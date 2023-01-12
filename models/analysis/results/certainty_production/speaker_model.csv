@@ -1,0 +1,11 @@
+certainty,utterances,probability
+certain,"""p?""",0.0714
+certain,"""knew p?""",0.5714
+certain,"""knew not p?""",0.0714
+certain,"""thought p?""",0.1429
+certain,"""thought not p?""",0.1429
+uncertain,"""p?""",0.5714
+uncertain,"""knew p?""",0.0714
+uncertain,"""knew not p?""",0.0714
+uncertain,"""thought p?""",0.1429
+uncertain,"""thought not p?""",0.1429

@@ -1,0 +1,11 @@
+utterance,content,probability
+"""p?""",p,0.5
+"""p?""",not p,0.5
+"""thought p?""",p,0.5
+"""thought p?""",not p,0.5
+"""knew p?""",p,0.818181818
+"""knew p?""",not p,0.181818182
+"""thought not p?""",p,0.5
+"""thought not p?""",not p,0.5
+"""knew not p?""",p,0.181818182
+"""knew not p?""",not p,0.818181818

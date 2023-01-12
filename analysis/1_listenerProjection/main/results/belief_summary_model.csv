@@ -1,0 +1,12 @@
+predicate,condition,utterance_type,belief_content,mean_belief_rating,ci_low,ci_high,YMin,YMax
+MC,empirical,MC,p,0.527966667,0.019800833,0.020168333,0.508165833,0.548135
+simple,empirical,polar,p,0.601,0.0341125,0.0357,0.5668875,0.6367
+think,empirical,pos,p,0.5024,0.07304,0.080615,0.42936,0.583015
+think,empirical,neg,p,0.6978,0.07841,0.07482,0.61939,0.77262
+know,empirical,pos,p,0.852,0.055205,0.04841,0.796795,0.90041
+know,empirical,neg,p,0.2416,0.077635,0.083845,0.163965,0.325445
+simple,model,polar,p,0.75,,,,
+think,model,pos,p,0.75,,,,
+think,model,neg,p,0.75,,,,
+know,model,pos,p,0.931,,,,
+know,model,neg,p,0.4,,,,

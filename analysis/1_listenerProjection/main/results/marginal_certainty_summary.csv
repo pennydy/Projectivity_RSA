@@ -1,0 +1,11 @@
+condition,predicate,utterance_type,mean_certainty_rating,ci_low,ci_high,YMin,YMax
+empirical,simple,pos,0.433367347,0.046844388,0.048265306,0.386522959,0.481632653
+empirical,think,pos,0.618979592,0.062255102,0.061443878,0.55672449,0.680423469
+empirical,think,neg,0.706530612,0.071637755,0.068229592,0.634892857,0.774760204
+empirical,know,pos,0.811836735,0.066964286,0.058984694,0.744872449,0.870821429
+empirical,know,neg,0.789387755,0.074285714,0.068183673,0.715102041,0.857571429
+model,simple,pos,0.111,,,,
+model,think,pos,0.5,,,,
+model,think,neg,0.5,,,,
+model,know,pos,0.862,,,,
+model,know,neg,0.733,,,,

@@ -1,6 +1,6 @@
 // Listener's prior knowledge about the content
 var contentPriorListener = function() {
-  return categorical({vs: ["dances", "doesn't dance"], ps:[1, 1]})
+  return categorical({vs: ["dances", "doesn't dance"], ps:[3, 1]})
 }
 
 
@@ -61,16 +61,16 @@ var speaker = function(content, certainty) {
   if (certainty=="uncertain") {
     // doesn't make sense to use the extact value if certainty is continuous
 //   if (certainty == 0.5) {
-      return Categorical({ps:[0.1, 0.2, 0.8, 0.1, 0.2], vs:["knew dances", "thought dances", "dances",
+      return Categorical({ps:[0.1, 0.2, 0.8, 0.1, 0.4], vs:["knew dances", "thought dances", "dances",
                                                                  "knew doesn't dance", "thought doesn't dance"]}) 
    } else if (certainty=="certain") {
 //     } else if (certainty>0.8) {
      if (content == "dances") {
        // when the content is "dances" and the speaker is certain that it is TRUE
-        return Categorical({ps:[0.8, 0.2, 0.1, 0.1, 0.2], vs:["knew dances", "thought dances", "dances",
+        return Categorical({ps:[0.8, 0.2, 0.1, 0.1, 0.4], vs:["knew dances", "thought dances", "dances",
                                                                  "knew doesn't dance", "thought doesn't dance"]}) 
      } else {
-       return Categorical({ps:[0.1, 0.2, 0.1, 0.8, 0.2], vs:["knew dances", "thought dances", "dances",
+       return Categorical({ps:[0.1, 0.4, 0.1, 0.8, 0.2], vs:["knew dances", "thought dances", "dances",
                                                                    "knew doesn't dance", "thought doesn't dance"]}) 
      } 
   }
@@ -106,4 +106,3 @@ viz.table(marginalize(listenerPosterior, "content"))
 // display(expectation(marginalize(listenerPosterior, "certainty")))
 display("marginalize (listener's certainty about) speaker's certainty distribution")
 viz.table(marginalize(listenerPosterior, "certainty"))
-
