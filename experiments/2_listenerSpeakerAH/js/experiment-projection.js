@@ -24,7 +24,7 @@ function make_slides(f) {
             if ((exp.lives < 3) && ((exp.text_input.toLowerCase() == exp.listener.toLowerCase()))){
                 exp.data_trials.push({
                     "slide_number_in_experiment" : exp.phase,
-                    "utterance": "bot_check",
+                    "text": "bot_check",
                     "object": exp.listener,
                     "rt" : 0,
                     "response" : exp.text_input
@@ -33,7 +33,7 @@ function make_slides(f) {
             } else {
                 exp.data_trials.push({
                     "slide_number_in_experiment" : exp.phase,
-                    "utterance": "bot_check",
+                    "text": "bot_check",
                     "object": exp.listener,
                     "rt" : 0,
                     "response" : exp.text_input
@@ -72,7 +72,7 @@ function make_slides(f) {
         name : "instructions1",
         start : function() {
             $('.bar').css('width', ( (100*(exp.phase)/exp.nQs) + "%"));    	
-            var inst1 = "Let's get started! <br><br>Imagine you are at a party. <br><br> You walk into the kitchen and overhear somebody ask something. You'll answer questions about what the people believe and how certain they are.";
+            var inst1 = "Let's get started! <br><br>Imagine you are at a party. <br><br> You walk into the kitchen and overhear somebody ask something. You'll answer questions about what people believe.";
             $("#inst1").html(inst1);
         },
         button : function() {
@@ -131,7 +131,13 @@ function make_slides(f) {
                     exp.ah_question = "Does <font color=\"red\">"+this.stim.ah_name+"</font> believe that "+this.stim.statement+"?";
                 }
             }
-            var question_list = _.shuffle([exp.speaker_question, exp.ah_question]);
+
+            if (this.stim.question_order == "ah_first") {
+                var question_list = [exp.speaker_question, exp.ah_question];
+            } else {
+                var question_list = [exp.ah_question, exp.speaker_question];
+            }
+            console.log("question order: "+this.stim.question_order);
             console.log("question list: "+question_list);
             exp.first_question = question_list.pop();
             exp.second_question = question_list.pop();
@@ -216,6 +222,7 @@ function make_slides(f) {
 
             exp.data_trials.push({
                 "slide_number_in_experiment" : exp.phase, // trial number
+                "question_order" : this.stim.question_order,
                 "trigger": trigger,
                 "predicate" : this.stim.predicate,
                 "trigger_class": this.stim.trigger_class,
@@ -276,6 +283,8 @@ function make_slides(f) {
 }
 
 function init() {
+
+    var question_order = _.sample(["speaker_first", "ah_first"]);
     var speaker_names = _.shuffle(["Christopher","Daniel","Tyler","Paul","George","Steven","Kenneth","Edward","Brian","Kevin","Larry","Scott",
     "Jennifer","Dorothy","Karen","Nancy","Betty","Lisa","Sandra","Ashley","Donna","Kimberly","Cynthia","Kathleen"])
     var ah_names = _.shuffle(["Ronald","Timothy","Jason","Jeffrey","Gary","Ryan","Nicholas","Eric","Jacob","Jonathan",
@@ -574,7 +583,7 @@ function init() {
             "negation":"Owen didn't shovel snow last winter",
             "simple_polar":"Did Owen shovel snow last winter?",
             "know_pos":"that Owen shoveled snow last winter?",
-            "know_neg":"that Owen didn't shoveled snow last winter?",
+            "know_neg":"that Owen didn't shovel snow last winter?",
             "say_pos":"that Owen shoveled snow last winter?",
             "say_neg":"that Owen didn't shovel snow last winter?",
             "think_pos":"that Owen shoveled snow last winter?",
@@ -659,18 +668,12 @@ function init() {
 
     for (var i=0; i<content_items.length/2; i++){
         var stim = content_items[i];
-        // stim.prior_condition = "high prob";
-        // stim.prior_fact = stim["high_prior"];
-        // stim.prior_rating = stim["high_prior_rating"];
         high_prob_contents.push(stim)
     }
     console.log(high_prob_contents)
 
     for (var j=content_items.length/2; j<content_items.length; j++){
         var stim = content_items[j];
-        // stim.prior_condition = "low prob";
-        // stim.prior_fact = stim["low_prior"];
-        // stim.prior_rating = stim["low_prior_rating"];
         low_prob_contents.push(stim)
     }
     console.log(low_prob_contents)
@@ -687,14 +690,13 @@ function init() {
         var item = content_list[i];
         // get content
         var content = contents[item];
-        // console.log(content)
         // make the utterance
         // "think" and "know" use present tense; "say" and "inform" use past tense
         if (trigger == "simple_polar") {
             var predicate = "NA";
             var utterance = content[trigger];
             ah_name = "NA"; // no attitude holder if it is simple polar
-        } else if (trigger == "know" | trigger == "think") {
+        } else if (trigger.includes("know") | trigger.includes("think")) {
             var predicate = trigger.split("_")[0]; // only use the predicate, not the entire trigger label with "_pos"
             var utterance = "Does <font color=\"red\">" + ah_name + "</font> " + predicate + " " + content[trigger]
         } else {
@@ -721,7 +723,6 @@ function init() {
             var prior_condition = "low prob of p";
         }
         
-
         return {
             "speaker_name": speaker_name,
             "ah_name": ah_name,	  
@@ -815,8 +816,10 @@ function init() {
     // the two lists should have the same number of contents
     for (var i=0; i<high_prob_contents.length; i++) {
         var high_prob_stim = makeStim(i, high_prob_contents);
+        high_prob_stim["question_order"] = question_order;
         exp.stims_block1.push(jQuery.extend(true, {}, high_prob_stim));
         var low_prob_stim = makeStim(i, low_prob_contents);
+        low_prob_stim["question_order"] = question_order;
         exp.stims_block1.push(jQuery.extend(true, {}, low_prob_stim));
     }
 	exp.stims_block1 = _.shuffle(exp.stims_block1); // randomize the critical items (no need)
@@ -824,6 +827,7 @@ function init() {
     // add the control items
     for (var l=0; l<mcitemnames.length; l++) {
         var stim = makeMCStim(l,mcitemnames);
+        stim["question_order"] = question_order;
         exp.stims_block1.push(jQuery.extend(true, {}, stim));
     }  
 
@@ -833,7 +837,6 @@ function init() {
 
     exp.trials = [];
     exp.catch_trials = [];
-    // exp.condition = {}; // can randomize between subject conditions here -> not needed?
     exp.system = {
         Browser : BrowserDetect.browser,
         OS : BrowserDetect.OS,
