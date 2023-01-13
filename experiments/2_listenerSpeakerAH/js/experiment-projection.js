@@ -357,26 +357,26 @@ function init() {
             "high_prior_rating":0.680763888888889,
             "low_prior_rating":0.323098591549296
         },
-        "mia":{
-            // "item":"mia",
-            "statement":"Mia drank 2 cocktails last night",
-            "negation":"Mia didn't drink 2 cocktails last night",
-            "simple_polar":"Did Mia drink 2 cocktails last night?",
-            "know_pos":"that Mia drank 2 cocktails last night?",
-            "know_neg":"that Mia didn't drink 2 cocktails last night?",
-            "say_pos":"that Mia drank 2 cocktails last night?",
-            "say_neg":"that Mia didn't drink 2 cocktails last night?",
-            "think_pos":"that Mia drank 2 cocktails last night?",
-            "think_neg":"that Mia didn't drink 2 cocktails last night?",
-            // "confirm_pos":"Did Frank confirm that Mia drank 2 cocktails last night?",
-            // "confirm_neg":"Did Frank confirm that Mia didn't drink 2 cocktails last night?",
-            "inform_pos":"Sam that Mia drank 2 cocktails last night?",
-            "inform_neg":"Sam that Mia didn't drink 2 cocktails last night?",
-            "low_prior": "Mia is a nun",
-            "high_prior": "Mia is a college student",
-            "high_prior_rating":0.579022556390977,
-            "low_prior_rating":0.224901960784314
-        },
+        "julian": {
+            // "item":"julian",
+            "statement":"Julian dances salsa",
+            "negation":"Julian doesn't dance salsa",
+            "simple_polar":"Does Julian dance salsa?",
+            "know_pos":"that Julian dances salsa?",
+            "know_neg":"that Julian doesn't dance salsa?",
+            "say_pos":"that Julian dances salsa?",
+            "say_neg":"that Julian doesn't dance salsa?",
+            "think_pos":"that Julian dances salsa?",
+            "think_neg":"that Julian doesn't dance salsa?",
+            // "confirm_pos":"Did Cole confirm that Julian dances salsa?",
+            // "confirm_neg":"Did Cole confirm that Julian doesn't dance salsa?",
+            "inform_pos":"Sam that Julian dances salsa?",
+            "inform_neg":"Sam that Julian doesn't dance salsa?",
+            "low_prior": "Julian is German",
+            "high_prior": "Julian is Cuban",
+            "high_prior_rating":0.599493670886076,
+            "low_prior_rating":0.401796875
+          },
         "isabella": {
             // "item":"isabella",
             "statement":"Isabella ate a steak on Sunday",
@@ -659,7 +659,7 @@ function init() {
         }
     }
 
-    var content_items = _.shuffle(["mary","josie","emma", "mia","isabella","emily","danny","grace","zoe",
+    var content_items = _.shuffle(["mary","josie","emma", "julian","isabella","emily","danny","grace","zoe",
     "frank","jackson","jayden","tony","josh","owen","olivia","jon","charley"])
 
     // split critical contents into two groups, half with high and half with low-prob. prior 
@@ -716,7 +716,7 @@ function init() {
         } else {
             var prior_fact = content.low_prior;
             if (trigger.includes("_neg")) {
-                var prior_rating = 1 - content.high_prior_rating;
+                var prior_rating = 1 - content.low_prior_rating;
             } else {
                 var prior_rating = content.low_prior_rating;
             }
