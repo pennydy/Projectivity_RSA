@@ -105,9 +105,9 @@ function make_slides(f) {
             $(".next_button").hide(); // hide the next botton
 
             console.log(this.stim);
-            var utterance =  "<strong> Fact (which everyone knows):</strong> "+this.stim.prior_fact+".<br><br>" + 
+            exp.text =  "<strong> Fact (which everyone knows):</strong> "+this.stim.prior_fact+".<br><br>" + 
                     "<font color=\"blue\">" + this.stim.speaker_name + "</font> asks: \"<i>"+this.stim.utterance+"</i>\"";
-            $(".sentence").html(utterance);
+            $(".sentence").html(exp.text);
 
             exp.leftLabel =  "definitely no";
             $(".leftLabel").html(exp.leftLabel);
@@ -220,9 +220,9 @@ function make_slides(f) {
                 "predicate" : this.stim.predicate,
                 "trigger_class": this.stim.trigger_class,
                 // "content": this.stim.content,
-                "speaker_question": exp.speaker_question,
-                "ah_question":exp.ah_question,
-                "utterance": this.stim.utterance, // record utterance for sanity check
+                // "speaker_question": exp.speaker_question, // sanity check
+                // "ah_question":exp.ah_question, // sanity check
+                "text": exp.text, // record context + utterance for sanity check
                 "prior_rating" : this.stim.prior_rating,
                 "prior_fact" : this.stim.prior_fact,
                 "prior_condition" : this.stim.prior_condition,
@@ -276,7 +276,7 @@ function make_slides(f) {
 }
 
 function init() {
-    var speaker_names = _.shuffle(["Christopher","Daniel","Donald","Paul","George","Steven","Kenneth","Edward","Brian","Kevin","Larry","Scott",
+    var speaker_names = _.shuffle(["Christopher","Daniel","Tyler","Paul","George","Steven","Kenneth","Edward","Brian","Kevin","Larry","Scott",
     "Jennifer","Dorothy","Karen","Nancy","Betty","Lisa","Sandra","Ashley","Donna","Kimberly","Cynthia","Kathleen"])
     var ah_names = _.shuffle(["Ronald","Timothy","Jason","Jeffrey","Gary","Ryan","Nicholas","Eric","Jacob","Jonathan",
     "Carol","Michelle","Emily","Amanda","Melissa","Deborah","Laura","Stephanie","Rebecca","Sharon"])
@@ -354,7 +354,7 @@ function init() {
             "negation":"Mia didn't drink 2 cocktails last night",
             "simple_polar":"Did Mia drink 2 cocktails last night?",
             "know_pos":"that Mia drank 2 cocktails last night?",
-            "know_neg":"that Mia didn't 2 cocktails last night?",
+            "know_neg":"that Mia didn't drink 2 cocktails last night?",
             "say_pos":"that Mia drank 2 cocktails last night?",
             "say_neg":"that Mia didn't drink 2 cocktails last night?",
             "think_pos":"that Mia drank 2 cocktails last night?",
@@ -378,11 +378,11 @@ function init() {
             "say_pos":"that Isabella ate a steak on Sunday?",
             "say_neg":"that Isabella didn't eat a steak on Sunday?",
             "think_pos":"that Isabella ate a steak on Sunday?",
-            "think_neg":"that Isabella didn't a steak on Sunday?",
+            "think_neg":"that Isabella didn't eat a steak on Sunday?",
             // "confirm_pos":"Did Andrea confirm that Isabella ate a steak on Sunday?",
             // "confirm_neg":"Did Andrea confirm that Isabella didn't eat a steak on Sunday?",
             "inform_pos":"Sam that Isabella ate a steak on Sunday?",
-            "inform_neg":"Sam that Isabella didn't a steak on Sunday?",
+            "inform_neg":"Sam that Isabella didn't eat a steak on Sunday?",
             "low_prior": "Isabella is a vegetarian",
             "high_prior": "Isabella is from Argentina",
             "high_prior_rating":0.517707006369427,
@@ -555,6 +555,8 @@ function init() {
             "simple_polar":"Did Josh learn to ride a bike yesterday?",
             "know_pos":"that Josh learned to ride a bike yesterday?",
             "know_neg":"that Josh didn't learn to ride a bike yesterday?",
+            "say_pos":"that Josh learned to ride a bike yesterday?",
+            "say_neg":"that Josh didn't learn to ride a bike yesterday?",
             "think_pos":"that Josh learned to ride a bike yesterday?",
             "think_neg":"that Josh didn't learn to ride a bike yesterday?",
             // "confirm_pos":"Did Brad confirm that Josh learned to ride a bike yesterday?",
@@ -598,7 +600,7 @@ function init() {
             "think_pos":"that Olivia sleeps until noon?",
             "think_neg":"that Olivia doesn't sleep until noon?",
             // "confirm_pos":"Did Jane confirm that Olivia sleeps until noon?",
-            // "confirm_neg":"Did Jane confirm that Olivia sleeps until noon?",
+            // "confirm_neg":"Did Jane confirm that Olivia doesn't sleep until noon?",
             "inform_pos":"Sam that Olivia sleeps until noon?",
             "inform_neg":"Sam that Olivia doesn't sleep until noon?",
             "low_prior": "Olivia has two small children",
