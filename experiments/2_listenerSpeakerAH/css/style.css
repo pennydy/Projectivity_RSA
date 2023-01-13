@@ -141,6 +141,7 @@ form {
 
 /* prog bar */
 .progress{
+	margin-top: 1.5em;
     float:right;
 }
 

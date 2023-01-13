@@ -94,25 +94,19 @@ function make_slides(f) {
             this.stim.trial_start = Date.now();      
             $(".err").hide();   
             $(".second_err").hide() 	
+            $(".question").show();
             this.init_sliders();
-            $(".continue_button").show(); // show the belief button
             $(".first_slider_table").show(); // show the belief slider
-            $(".first_question").show();
+            $(".continue_button").show(); // show the belief button
             exp.first_sliderPost = null;
             exp.second_sliderPost = null;
             exp.ah_question = null;
-            $(".second_question").hide(); // hide the ah question in the beginning
             $(".second_slider_table").hide(); // hide the second slider in the beginning
             $(".next_button").hide(); // hide the next botton
 
-            console.log(this.stim);    
-            if (this.stim.ah_name == "NA") {
-                var utterance =  "<strong> Fact (which "+this.stim.speaker_name+" knows):</strong> "+this.stim.prior_fact+".<br><br>" + 
-                    this.stim.speaker_name + " asks: \"<i>"+this.stim.utterance+"</i>\"";
-            } else {
-                var utterance = "<strong> Fact (which "+this.stim.speaker_name+" and "+this.stim.ah_name+ " know):</strong> "+this.stim.prior_fact+".<br><br>" + 
-                    this.stim.speaker_name + " asks: \"<i>"+this.stim.utterance+"</i>\"";
-            }
+            console.log(this.stim);
+            var utterance =  "<strong> Fact (which everyone knows):</strong> "+this.stim.prior_fact+".<br><br>" + 
+                    "<font color=\"blue\">" + this.stim.speaker_name + "</font> asks: \"<i>"+this.stim.utterance+"</i>\"";
             $(".sentence").html(utterance);
 
             exp.leftLabel =  "definitely no";
@@ -122,19 +116,19 @@ function make_slides(f) {
 
             // allows the content question to match with the utterance (i.e. not p in question when the embedded is not p)
             if (this.stim.trigger.includes("_neg")) {
-                exp.speaker_question = "Is <strong>"+this.stim.speaker_name+"</strong> certain that "+this.stim.negation+"?";
+                exp.speaker_question = "Does <font color=\"blue\">"+this.stim.speaker_name+"</font> believe that "+this.stim.negation+"?";
                 // if there is no attitude holder
                 if (this.stim.ah_name == "NA") {
                     exp.ah_question = "NA";
                 } else {
-                    exp.ah_question = "Is <strong>"+this.stim.ah_name+"</strong> certain that "+this.stim.negation+"?";
+                    exp.ah_question = "Does <font color=\"red\">"+this.stim.ah_name+"</font> believe that "+this.stim.negation+"?";
                 }
             } else {
-                exp.speaker_question = "Is <strong>"+this.stim.speaker_name+"</strong> certain that "+this.stim.statement+"?";
+                exp.speaker_question = "Does <font color=\"blue\">"+this.stim.speaker_name+"</font> believe that "+this.stim.statement+"?";
                 if (this.stim.ah_name == "NA") {
                     exp.ah_question = "NA";
                 } else {
-                    exp.ah_question = "Is <strong>"+this.stim.ah_name+"</strong> certain that "+this.stim.statement+"?";
+                    exp.ah_question = "Does <font color=\"red\">"+this.stim.ah_name+"</font> believe that "+this.stim.statement+"?";
                 }
             }
             var question_list = _.shuffle([exp.speaker_question, exp.ah_question]);
@@ -145,7 +139,7 @@ function make_slides(f) {
                 exp.first_question = exp.second_question;
                 exp.second_question = "NA";
             }
-            $(".first_question").html(exp.first_question);	  
+            $(".question").html(exp.first_question);	  
             console.log("first question: "+exp.first_question); 
         },
         
@@ -156,13 +150,11 @@ function make_slides(f) {
 
             if (exp.first_sliderPost != null) {
                 $(".err").hide(); // have a rating, so hide the error message
-                $(".first_question").hide(); // hide the speaker belief question
                 $(".first_slider_table").hide(); // hide the speaker belief slider
 
                 console.log("second question: "+exp.second_question);
                 if (exp.second_question != "NA") {
-                    $(".second_question").show();
-                    $(".second_question").html(exp.second_question);
+                    $(".question").html(exp.second_question);
                     
                     this.init_second_slider();
                     exp.second_sliderPost = null;
@@ -702,10 +694,10 @@ function init() {
             ah_name = "NA"; // no attitude holder if it is simple polar
         } else if (trigger == "know" | trigger == "think") {
             var predicate = trigger.split("_")[0]; // only use the predicate, not the entire trigger label with "_pos"
-            var utterance = "Does " + ah_name + " " + predicate + " " + content[trigger]
+            var utterance = "Does <font color=\"red\">" + ah_name + "</font> " + predicate + " " + content[trigger]
         } else {
             var predicate = trigger.split("_")[0]; // only use the predicate, not the entire trigger label with "_pos"
-            var utterance = "Did " + ah_name + " " + predicate + " " + content[trigger]
+            var utterance = "Did <font color=\"red\">" + ah_name + "</font> " + predicate + " " + content[trigger]
         }
         var statement = content.statement;
         var negation = content.negation;
