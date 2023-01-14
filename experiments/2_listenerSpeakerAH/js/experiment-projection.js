@@ -229,7 +229,8 @@ function make_slides(f) {
                 // "content": this.stim.content,
                 // "speaker_question": exp.speaker_question, // sanity check
                 // "ah_question":exp.ah_question, // sanity check
-                "text": exp.text, // record context + utterance for sanity check
+                // "text": exp.text, // record context + utterance for sanity check
+                "item" : this.stim.item,
                 "prior_rating" : this.stim.prior_rating,
                 "prior_fact" : this.stim.prior_fact,
                 "prior_condition" : this.stim.prior_condition,
@@ -696,12 +697,15 @@ function init() {
             var predicate = "NA";
             var utterance = content[trigger];
             ah_name = "NA"; // no attitude holder if it is simple polar
+            var trigger_class = "Critical";
         } else if (trigger.includes("know") | trigger.includes("think")) {
             var predicate = trigger.split("_")[0]; // only use the predicate, not the entire trigger label with "_pos"
             var utterance = "Does <font color=\"red\">" + ah_name + "</font> " + predicate + " " + content[trigger]
+            var trigger_class = "Critical";
         } else {
             var predicate = trigger.split("_")[0]; // only use the predicate, not the entire trigger label with "_pos"
             var utterance = "Did <font color=\"red\">" + ah_name + "</font> " + predicate + " " + content[trigger]
+            var trigger_class = "Control";
         }
         var statement = content.statement;
         var negation = content.negation;
@@ -709,18 +713,20 @@ function init() {
             var prior_fact = content.high_prior;
             if (trigger.includes("_neg")) {
                 var prior_rating = 1 - content.high_prior_rating;
+                var prior_condition = "low_prob"; // high prob of affirmative p, but low prob of the actual embedded contnet
             } else {
                 var prior_rating = content.high_prior_rating;
+                var prior_condition = "high_prob"; // high_prob of p
             }
-            var prior_condition = "high prob of p";
         } else {
             var prior_fact = content.low_prior;
             if (trigger.includes("_neg")) {
                 var prior_rating = 1 - content.low_prior_rating;
+                var prior_condition = "high_prob"; // high_prob of p
             } else {
                 var prior_rating = content.low_prior_rating;
+                var prior_condition = "low_prob"; // low prob of affirmative p, but low high of the actual embedded contnet
             }
-            var prior_condition = "low prob of p";
         }
         
         return {
@@ -728,7 +734,8 @@ function init() {
             "ah_name": ah_name,	  
             "trigger": trigger,
             "predicate" : predicate,
-            "trigger_class": "Critical",
+            "trigger_class": trigger_class,
+            "item" : item,
             "content": content,
             "utterance": utterance,
             "statement": statement,
@@ -798,7 +805,8 @@ function init() {
             "ah_name":"NA",
             "trigger": "MC", 
             "predicate" : "NA", 
-            "trigger_class": "Control",
+            "trigger_class": "Filler",
+            "item" : item,
             "content": content,
             "utterance": utterance,
             "statement": statement,
