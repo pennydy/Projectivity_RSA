@@ -230,6 +230,7 @@ function make_slides(f) {
                 // "speaker_question": exp.speaker_question, // sanity check
                 // "ah_question":exp.ah_question, // sanity check
                 // "text": exp.text, // record context + utterance for sanity check
+                "utterance" : this.stim.utterance, // record utterance for sanity check
                 "item" : this.stim.item,
                 "prior_rating" : this.stim.prior_rating,
                 "prior_fact" : this.stim.prior_fact,
