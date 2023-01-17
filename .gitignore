@@ -4,5 +4,8 @@
 data/*.config
 data/*.exps
 data/1_listenerProjection/all_original/
+data/2_listenerSpeakerAH/all_original/
 
-experiment/finalized_interface/
+experiments/1_listenerProjection/finalized_interface/
+experiments/1_listenerProjection/*.config
+.Rproj.user

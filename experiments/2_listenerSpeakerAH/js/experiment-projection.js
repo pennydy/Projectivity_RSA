@@ -694,7 +694,7 @@ function init() {
         // make the utterance
         // "think" and "know" use present tense; "say" and "inform" use past tense
         if (trigger == "simple_polar") {
-            var predicate = "NA";
+            var predicate = "Polar";
             var utterance = content[trigger];
             ah_name = "NA"; // no attitude holder if it is simple polar
             var trigger_class = "Critical";
@@ -711,22 +711,26 @@ function init() {
         var negation = content.negation;
         if (content_list == high_prob_contents){
             var prior_fact = content.high_prior;
-            if (trigger.includes("_neg")) {
-                var prior_rating = 1 - content.high_prior_rating;
-                var prior_condition = "low_prob"; // high prob of affirmative p, but low prob of the actual embedded contnet
-            } else {
-                var prior_rating = content.high_prior_rating;
-                var prior_condition = "high_prob"; // high_prob of p
-            }
+            var prior_condition = "high_prob"; // high prob of positive p
+            var prior_rating = content.high_prior_rating;
+            // if (trigger.includes("_neg")) {
+            //     var prior_rating = 1 - content.high_prior_rating;
+            //     var prior_condition = "low_prob"; // high prob of affirmative p, but low prob of the actual embedded contnet
+            // } else {
+            //     var prior_rating = content.high_prior_rating;
+            //     var prior_condition = "high_prob"; // high_prob of p
+            // }
         } else {
             var prior_fact = content.low_prior;
-            if (trigger.includes("_neg")) {
-                var prior_rating = 1 - content.low_prior_rating;
-                var prior_condition = "high_prob"; // high_prob of p
-            } else {
-                var prior_rating = content.low_prior_rating;
-                var prior_condition = "low_prob"; // low prob of affirmative p, but low high of the actual embedded contnet
-            }
+            var prior_condition = "low_prob";
+            var prior_rating = content.low_prior_rating;
+            // if (trigger.includes("_neg")) {
+            //     var prior_rating = 1 - content.low_prior_rating;
+            //     var prior_condition = "high_prob"; // high_prob of p
+            // } else {
+            //     var prior_rating = content.low_prior_rating;
+            //     var prior_condition = "low_prob"; // low prob of affirmative p, but low high of the actual embedded contnet
+            // }
         }
         
         return {
@@ -804,7 +808,7 @@ function init() {
             "speaker_name": speaker_name,
             "ah_name":"NA",
             "trigger": "MC", 
-            "predicate" : "NA", 
+            "predicate" : "MC", 
             "trigger_class": "Filler",
             "item" : item,
             "content": content,
@@ -813,7 +817,7 @@ function init() {
             "negation": negation,
             "prior_rating":0,
             "prior_fact": prior_fact,
-            "prior_condition":"NA"
+            "prior_condition":"neutral"
         }
     }
 
