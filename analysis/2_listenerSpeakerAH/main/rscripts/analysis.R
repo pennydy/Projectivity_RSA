@@ -198,6 +198,16 @@ speaker_all_alt
 ggsave(speaker_all_alt, file="../graphs/speaker_embedded_collapse_prior.pdf", width=6, height=3)
 
 # line graph by prior (facet by embedded clause)
+d_byitem_sp = df.data.summary %>% 
+  group_by(item,predicate,utterance_type,prior_condition_embedded) %>% 
+  mutate(speaker_response = mean(speaker_response)) %>% 
+  ungroup() %>% 
+  mutate(predicate = fct_relevel(as.factor(predicate), "MC","Polar","think","know","say","inform"),
+         utterance_type = fct_relevel(as.factor(utterance_type), "MC","Polar","pos", "neg"),
+         prior_condition = fct_relevel(as.factor(prior_condition_embedded), "neutral", "high_prob", "low_prob")) %>% 
+  filter(trigger != "MC")
+  
+
 speaker_prior_embedded <- ggplot(data = df.data.summary |>
                           # to reorder the predicate and utterance_type for graph
                           mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
@@ -207,7 +217,8 @@ speaker_prior_embedded <- ggplot(data = df.data.summary |>
                           mapping = aes(x = prior_rating_embedded,
                                         y = speaker_response,
                                         color = predicate)) +
-  geom_point(alpha = 0.1) +
+  # geom_point(alpha = 0.1) +
+  geom_point(data=d_byitem_sp, alpha=.1) +
   geom_smooth(method = "lm", fullrange=T) +  # extend to full range 0-1 
   facet_grid(. ~ utterance_type,
              labeller = utterance_labeller) +
@@ -218,7 +229,7 @@ speaker_prior_embedded <- ggplot(data = df.data.summary |>
                     labels=c("Polar", "think", "know", "say", "inform"),
                     name="Predicate")
 speaker_prior_embedded
-ggsave(speaker_prior_embedded, file="../graphs/speaker_prior_embedded.pdf", width=6, height=3)
+ggsave(speaker_prior_embedded, file="../graphs/speaker_prior_embedded.pdf", width=7, height=3)
 
 ## AH BELEIF RATING
 # bar graph by embedded clause (facet by predicate)
@@ -256,6 +267,16 @@ ah_all_alt
 ggsave(ah_all_alt, file="../graphs/ah_embedded_collapse_prior.pdf", width=6, height=3)
 
 # line plot by prior (facet by embedded clause)
+d_byitem_ah = df.data.summary %>% 
+  group_by(item,predicate,utterance_type,prior_condition_embedded) %>% 
+  mutate(ah_response = mean(ah_response)) %>% 
+  ungroup() %>% 
+  mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
+         utterance_type = fct_relevel(utterance_type, "MC","Polar","pos", "neg"),
+         prior_condition = fct_relevel(prior_condition_embedded, "neutral", "high_prob", "low_prob")) |>
+  filter(trigger != "MC" & trigger != "Polar")
+
+
 ah_prior <- ggplot(data = df.data.summary |>
                      mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
                             utterance_type = fct_relevel(utterance_type, "MC","Polar","pos", "neg"),
@@ -264,7 +285,8 @@ ah_prior <- ggplot(data = df.data.summary |>
                    mapping = aes(x = prior_rating_embedded,
                                  y = ah_response,
                                  color = predicate)) +
-  geom_point(alpha = 0.1) +
+  # geom_point(alpha = 0.1) +
+  geom_point(data=d_byitem_ah, alpha=.1) +
   geom_smooth(method = "lm", fullrange=T) + 
   facet_grid(. ~ utterance_type,
              labeller = utterance_labeller) +
