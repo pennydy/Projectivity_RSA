@@ -1,20 +1,23 @@
-var belief_states = [["dances","dances"],["dances","doesn't dance"],["doesn't dance","dances"],["doesn't dance","doesn't dance"]] //<SPEAKER BELIEF, ATTITUDE HOLDER BELIEF>
+var belief_states = [["dances","dances"],
+                     ["dances","doesn't dance"],
+                     ["doesn't dance","dances"],
+                     ["doesn't dance","doesn't dance"]] //<SPEAKER BELIEF, ATTITUDE HOLDER BELIEF>
 
 
 // speaker and attitude holder belief priors
-var beliefs = ["dances","not dances"]
+var beliefs = ["dances","doesn't dance"]
 
 var speaker_beliefPrior = function() {
   return categorical({
     vs: beliefs,
-    ps: [.5,.5]
+    ps: [.75,.25]
   })
 }
 
 var ah_beliefPrior = function() {
   return categorical({
     vs: beliefs,
-    ps: [.5,.5]
+    ps: [.75,.25]
   })
 }
 
@@ -27,45 +30,27 @@ var extractBeliefs = function(utterance) {
    var sentence_type = splitutt[2]
 
    if (predicate == "know") {
-     if (sentence_type == ".") {
-       return [{speaker_belief:"dances", ah_belief:"dances"}]
-     } else if (sentence_type == "?") {
+     if (sentence_type == "?") {
        return [{speaker_belief:"dances", ah_belief:"dances"},
-               {speaker_belief:"dances", ah_belief:"not dances"}]
-     } else {
-       console.log("error: unknown sentence type in extractBeliefs()")
-     }
-   }
-   if (predicate == "be_right") {
-     if (sentence_type == ".") {
-       return [{speaker_belief:"dances", ah_belief:"dances"}]
-     } else if (sentence_type == "?") {
-       return [{speaker_belief:"not dances", ah_belief:"dances"},
-               {speaker_belief:"dances", ah_belief:"dances"}]
+               {speaker_belief:"dances", ah_belief:"doesn't dance"}]
      } else {
        console.log("error: unknown sentence type in extractBeliefs()")
      }
    }
    if (predicate == "think") {
-     if (sentence_type == ".") {
+    if (sentence_type == "?") {
        return [{speaker_belief:"dances", ah_belief:"dances"},
-               {speaker_belief:"not dances", ah_belief:"dances"}]
-     } else if (sentence_type == "?") {
-       return [{speaker_belief:"dances", ah_belief:"dances"},
-               {speaker_belief:"not dances", ah_belief:"dances"},
-               {speaker_belief:"dances", ah_belief:"not dances"},
-               {speaker_belief:"not dances", ah_belief:"not dances"}]
+               {speaker_belief:"doesn't dance", ah_belief:"dances"},
+               {speaker_belief:"dances", ah_belief:"doesn't dance"},
+               {speaker_belief:"doesn't dance", ah_belief:"doesn't dance"}]
      } else {
        console.log("error: unknown sentence type in extractBeliefs()")
      }
    }
    if (predicate == "BARE") {
-     if (sentence_type == ".") {
+     if (sentence_type == "?") {
        return [{speaker_belief:"dances", ah_belief:"dances"},
-               {speaker_belief:"dances", ah_belief:"not dances"}]
-     } else if (sentence_type == "?") {
-       return [{speaker_belief:"dances", ah_belief:"dances"},
-               {speaker_belief:"not dances", ah_belief:"not dances"}]
+               {speaker_belief:"doesn't dance", ah_belief:"doesn't dance"}]
      } else {
        console.log("error: unknown sentence type in extractBeliefs()")
      }
@@ -73,7 +58,7 @@ var extractBeliefs = function(utterance) {
 }
 
 // meaning function checks whether belief tuple is in set of belief tuples compatible with utterance
-var meaning = function(utterance,belief_tuple) {
+var meaning = function(utterance, belief_tuple) {
   var extractedBeliefs = extractBeliefs(utterance) // the set of belief tuples compatible with the utterance
   var speaker_belief = belief_tuple.speaker_belief
   var ah_belief = belief_tuple.ah_belief
@@ -84,81 +69,36 @@ var meaning = function(utterance,belief_tuple) {
   return(matchesInArray > 0) 
 }
 
-// specify different quds
-var qudFns = {
-  speaker_belief : function(belief_tuple) {return { speaker_belief: belief_tuple.speaker_belief } },
-  ah_belief : function(belief_tuple) {return { ah_belief: belief_tuple.ah_belief } },
-  full_belief : function(belief_tuple) {
-    return { speaker_belief: belief_tuple.speaker_belief, ah_belief: belief_tuple.ah_belief }
-  }
-}
+// display(meaning("know-dances-?", {speaker_belief:"dances", ah_belief:"dances"}))
 
-// Prior over QUDs
-var qudPrior = function() {
-  categorical({
-    vs: ["speaker_belief", "ah_belief", "full_belief"],
-    ps: [1, 1, 1]
-  })
-}
 
 // specify utterance alternatives
 var utterances = ["know-dances-?", 
-                  "know-dances-.", 
-                  "be_right-dances-?", 
-                  "be_right-dances-.",                   
+                  "know-doesn't dance-?",                 
                   "think-dances-?", 
-                  "think-dances-.",                         
-                  "BARE-dances-?",
-                  "BARE-dances-."
-                ]
-
-// prior over utterance alternatives
-var utterancePrior = function() {
-  return  uniformDraw(utterances)
-}
-
-
-// literal listener
-var literalListener = cache(function(utterance, qud) {
-  return Infer({model: function(){
-    var speaker_belief = speaker_beliefPrior()
-    var ah_belief = ah_beliefPrior()
-    var belief_tuple = {speaker_belief:speaker_belief, ah_belief:ah_belief}
-    var qudFn = qudFns[qud]
-    var qudAnswer = qudFn(belief_tuple)
-    // console.log(belief_tuple)
-    // console.log(utterance)
-    // console.log(qud)
-//  console.log(qudAnswer)
-    condition( meaning(utterance, belief_tuple) )
-    // observe( meaning(utterance, belief_tuple), true)    
-    return qudAnswer
-  }
-})})
-
-
-// set speaker optimality
-var alpha = 3
+                  "think-doesn't dance-?",                         
+                  "BARE-dances-?"]
 
 // set cost (we start with zero)
-var embeddedCost = .5
+var embeddedCost = 0
 
 var cost = function(utterance){
   return utterance.includes("BARE") ? // if it's not a bare form, add a cost
     0 : 
     embeddedCost 
 }
+
 // Speaker, chooses an utterance to convey a particular answer of the qud
-var speaker = cache(function(belief_tuple, qud) {
-  return Infer({model: function(){
-    var utterance = utterancePrior()
-    var qudFn = qudFns[qud]
-    var qudAnswer = qudFn(belief_tuple)
-    factor(alpha*(literalListener(utterance,qud).score(qudAnswer) 
-                  - cost(utterance)))
+var speaker = cache(function(belief_tuple) {
+  return Infer({model:function() {
+      var utterance = categorical({ps:[0.8, 0.6, 0.1, 0.5, 0.4],
+                                   vs:utterances })
+      condition(meaning(utterance, belief_tuple))
     return utterance
   }})
 })
+
+// viz.table(speaker({speaker_belief:"dances", ah_belief:"dances"}))
 
 
 var pragmaticListener = cache(function(utterance) {
@@ -166,10 +106,11 @@ var pragmaticListener = cache(function(utterance) {
     //////// priors ////////
     var speaker_belief = speaker_beliefPrior()
     var ah_belief = ah_beliefPrior()
-    var qud = qudPrior()
     ////////////////////////
     var belief_tuple = {speaker_belief:speaker_belief, ah_belief:ah_belief}
-    observe(speaker(belief_tuple, qud), utterance)
+    display("speaker: "+speaker_belief)
+    display("ah: "+ah_belief)
+    observe(speaker(belief_tuple), utterance)
     return belief_tuple
     // in order to turn this into a joint inference listener:
     // return [belief_tuple, qud]
@@ -180,31 +121,13 @@ var pragmaticListener = cache(function(utterance) {
 ///
 
 
-
-// check if belief priors work
-// Infer({model: ah_beliefPrior})
-
-// check if belief extraction from utterances works
-// extractBeliefs("think-dances-?")
-// extractBeliefs("know-dances-.")
-
-// check if meaning function works
-// meaning("know-dances-.", {speaker_belief:"dances", ah_belief:"not dances"})
-
-// literalListener("know-dances-?","full_belief")
-
-
-
 // speaker knows that speaker and ah believe "dances" and wants to communicate speaker belief, ah belief, and both, respectively
-// speaker({speaker_belief:"dances", ah_belief:"dances"},"speaker_belief")
-// speaker({speaker_belief:"dances", ah_belief:"dances"},"ah_belief")
-// speaker({speaker_belief:"dances", ah_belief:"dances"},"full_belief")
+// speaker({speaker_belief:"dances", ah_belief:"dances"})
+// speaker({speaker_belief:"dances", ah_belief:"dances"}) // check BARE
+// speaker({speaker_belief:"dances", ah_belief:"dances"})
 
-// pragmatic listner observes various utterances
-// pragmaticListener("know-dances-?")
-// pragmaticListener("think-dances-?")
-// pragmaticListener("be_right-dances-?")
-//pragmaticListener("BARE-dances-?")
+pragmaticListener("know-dances-?")
+pragmaticListener("BARE-dances-?")
 
 
 
