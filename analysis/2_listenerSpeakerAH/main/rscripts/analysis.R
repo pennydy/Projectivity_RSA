@@ -159,6 +159,28 @@ speaker_ah_summary <- df.data.summary |>
 speaker_ah_summary
 # write.csv(speaker_ah_summary, "../results/speaker_ah_summary.csv" , row.names = FALSE)  
 
+speaker_ah_prior <- df.data.summary |>
+  group_by(predicate, utterance_type,prior_condition_embedded) |> # collapse prior condition
+  summarize(mean_speaker_rating = mean(speaker_response),
+            speaker_ci_low = ci.low(speaker_response),
+            speaker_ci_high = ci.high(speaker_response),
+            
+            mean_ah_rating = mean(ah_response),
+            ah_ci_low = ci.low(ah_response),
+            ah_ci_high = ci.high(ah_response)) |> 
+  ungroup() |>
+  mutate(speaker_YMin = mean_speaker_rating - speaker_ci_low,
+         speaker_YMax = mean_speaker_rating + speaker_ci_high,
+         ah_YMin = mean_ah_rating - ah_ci_low,
+         ah_YMax = mean_ah_rating + ah_ci_high) |>
+  mutate(utterance_type = ifelse(predicate %in% c("Polar", "MC"),
+                                 "pos",
+                                 as.character(utterance_type)),
+         utterance_type = fct_relevel(utterance_type, "pos", "neg")) |>
+  mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
+         utterance_type = fct_relevel(utterance_type, "pos", "neg"))
+# write.csv(speaker_ah_prior, "../results/speaker_ah_prior.csv" , row.names = FALSE)
+
 # alternatively, belief in p (instead of belief in the embedded clause)
 # speaker_ah_summary <- read.csv("../results/speaker_ah_summary.csv") |>
 #   mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
@@ -318,7 +340,7 @@ analysis_data <- df.data.summary |>
          centered_prior_rating = prior_rating_embedded - mean(prior_rating_embedded), 
          centered_embedded_content = embedded_content - mean(embedded_content))
 
-table(analysis_data$predicate, analysis_data$centered_embedded_content, analysis_data$item)
+# table(analysis_data$predicate, analysis_data$centered_embedded_content, analysis_data$item)
 
 speaker_model <- lmer(speaker_response ~ predicate + centered_prior_rating + centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item),
                       analysis_data)
@@ -360,16 +382,53 @@ summary(speaker_know_think_model)
 # summary(speaker_order_model)
 
 
-ah_model <- lmer(ah_belief_p ~  predicate * centered_prior_rating * centered_prior_rating + (predicate + centered_prior_rating + centered_prior_rating | workerid) + (predicate + centered_prior_rating + centered_prior_rating| item),
+ah_model <- lmer(ah_response ~predicate * centered_prior_rating * centered_prior_rating + (predicate + centered_prior_rating + centered_prior_rating | workerid) + (predicate + centered_prior_rating + centered_prior_rating| item),
                  analysis_data)
-joint_tests(ah_model)
 summary(ah_model)
 
 
-## Bayesian
-speaker_interaction_bayesian <- brm(speaker_response ~  predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item),
-                                  analysis_data)
-                                  # control = list(max_treedepth = 15, adapt_delta = 0.99))
-summary(speaker_interaction_bayesian)
+## Bayesian ##
+# Speaker belief
+speaker_simple_p_bayesian <- brm(speaker_response ~ predicate * centered_prior_rating + (1 | workerid) + (1 | item),
+                       analysis_data |>
+                         filter(utterance_type != "neg"),
+                       control=list(max_treedepth = 15, adapt_delta = 0.99),
+                       file="../cache/brm_speaker_p_simple")
+summary(speaker_simple_p_bayesian)
 
 
+speaker_p_bayesian <- brm(speaker_response ~ predicate * centered_prior_rating + (predicate + centered_prior_rating || workerid) + (predicate + centered_prior_rating || item),
+                                 analysis_data |>
+                                   filter(utterance_type != "neg"),
+                                 control=list(max_treedepth = 15, adapt_delta = 0.99),
+                                 file="../cache/brm_speaker_p")
+summary(speaker_p_bayesian)
+
+
+speaker_simple_know_think_bayesian <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (1 | workerid) + (1 | item),
+                                    data=analysis_data |>
+                                 filter(predicate %in% c("think", "know")),
+                                    control=list(max_treedepth = 15, adapt_delta = 0.99),
+                                    file="../cache/brm_speaker_know_think_simple")
+summary(speaker_simple_know_think_bayesian)
+
+
+speaker_know_think_bayesian <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item),
+                                          data=analysis_data |>
+                                            filter(predicate %in% c("think", "know")),
+                                          control=list(max_treedepth = 15, adapt_delta = 0.99),
+                                          file="../cache/brm_speaker_know_think")
+summary(speaker_know_think_bayesian)
+
+# ah belief
+ah_simple_bayesian <- brm(ah_response ~ predicate * centered_prior_rating * centered_prior_rating + (1 | workerid) + (1| item),
+                 data=analysis_data |>
+                   filter(predicate != "simple"),
+                 control=list(max_treedepth = 15, adapt_delta = 0.99),
+                 file="../cache/brm_ah_simple")
+summary(ah_simple_bayesian)
+
+plot(ah_simple_bayesian)
+
+variables(ah_simple_bayesian)
+pairs(ah_simple_bayesian, variable = variables(ah_simple_bayesian)[1:3])
