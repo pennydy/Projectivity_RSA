@@ -9,3 +9,9 @@ data/2_listenerSpeakerAH/all_original/
 experiments/1_listenerProjection/finalized_interface/
 experiments/1_listenerProjection/*.config
 .Rproj.user
+
+writings/*
+analysis/2_listenerSpeakerAH/main/graphs/belief_p/
+analysis/2_listenerSpeakerAH/main/cache/
+
+models/analysis/*

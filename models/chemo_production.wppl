@@ -6,25 +6,24 @@ var belief_states = [["dances","dances"],
 
 // speaker and attitude holder belief priors
 var beliefs = ["dances","doesn't dance"]
-var ah_beliefs = ["dances,", "doesn't dance", undefined]
+var ah_beliefs = ["dances", "doesn't dance", undefined]
 
 var speaker_beliefPrior = function() {
   return categorical({
     vs: beliefs,
-    ps: [.75, .25]
+    ps: [.73, .27]
   })
 }
 
 var ah_beliefPrior = function() {
   return categorical({
-//     vs: ah_beliefs,
-//     ps: [1,1,1]
-    vs: beliefs,
-    ps: [.75, .25]
+    vs: ah_beliefs,
+    ps: [0.73, 0.27, 0.05]
+//     vs: beliefs,
+//     ps: [.75, .25]
   })
 }
 
-display(ah_beliefPrior())
 
 
 // display(meaning("know-dances-?", {speaker_belief:"dances", ah_belief:"dances"}))
@@ -55,14 +54,14 @@ var utterances = ["know-dances-?",
 // "think": speaker belief is the opposite of the utterances
 
 // utterances: know p, know not p, think p, think not p, BARE
-var dances_dances_prob = [0.5, 0.15, 0.2, 0.15]
-var dances_doesnt_prob = [0.55, 0.1, 0.1, 0.2]
+var dances_dances_prob = [0.5, 0.15, 0.3, 0.2, 0.05]
+var dances_doesnt_prob = [0.7, 0.2, 0.1, 0.25, 0.05]
 
-var doesnt_dances_prob = [0.1, 0.6, 0.2, 0.1]
-var doesnt_doesnt_prob = [0.1, 0.4, 0.4, 0.1]
+var doesnt_dances_prob = [0.1, 0.8, 0.5, 0.3, 0.05]
+var doesnt_doesnt_prob = [0.15, 0.5, 0.4, 0.3, 0.05]
 
-var dances_na_prob = [0.3, 0.25, 0.15, 0.2, 0.6]
-var doesnt_na_prob = [0.2, 0.25, 0.15, 0.1, 0.7]
+var dances_na_prob = [0.05, 0.05, 0.05, 0.05, 0.8]
+var doesnt_na_prob = [0.025, 0.025, 0.025, 0.025, 0.9]
 
 // var dances_dances_prob = [0.625, 0.15, 0.1, 0.125, 0.05]
 // var dances_doesnt_prob = [0.6, 0.1, 0.1, 0.2, 0.05]
@@ -78,35 +77,19 @@ var speaker = cache(function(belief_tuple){
   var ah_belief = belief_tuple.ah_belief
   if (speaker_belief == "dances" & ah_belief =="dances") {
     return Categorical({ps:dances_dances_prob,
-                        vs:["know-dances-?",
-                            "know-doesn't dance-?",
-                            "think-dances-?",
-                            "think-doesn't dance-?"]})
-//                         vs:utterances})
+                        vs:utterances})
   }
   else if (speaker_belief=="dances" & ah_belief =="doesn't dance") {
     return Categorical({ps:dances_doesnt_prob,
-                        vs:["know-dances-?",
-                            "know-doesn't dance-?",
-                            "think-dances-?",
-                            "think-doesn't dance-?"]})
-//                         vs:utterances})
+                        vs:utterances})
   }
   else if (speaker_belief =="doesn't dance" & ah_belief=="dances") {
     return Categorical({ps:doesnt_dances_prob,
-                        vs:["know-dances-?",
-                            "know-doesn't dance-?",
-                            "think-dances-?",
-                            "think-doesn't dance-?"]})
-//                         vs:utterances})
+                        vs:utterances})
   }
   else if (speaker_belief == "doesn't dance" & ah_belief == "doesn't dance") {
     return Categorical({ps:doesnt_doesnt_prob,
-                        vs:["know-dances-?",
-                            "know-doesn't dance-?",
-                            "think-dances-?",
-                            "think-doesn't dance-?"]})
-//                         vs:utterances})
+                        vs:utterances})
   }
   else if (speaker_belief == "dances") {
     return Categorical({ps:dances_na_prob,
@@ -118,7 +101,17 @@ var speaker = cache(function(belief_tuple){
   }
     
 })
+
+display("p , p")
+viz.table(speaker({speaker_belief:"dances", ah_belief:"dances"}))
+display("p, not p")
+viz.table(speaker({speaker_belief:"dances", ah_belief:"doesn't dance"}))
+display("not p, p")
+viz.table(speaker({speaker_belief:"doesn't dance", ah_belief:"dances"}))
+display("not p, not p")
+viz.table(speaker({speaker_belief:"doesn't dance", ah_belief:"doesn't dance"}))
 viz.table(speaker({speaker_belief:"dances"}))
+viz.table(speaker({speaker_belief:"doesn't dance"}))
 
 
 var pragmaticListener = cache(function(utterance) {
@@ -127,57 +120,46 @@ var pragmaticListener = cache(function(utterance) {
     var speaker_belief = speaker_beliefPrior()
     var ah_belief = ah_beliefPrior()
     ////////////////////////
-    if (utterance == "BARE-dances-?") {
-      var belief_tuple = {speaker_belief:speaker_belief}
-      observe(speaker(belief_tuple), utterance)
-      return belief_tuple
-    } else {
-      var belief_tuple = {speaker_belief:speaker_belief, ah_belief:ah_belief}
-      observe(speaker(belief_tuple), utterance)
-      return belief_tuple
-    }
-//     var belief_tuple = {speaker_belief:speaker_belief, ah_belief:ah_belief}
-//       observe(speaker(belief_tuple), utterance)
-//       return belief_tuple
+    var belief_tuple = {speaker_belief:speaker_belief, ah_belief:ah_belief}
+    observe(speaker(belief_tuple), utterance)
+    return belief_tuple
   }})
 })
 
 
 ///
-display("know")
-var know = pragmaticListener("know-dances-?")
-display("speaker_belief")
-viz.table(marginalize(know, "speaker_belief"))
-display("ah_belief")
-viz.table(marginalize(know, "ah_belief"))
+// display("know")
+// var know = pragmaticListener("know-dances-?")
+// display("speaker_belief")
+// viz.table(marginalize(know, "speaker_belief"))
+// display("ah_belief")
+// viz.table(marginalize(know, "ah_belief"))
 
-display("know not")
-var know_not = pragmaticListener("know-doesn't dance-?")
-display("speaker_belief")
-viz.table(marginalize(know_not, "speaker_belief"))
-display("ah_belief")
-viz.table(marginalize(know_not, "ah_belief"))
+// display("know not")
+// var know_not = pragmaticListener("know-doesn't dance-?")
+// display("speaker_belief")
+// viz.table(marginalize(know_not, "speaker_belief"))
+// display("ah_belief")
+// viz.table(marginalize(know_not, "ah_belief"))
 
-display("think")
-var think = pragmaticListener("think-dances-?")
-display("speaker_belief")
-viz.table(marginalize(think, "speaker_belief"))
-display("ah_belief")
-viz.table(marginalize(think, "ah_belief"))
+// display("think")
+// var think = pragmaticListener("think-dances-?")
+// display("speaker_belief")
+// viz.table(marginalize(think, "speaker_belief"))
+// display("ah_belief")
+// viz.table(marginalize(think, "ah_belief"))
 
-display("think not")
-var think_not = pragmaticListener("think-doesn't dance-?")
-display("speaker_belief")
-viz.table(marginalize(think_not, "speaker_belief"))
-display("ah_belief")
-viz.table(marginalize(think_not, "ah_belief"))
+// display("think not")
+// var think_not = pragmaticListener("think-doesn't dance-?")
+// display("speaker_belief")
+// viz.table(marginalize(think_not, "speaker_belief"))
+// display("ah_belief")
+// viz.table(marginalize(think_not, "ah_belief"))
 
-display("BARE")
-var bare = pragmaticListener("BARE-dances-?")
-display("speaker_belief")
-viz.table(marginalize(bare, "speaker_belief"))
+// display("BARE")
+// var bare = pragmaticListener("BARE-dances-?")
+// display("speaker_belief")
+// viz.table(marginalize(bare, "speaker_belief"))
 // display("ah_belief")
 // viz.table(marginalize(bare, "ah_belief"))
-
-
 

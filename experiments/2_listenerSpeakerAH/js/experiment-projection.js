@@ -492,7 +492,7 @@ function init() {
             "think_neg":"that Frank didn't get a cat?",
             // "confirm_pos":"Did Walt confirm that Frank got a cat?",
             // "confirm_neg":"Did Walt confirm that Frank didn't get a cat?",
-            "inform":"Sam that Frank got a cat?",
+            "inform_pos":"Sam that Frank got a cat?",
             "inform_neg":"Sam that Frank didn't get a cat?",
             "low_prior": "Frank is allergic to cats",
             "high_prior": "Frank has always wanted a pet",
