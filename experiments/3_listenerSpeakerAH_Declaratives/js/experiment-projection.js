@@ -781,26 +781,38 @@ function init() {
         "muffins": {
             "statement":"these muffins have blueberries in them",
             "negation":"these muffins don't have blueberries in them",
+            "bare_pos":"These muffins have blueberries in them",
+            "bare_neg":"These muffins don't have blueberries in them",
             "prior_fact": "Muffins are sold at the bakery"},
         "pizza": {
             "statement":"this pizza has mushrooms on it",
             "negation":"this pizza doesn't have mushrooms on it",
+            "bare_pos":"This pizza has mushrooms on it",
+            "bare_neg":"This pizza doesn't have mushrooms on it",
             "prior_fact": "Pizza is sold at the pizzeria"},
         "kids": {
             "statement":"Jack was playing outside with the kids",
             "negation":"Jack wasn't playing outside with the kids",
+            "bare_pos":"Jack was playing outside with the kids",
+            "bare_neg":"Jack wasn't playing outside with the kids",
             "prior_fact": "Many children like ice cream"},
         "ballet": {
             "statement":"Ann dances ballet",
             "negation":"Ann doesn't dance ballet",
+            "bare_pos":"Ann dances ballet",
+            "bare_neg":"Ann doesn't dance ballet",
             "prior_fact": "Ballet is a type of dance"},
         "garage": {
             "statement":"Carl's kids were in the garage",
             "negation":"Carl's kids weren't in the garage",
+            "bare_pos":"Carl's kids were in the garage",
+            "bare_neg":"Carl's kids weren't in the garage",
             "prior_fact": "Garages are used to store cars and other things"},
         "hat": {
             "statement":"Samantha has a new hat",
             "negation":"Samantha doesn't have a new hat",
+            "bare_pos":"Samantha has a new hat",
+            "bare_neg":"Samantha doesn't have a new hat",
             "prior_fact": "Hats are worn on the head"}
     };
 
@@ -812,7 +824,7 @@ function init() {
         // get content
         var content = mcitems[item];
         // console.log(content)
-        var utterance = content.statement + ".";
+        var utterance = content.bare_pos + ".";
         var statement = content.statement;  
         var negation = content.negation;
         var prior_fact = content.prior_fact; 
