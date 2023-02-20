@@ -719,12 +719,13 @@ function init() {
         // "think" and "know" use present tense; "say" and "inform" use past tense
         if (trigger.includes("bare")) {
             var predicate = "Polar";
+            var trigger_predicate = "Polar";
             var utterance = content[trigger] + ".";
             ah_name = "NA"; // no attitude holder if it is simple polar
             var trigger_class = "Critical";
         } else {
             var trigger_predicate = trigger.split("_")[0];
-            var predicate = predicate_mapping[trigger_predicate]
+            var predicate = predicate_mapping[trigger_predicate];
             var utterance = "<font color=\"red\">" + ah_name + "</font> " + predicate + " " + content[trigger] + ".";
             if (trigger.includes("know") | trigger.includes("think")){
                 var trigger_class = "Critical";
@@ -821,6 +822,7 @@ function init() {
             "ah_name":"NA",
             "trigger": "MC", 
             "predicate" : "MC", 
+            "trigger_predicate" : "MC",
             "trigger_class": "Filler",
             "item" : item,
             "content": content,
