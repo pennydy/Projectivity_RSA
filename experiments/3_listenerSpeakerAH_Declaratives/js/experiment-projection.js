@@ -109,9 +109,9 @@ function make_slides(f) {
                     "<font color=\"blue\">" + this.stim.speaker_name + "</font> says: \"<i>"+this.stim.utterance+"</i>\"";
             $(".sentence").html(exp.text);
 
-            exp.leftLabel =  "definitely doesn't <br> believe it";
+            exp.leftLabel =  "definitely no";
             $(".leftLabel").html(exp.leftLabel);
-            exp.rightLabel = "definitely believes it";
+            exp.rightLabel = "definitely yes";
             $(".rightLabel").html(exp.rightLabel);
 
             // allows the content question to match with the utterance (i.e. not p in question when the embedded is not p)
