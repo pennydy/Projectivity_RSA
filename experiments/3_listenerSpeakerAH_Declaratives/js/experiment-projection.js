@@ -220,7 +220,7 @@ function make_slides(f) {
                 "slide_number_in_experiment" : exp.phase, // trial number
                 "question_order" : this.stim.question_order,
                 "trigger": trigger,
-                "predicate" : this.stim.predicate,
+                "predicate" : this.stim.trigger_predicate,
                 "trigger_class": this.stim.trigger_class,
                 // "content": this.stim.content,
                 // "speaker_question": exp.speaker_question, // sanity check
@@ -738,30 +738,17 @@ function init() {
             var prior_fact = content.high_prior;
             var prior_condition = "high_prob"; // high prob of positive p
             var prior_rating = content.high_prior_rating;
-            // if (trigger.includes("_neg")) {
-            //     var prior_rating = 1 - content.high_prior_rating;
-            //     var prior_condition = "low_prob"; // high prob of affirmative p, but low prob of the actual embedded contnet
-            // } else {
-            //     var prior_rating = content.high_prior_rating;
-            //     var prior_condition = "high_prob"; // high_prob of p
-            // }
         } else {
             var prior_fact = content.low_prior;
             var prior_condition = "low_prob";
             var prior_rating = content.low_prior_rating;
-            // if (trigger.includes("_neg")) {
-            //     var prior_rating = 1 - content.low_prior_rating;
-            //     var prior_condition = "high_prob"; // high_prob of p
-            // } else {
-            //     var prior_rating = content.low_prior_rating;
-            //     var prior_condition = "low_prob"; // low prob of affirmative p, but low high of the actual embedded contnet
-            // }
         }
         
         return {
             "speaker_name": speaker_name,
             "ah_name": ah_name,	  
             "trigger": trigger,
+            "trigger_predicate" : trigger_predicate,
             "predicate" : predicate,
             "trigger_class": trigger_class,
             "item" : item,
