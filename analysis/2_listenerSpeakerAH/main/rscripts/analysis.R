@@ -166,7 +166,7 @@ speaker_ah_summary
 # write.csv(speaker_ah_summary, "../results/speaker_ah_summary.csv" , row.names = FALSE)  
 
 speaker_ah_prior <- df.data.summary |>
-  group_by(predicate, utterance_type,prior_condition_embedded) |> # collapse prior condition
+  group_by(predicate, utterance_type,prior_condition_embedded) |> # separate prior condition
   summarize(mean_speaker_rating = mean(speaker_response),
             speaker_ci_low = ci.low(speaker_response),
             speaker_ci_high = ci.high(speaker_response),
@@ -218,7 +218,7 @@ speaker_all_alt <- ggplot(data = speaker_ah_summary,
   # scale_alpha_discrete(range=c(.9,.4), # include both low and high prior (more opaque).
   #                      labels=c("neutral", "high prob", "low prob"),
   #                      name="Prior belief\nin p") +
-  scale_y_continuous(name="Mean speaker belief in p",
+  scale_y_continuous(name="Mean speaker belief in the embedded content",
                      limits=c(0,1)) +
   scale_x_discrete(label=c("p", "not p"),
                    name="Type of embedded clause")
@@ -235,7 +235,6 @@ d_byitem_sp = df.data.summary %>%
          prior_condition = fct_relevel(as.factor(prior_condition_embedded), "neutral", "high_prob", "low_prob")) %>% 
   filter(predicate != "MC")
 
-  
 
 speaker_prior_embedded <- ggplot(data = df.data.summary |>
                           # to reorder the predicate and utterance_type for graph
@@ -513,7 +512,7 @@ summary(speaker_know_think_model)
 # summary(speaker_order_model)
 
 
-ah_model <- lmer(ah_response ~predicate * centered_prior_rating * centered_prior_rating + (predicate + centered_prior_rating + centered_prior_rating | workerid) + (predicate + centered_prior_rating + centered_prior_rating| item),
+ah_model <- lmer(ah_response ~predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content| item),
                  analysis_data)
 summary(ah_model)
 

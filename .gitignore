@@ -1,17 +1,22 @@
 .DS_Store
 
+
 # data
 data/*.config
 data/*.exps
 data/1_listenerProjection/all_original/
 data/2_listenerSpeakerAH/all_original/
+data/3_listenerSpeakerAH_Declaratives/all_original/
 
 experiments/1_listenerProjection/finalized_interface/
 experiments/1_listenerProjection/*.config
 .Rproj.user
 
 writings/*
+
 analysis/2_listenerSpeakerAH/main/graphs/belief_p/
 analysis/2_listenerSpeakerAH/main/cache/
+analysis/3_listenerSpeakerAH_Declaratives/pilot/cache/
+analysis/3_listenerSpeakerAH_Declaratives/main/cache/
 
 models/analysis/*
