@@ -50,11 +50,7 @@ df.data.all <- df.data.clean |>
          prior_condition_p = prior_condition)
 
 ## Data exclusion
-# exclusion based on language status/background and other comments
-excludeid <- c(934, 1039, 641, 786, 978, 642, 640, 770) # non-native speakers
-excludeid <- c(excludeid, 706) # neurodivergent 
-excludeid <- c(excludeid, 927, 695, 714) # bilinguals
-
+# exclusion based on performance in the filler items
 df.data.all <- df.data.all |>
   filter(!workerid %in% excludeid)
 group_mc_mean <- mean(df.data.all$speaker_response[df.data.all$trigger == "MC"])
@@ -68,6 +64,12 @@ excludeid_filler <- df.data.all |>
   filter(exclude == "yes") |>
   select(workerid)
 excludeid <- c(excludeid, excludeid_filler$workerid)
+
+# exclusion based on language status/background and other comments
+excludeid <- c(excludeid, 934, 1039, 641, 786, 978, 642, 640, 770) # non-native speakers
+excludeid <- c(excludeid, 706) # neurodivergent 
+excludeid <- c(excludeid, 927, 695, 714) # bilinguals
+
 df.data.summary <- df.data.all |>
   filter(!workerid %in% excludeid)
 
@@ -405,64 +407,101 @@ speaker_model <- lmer(speaker_response ~ predicate * centered_prior_rating * cen
                       analysis_data)
 summary(speaker_model)
 
+speaker_model_decorrelated <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), 
+                      analysis_data)
+summary(speaker_model_decorrelated)
+
 full_speaker_model <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
                       full_analysis_data)
 summary(full_speaker_model)
 print(full_speaker_model, correlation=TRUE)
-# some random effects are highly correlated -> de-correlate them 
+
+full_speaker_model_decorrelated <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), 
+                           full_analysis_data)
+summary(full_speaker_model_decorrelated)
 
 # ah
 ah_model <- lmer(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
                  analysis_data)
 summary(ah_model)
 
+ah_model_decorrelated <- lmer(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), 
+                 analysis_data)
+summary(ah_model_decorrelated)
 
 ## Bayesian, brm
 # speaker
-speaker_bayesian_simple <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (1 | workerid) + (1 | item),  
-                        analysis_data,
-                        control=list(max_treedepth = 15, adapt_delta = 0.99),
-                        file="../cache/brm_speaker_simple")
-summary(speaker_bayesian_simple)
+# speaker_bayesian_simple <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (1 | workerid) + (1 | item),  
+#                         analysis_data,
+#                         control=list(max_treedepth = 15, adapt_delta = 0.99),
+#                         file="../cache/brm_speaker_simple")
+# summary(speaker_bayesian_simple)
+
+speaker_bayesian <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
+                                     analysis_data,
+                                     control=list(max_treedepth = 15, adapt_delta = 0.99),
+                                     file="../cache/brm_speaker")
+summary(speaker_bayesian)
+plot(speaker_bayesian)
 
 speaker_bayesian_decorrelated <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), # de-correlate
                                analysis_data,
                                control=list(max_treedepth = 15, adapt_delta = 0.99),
                                file="../cache/brm_speaker_decorrelated")
 summary(speaker_bayesian_decorrelated)
+plot(speaker_bayesian_decorrelated)
 
 full_speaker_bayesian <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
                                full_analysis_data,
                                control=list(max_treedepth = 15, adapt_delta = 0.99),
                                file="../cache/brm_speaker_full")
 summary(full_speaker_bayesian)
+plot(full_speaker_bayesian)
+
+full_speaker_bayesian_decorrelated <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), 
+                             full_analysis_data,
+                             control=list(max_treedepth = 15, adapt_delta = 0.99),
+                             file="../cache/brm_speaker_full_decorrelated")
+summary(full_speaker_bayesian_decorrelated)
+plot(full_speaker_bayesian_decorrelated)
 
 # ah
-ah_bayesian_simple <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (1 | workerid) + (1 | item), # only include random intercept since not enough observations 
-                        analysis_data |>
-                     filter(predicate != "Polar"),
-                        control=list(max_treedepth = 15, adapt_delta = 0.99),
-                        file="../cache/brm_ah_simple")
-summary(ah_bayesian_simple)
+# ah_bayesian_simple <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (1 | workerid) + (1 | item), # only include random intercept since not enough observations 
+#                         analysis_data |>
+#                      filter(predicate != "Polar"),
+#                         control=list(max_treedepth = 15, adapt_delta = 0.99),
+#                         file="../cache/brm_ah_simple")
+# summary(ah_bayesian_simple)
 
-ah_bayesian_decorrelated <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), # 
+ah_bayesian <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
+                                analysis_data |>
+                                  filter(predicate != "Polar"),
+                                control=list(max_treedepth = 15, adapt_delta = 0.99),
+                                file="../cache/brm_ah")
+summary(ah_bayesian)
+plot(ah_bayesian)
+
+ah_bayesian_decorrelated <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), # decorrelated 
                           analysis_data |>
                             filter(predicate != "Polar"),
                           control=list(max_treedepth = 15, adapt_delta = 0.99),
                           file="../cache/brm_ah_decorrelated")
 summary(ah_bayesian_decorrelated)
+plot(ah_bayesian_decorrelated)
 
-full_ah_bayesian_simple <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (1 | workerid) + (1 | item), # simple 
-                             full_analysis_data |>
-                               filter(predicate != "Polar"),
-                             control=list(max_treedepth = 15, adapt_delta = 0.99),
-                             file="../cache/full_brm_ah_simple")
-summary(full_ah_bayesian_simple)
+full_ah_bayesian <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
+                                     full_analysis_data |>
+                                       filter(predicate != "Polar"),
+                                     control=list(max_treedepth = 15, adapt_delta = 0.99),
+                                     file="../cache/brm_ah_full")
+summary(full_ah_bayesian)
+plot(full_ah_bayesian)
 
-full_ah_bayesian <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), 
+full_ah_bayesian_decorrelated <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), 
                         full_analysis_data |>
                           filter(predicate != "Polar"),
                         control=list(max_treedepth = 15, adapt_delta = 0.99),
-                        file="../cache/full_brm_ah")
-summary(full_ah_bayesian)
+                        file="../cache/brm_ah_full_decorrelated")
+summary(full_ah_bayesian_decorrelated)
+plot(full_ah_bayesian_decorrelated)
                  
