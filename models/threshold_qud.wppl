@@ -1,7 +1,6 @@
-
-
-// // speaker and attitude holder belief priors
 var beliefs = ["dances","doesn't dance"]
+
+var quds = ["MC", "CC"]
 
 
 // var speaker_beliefPrior = function() {
@@ -21,20 +20,31 @@ var utterances = ["know-dances-?",
 var predicate_thresholds = function(predicate, qud) {
   if (predicate == "know") {
     if (qud == "MC") { // if the matrix clause/predicate is at-issue
-      return beta(10,1)
+      return beta(10,1) // cannot do beta(10, 0.1): beta sample overflow
     } else { // if the qud is CC
-      return beta(8,3)
+      return beta(8,2)
     }
   }
   if (predicate == "think") {
     if (qud == "MC") {
-      return beta(3,8)
+      return beta(2,8)
     } else {
-      return beta(1,10)
+      return beta(1,10) // beta(0.1,10)
     }
   }
   else { // BARE, regardless of qud
     return beta(20,20)
+  }
+}
+
+var predicate_qud = function(predicate) {
+  if (predicate=="know") {
+    return categorical({ps: [0.8, 0.2], vs: ["MC", "CC"]})
+  }
+  if (predicate=="think"){
+    return categorical({ps: [0.2, 0.8], vs: ["MC", "CC"]})
+  } else { // BARE
+    return categorical({ps: [1, 0], vs: ["MC", "CC"]})
   }
 }
 
@@ -58,10 +68,6 @@ display("predicate:BARE, qud:MC")
 viz(Infer({method:"forward", samples:1000}, function(){
     return predicate_thresholds("BARE", "MC")
 }))
-display("predicate:BARE, qud:CC")
-viz(Infer({method:"forward", samples:1000}, function(){
-    return predicate_thresholds("BARE", "CC")
-}))
 
 
 // belief_prob is a tuple, the degree of speaker belief and ah belief
@@ -79,9 +85,8 @@ var meaning = function(utterance, speaker_belief, qud) {
       return speaker_belief <= 1 - threshold?1:0
     }
   } else {
-//     var prob = Math.pow(Math.abs(threshold - speaker_belief),0.4)
+//     var prob = Math.exp(Math.abs(threshold - speaker_belief))
     var prob = Math.pow(Math.abs(threshold - speaker_belief),0.5)
-    var prob = prob>1 ? 1 : prob
     return flip(1 - prob) ? 1:0
   }
   
@@ -94,18 +99,17 @@ var meaning = function(utterance, speaker_belief, qud) {
 var literalListener = cache(function(utterance, qud) {
   return Infer({method: 'MCMC', samples: 4000, lag: 100, burn: 50, model: function(){
 //     var speaker_belief = beta(4,2)
-//     var ah_belief = beta(4,2)
     var speaker_belief = uniform(0,1)
     factor(meaning(utterance, speaker_belief, qud))
-    return Math.trunc(Math.trunc(speaker_belief * 100)/10)
+    return Math.trunc(Math.trunc((speaker_belief-0.01) * 100)/10) // put 1 to bin9
 //     return speaker_belief
   }})
 })
 
 display("u:BARE-dances-?, qud:MC")
 viz(literalListener("BARE-dances-?", "MC"))
-display("u:BARE-dances-?, qud:CC")
-viz(literalListener("BARE-dances-?", "CC"))
+// display("u:BARE-dances-?, qud:CC")
+// viz(literalListener("BARE-dances-?", "CC"))
 display("u:know-dances-?, qud:MC")
 viz(literalListener("know-dances-?", "MC"))
 display("u:know-dances-?, qud:CC")
@@ -114,6 +118,7 @@ display("u:think-dances-?, qud:MC")
 viz(literalListener("think-dances-?", "MC"))
 display("u:think-dances-?, qud:CC")
 viz(literalListener("think-dances-?", "CC"))
+
 
 
 var alpha = 3
@@ -146,19 +151,31 @@ viz(speaker(9, "MC"))
 display("belief: 9, qud:CC")
 viz(speaker(9, "CC"))
 
-var pragmaticListener = function(utterance, qud) {
+var pragmaticListener = function(utterance) {
   Infer({model: function() {
     var speaker_belief = uniformDraw([0,1,2,3,4,5,6,7,8,9])
+    var splitutt = utterance.split('-')
+    var predicate = splitutt[0]
+    var qud = predicate_qud(predicate)
     observe(speaker(speaker_belief, qud), utterance)
-    return speaker_belief
+    return {belief: speaker_belief, qud:qud}
   }})
 }
 
-viz(pragmaticListener("know-dances-?", "MC"))
-viz(pragmaticListener("know-dances-?", "CC"))
+display("u:know-dances-?, full + marginalized")
+var know = pragmaticListener("know-dances-?")
+// viz(know)
+viz(marginalize(know, "belief"))
+viz(marginalize(know, "qud"))
 
-viz(pragmaticListener("think-dances-?", "MC"))
-viz(pragmaticListener("think-dances-?", "CC"))
+display("u:think-dances-?, full + marginalized")
+var think = pragmaticListener("think-dances-?")
+// viz(think)
+viz(marginalize(think, "belief"))
+viz(marginalize(think, "qud"))
 
-viz(pragmaticListener("BARE-dances-?", "MC"))
-viz(pragmaticListener("BARE-dances-?", "CC"))
+display("u:BARE-dances-?")
+var bare = pragmaticListener("BARE-dances-?")
+// viz(bare)
+viz(marginalize(bare, "belief"))
+viz(marginalize(bare, "qud"))
