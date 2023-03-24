@@ -4,7 +4,6 @@ library(dplyr)
 library(emmeans)
 library(tidyverse)
 
-
 theme_set(theme_bw())
 # color-blind-friendly palette
 cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") 
@@ -47,6 +46,10 @@ df.data.all <- df.data.clean |>
 
 
 ## Data exclusion
+excludeid <- c(551, 580, 446, 253, 507, 500, 472, 457, 459) # language status: not native american english speakers
+
+df.data.all <- subset(df.data.all, !(workerid %in% excludeid) )
+
 group_mc_mean <- mean(df.data.all$speaker_response[df.data.all$trigger == "MC"])
 group_mc_sd <- sd(df.data.all$speaker_response[df.data.all$trigger == "MC"])
 exclusion_criteria <- group_mc_mean + 2*group_mc_sd
@@ -57,9 +60,9 @@ excludeid_list <- df.data.all |>
   mutate(exclude = ifelse(mean_speaker_response >= exclusion_criteria, "yes", "no")) |>
   filter(exclude == "yes") |>
   select(workerid)
+
 excludeid <- excludeid_list$workerid
-# not native american english speakers
-excludeid <- c(excludeid, 551, 580, 446, 253, 507, 500, 472, 457, 459)
+
 df.data.summary <- df.data.all |>
   filter(!workerid %in% excludeid)
 

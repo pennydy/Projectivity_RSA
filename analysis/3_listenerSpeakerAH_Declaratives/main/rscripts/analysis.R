@@ -50,6 +50,12 @@ df.data.all <- df.data.clean |>
          prior_condition_p = prior_condition)
 
 ## Data exclusion
+
+# exclusion based on language status/background and other comments
+excludeid <- c(934, 1039, 641, 786, 978, 642, 640, 770) # non-native speakers
+excludeid <- c(excludeid, 706) # neurodivergent 
+excludeid <- c(excludeid, 927, 695, 714) # bilinguals
+
 # exclusion based on performance in the filler items
 df.data.all <- df.data.all |>
   filter(!workerid %in% excludeid)
@@ -64,11 +70,6 @@ excludeid_filler <- df.data.all |>
   filter(exclude == "yes") |>
   select(workerid)
 excludeid <- c(excludeid, excludeid_filler$workerid)
-
-# exclusion based on language status/background and other comments
-excludeid <- c(excludeid, 934, 1039, 641, 786, 978, 642, 640, 770) # non-native speakers
-excludeid <- c(excludeid, 706) # neurodivergent 
-excludeid <- c(excludeid, 927, 695, 714) # bilinguals
 
 df.data.summary <- df.data.all |>
   filter(!workerid %in% excludeid)
@@ -401,6 +402,14 @@ full_analysis_data <- df.data.summary |>
          centered_prior_rating = prior_rating_embedded - mean(prior_rating_embedded), 
          centered_embedded_content = embedded_content - mean(embedded_content))
 
+anyNA(full_analysis_data$speaker_response)
+
+full_analysis_data |>
+  filter(predicate != "Polar") |>
+  anyNA()
+
+table(full_analysis_data$predicate, full_analysis_data$item,full_analysis_data$centered_embedded_content)
+
 ## lmer
 # speaker
 speaker_model <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
@@ -411,7 +420,16 @@ speaker_model_decorrelated <- lmer(speaker_response ~ predicate * centered_prior
                       analysis_data)
 summary(speaker_model_decorrelated)
 
-full_speaker_model <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
+# no significant main effect of question order
+speaker_model_order <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content * question_order + (predicate + centered_prior_rating + centered_embedded_content + question_order || workerid) + (predicate + centered_prior_rating + centered_embedded_content + question_order|| item), 
+                      analysis_data)
+summary(speaker_model_order)
+
+full_speaker_simple <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (1 | workerid) + (1 | item), 
+                                    full_analysis_data)
+summary(full_speaker_simple)
+
+full_speaker_model <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating | workerid) + (1 | item), 
                       full_analysis_data)
 summary(full_speaker_model)
 print(full_speaker_model, correlation=TRUE)
@@ -422,12 +440,31 @@ summary(full_speaker_model_decorrelated)
 
 # ah
 ah_model <- lmer(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
-                 analysis_data)
+                 analysis_data |>
+                   filter(predicate != "Polar"))
+save.lmer.effects(ah_model, fileName = "../cache/ah_model")
 summary(ah_model)
 
 ah_model_decorrelated <- lmer(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), 
-                 analysis_data)
+                 analysis_data |>
+                   filter(predicate != "Polar"))
 summary(ah_model_decorrelated)
+
+# no significant effect of quesiton order
+ah_model_order <- lmer(ah_response ~ predicate * centered_prior_rating * centered_embedded_content * question_order + (predicate + centered_prior_rating + centered_embedded_content + question_order || workerid) + (predicate + centered_prior_rating + centered_embedded_content + question_order || item), 
+                              analysis_data |>
+                                filter(predicate != "Polar"))
+summary(ah_model_order)
+
+full_ah_model <- lmer(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
+                           full_analysis_data |>
+                        filter(predicate != "Polar"))
+summary(full_ah_model)
+
+full_ah_model_decorrelated <- lmer(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), 
+                      full_analysis_data |>
+                        filter(predicate != "Polar"))
+summary(full_ah_model_decorrelated)
 
 ## Bayesian, brm
 # speaker
@@ -451,12 +488,19 @@ speaker_bayesian_decorrelated <- brm(speaker_response ~ predicate * centered_pri
 summary(speaker_bayesian_decorrelated)
 plot(speaker_bayesian_decorrelated)
 
-full_speaker_bayesian <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
+full_speaker_bayesian <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (1 + predicate + centered_prior_rating + centered_embedded_content | workerid) + (1 + predicate + centered_prior_rating + centered_embedded_content | item), 
                                full_analysis_data,
                                control=list(max_treedepth = 15, adapt_delta = 0.99),
                                file="../cache/brm_speaker_full")
 summary(full_speaker_bayesian)
 plot(full_speaker_bayesian)
+
+full_speaker_bayesian_simple <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (1 | workerid) + (1 | item), 
+                             full_analysis_data,
+                             control=list(max_treedepth = 15, adapt_delta = 0.99),
+                             file="../cache/brm_speaker_full_simple")
+summary(full_speaker_bayesian_simple)
+plot(full_speaker_bayesian_simple)
 
 full_speaker_bayesian_decorrelated <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), 
                              full_analysis_data,

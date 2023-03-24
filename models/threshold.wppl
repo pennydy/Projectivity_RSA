@@ -1,0 +1,185 @@
+var belief_states = [["dances","dances"],
+                     ["dances","doesn't dance"],
+                     ["doesn't dance","dances"],
+                     ["doesn't dance","doesn't dance"]]
+
+// // speaker and attitude holder belief priors
+// var beliefs = ["dances","doesn't dance"]
+// var ah_beliefs = ["dances", "doesn't dance", undefined]
+
+// var speaker_beliefPrior = function() {
+//   return categorical({
+//     vs: beliefs,
+//     ps: [.73, .27]
+//   })
+// }
+
+// var ah_beliefPrior = function() {
+//   return categorical({
+//     vs: ah_beliefs,
+//     ps: [0.73, 0.27, 0.05]
+//   })
+// }
+
+
+
+var speaker_beliefPrior = function() {
+  return beta(4, 2)
+}
+
+var ah_beliefPrior = function() {
+  return beta(4, 2)
+}
+
+// specify utterance alternatives, only include polar interrogatives for now
+var utterances = ["know-dances-?", 
+                  "know-doesn't dance-?",                 
+                  "think-dances-?", 
+                  "think-doesn't dance-?",                         
+                  "BARE-dances-?"]
+
+var negated_content = {
+  "dances" : "doesn't dance",
+  "doesn't dance" : "dances"
+}
+
+
+// a pair of thresholds, speaker and ah
+var predicate_thresholds = function(predicate, sentence_type) {
+  if (predicate == "know") {
+    if (sentence_type == "?") {
+      var speaker_threshold = beta(6,2)
+      var ah_threshold = beta(1,6)
+      return [speaker_threshold, ah_threshold]
+//       return [0.7, 0.5]
+    }
+  }
+  if (predicate == "think") {
+    if (sentence_type == "?") {
+      var speaker_threshold = beta(1,6)
+      var ah_threshold = beta(1,6)
+      return [speaker_threshold, ah_threshold]
+//       return [0.5, 0.4]
+    }
+  }
+  if (predicate == "BARE") {
+    if (sentence_type == "?") {
+      return beta(20,20)
+    }
+  }
+}
+
+// belief_prob is a tuple, the degree of speaker belief and ah belief
+var meaning = function(utterance, belief_prob) {
+  var splitutt = utterance.split('-')
+  var predicate = splitutt[0]
+  var content = splitutt[1]
+  var sentence_type = splitutt[2]
+  
+  var thresholds = predicate_thresholds(predicate, sentence_type)
+//   display(thresholds)
+  
+  var speaker_belief = belief_prob[0]
+  var ah_belief = belief_prob[1]
+  
+  
+  if (predicate != "BARE") {
+//     return speaker_belief > thresholds[0] && ah_belief > thresholds[1]
+    if (!_.includes(content, "doesn't")) {
+      return speaker_belief > thresholds[0] && ah_belief > thresholds[1]?1:0
+    } else {
+      return speaker_belief < 1 - thresholds[0] && ah_belief < 1 - thresholds[1]?1:0
+    }
+  } else {
+    var prob = Math.abs(thresholds - speaker_belief)
+    return flip(1 - prob) ? 1:0
+  }
+  
+}
+
+// viz(repeat(100, meaning("know-dances-?", [0.8, 0.5])))
+viz(Infer({method:"forward", samples:1000}, function(){
+    return meaning("know-dances-?", [0.8, 0.5])
+ }))
+// display(meaning("think-dances-?", [0.8, 0.5]))
+
+var literalListener = cache(function(utterance) {
+  return Infer({method: 'MCMC', samples: 1000, lag: 100, burn: 5, model: function(){
+//     var speaker_belief = beta(4,2)
+//     var ah_belief = beta(4,2)
+    var speaker_belief = uniform(0,1)
+    var ah_belief = uniform(0,1)
+    var belief_prob = [speaker_belief, ah_belief]
+    factor(meaning(utterance, belief_prob))
+    var splitutt = utterance.split('-')
+    var predicate = splitutt[0]
+    if (predicate=="BARE") {
+      return {speaker:  belief_prob[0], ah: null}
+    } else {
+      return {speaker:  belief_prob[0], ah:  belief_prob[1]}
+    }
+//     return {speaker: belief_prob[0], ah: belief_prob[1]}
+    
+//     var splitutt = utterance.split('-')
+//     var predicate = splitutt[0]
+
+//     var speaker = (belief_prob[0] > 0.5) ? "dances" : "doesn't dance"
+//     var ah = (belief_prob[1] > 0.5) ? "dances" : "doesn't dance"
+//     if (predicate=="BARE") {
+//       return {speaker: speaker, ah: null}
+//     } else {
+//       return {speaker: speaker, ah: ah}
+//     }
+  }})
+})
+
+display("BARE-dances-?")
+var bare = literalListener("BARE-dances-?")
+viz(marginalize(bare, "speaker"))
+// viz(marginalize(bare, "ah"))
+// viz.table(literalListener("BARE-dances-?"))
+display("know-dances-?")
+var know = literalListener("know-dances-?")
+viz(marginalize(know, "speaker"))
+viz(marginalize(know, "ah"))
+// viz.table(literalListener("know-dances-?"))
+// display("know-doesn't dance-?")
+// viz.table(literalListener("know-doesn't dance-?"))
+display("think-dances-?")
+var think = literalListener("think-dances-?")
+viz(marginalize(think, "speaker"))
+viz(marginalize(think, "ah"))
+// viz.table(literalListener("think-dances-?"))
+
+
+var alpha = 3
+
+var cost = function(utterance){
+  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0.5 
+  var negation_cost = _.includes(utterance, "doesn't") ? 0 : 0.5
+  return embedded_cost + negation_cost
+}
+
+// Speaker, chooses an utterance to convey a particular answer of the qud
+var speaker = cache(function(belief_tuple) {
+  return Infer({model: function(){
+    var utterance = uniformDraw(utterances)
+    factor(alpha*(literalListener(utterance).score(belief_tuple))) // ignore cost for now
+    return utterance
+  }})
+})
+
+// viz.table(speaker([0.7, 0.1]))
+// viz(speaker({speaker:"dances", ah:null}))
+
+var pragmaticListener = function(utterance) {
+  Infer({model: function() {
+    var speaker_belief = uniform(0,1) > 0.5 ? "dances" : "doesn't dance"
+    var ah_belief = uniform(0,1) > 0.5 ? "dances" : "doesn't dance"
+    var belief_tuple = [speaker_belief, ah_belief]
+    observe(speaker(belief_tuple), utterance)
+    return belief_tuple
+  }})
+}
+
+// viz(pragmaticListener("know-dances-?"))
