@@ -1,5 +1,6 @@
 .DS_Store
-
+.Rhistory
+.RData
 
 # data
 data/*.config
@@ -19,4 +20,3 @@ analysis/2_listenerSpeakerAH/main/cache/
 analysis/3_listenerSpeakerAH_Declaratives/pilot/cache/
 analysis/3_listenerSpeakerAH_Declaratives/main/cache/
 
-models/analysis/*

@@ -1,4 +1,6 @@
-var beliefs = ["dances","doesn't dance"]
+// var beliefs = ["dances","doesnt dance"]
+
+var beliefs = [0,1,2,3,4,5,6,7,8,9]
 
 var quds = ["MC", "CC"]
 
@@ -9,10 +11,19 @@ var quds = ["MC", "CC"]
 
 // specify utterance alternatives, only include polar interrogatives for now
 var utterances = ["know-dances-?", 
-                  "know-doesn't dance-?",                 
+                  "know-doesnt_dance-?",                 
                   "think-dances-?", 
-                  "think-doesn't dance-?",                         
+                  "think-doesnt_dance-?",                         
                   "BARE-dances-?"]
+
+// hacky prior definition
+var priors = {
+  lowest: [.3,.3,.3,.04,.01,.01,.01,.01,.01,.01],
+  low: [.01,.01,.3,.3,.3,.04,.01,.01,.01,.01],
+  mid: [.01,.01,.02,.02,.4,.4,.02,.02,.01,.01],  
+  high: [.01,.01,.01,.01,.04,.3,.3,.3,.01,.01],
+  highest: [.01,.01,.01,.01,.01,.01,.04,.3,.3,.3]  
+}
 
 
 
@@ -27,9 +38,9 @@ var predicate_thresholds = function(predicate, qud) {
   }
   if (predicate == "think") {
     if (qud == "MC") {
-      return beta(2,8)
+      return beta(1,10)
     } else {
-      return beta(1,10) // beta(0.1,10)
+      return beta(3,8) // beta(0.1,10)
     }
   }
   else { // BARE, regardless of qud
@@ -48,26 +59,26 @@ var predicate_qud = function(predicate) {
   }
 }
 
-display("predicate:know, qud:MC")
-viz(Infer({method:"forward", samples:1000}, function(){
-    return predicate_thresholds("know", "MC")
-}))
-display("predicate:know, qud:CC")
-viz(Infer({method:"forward", samples:1000}, function(){
-    return predicate_thresholds("know", "CC")
-}))
-display("predicate:think, qud:MC")
-viz(Infer({method:"forward", samples:1000}, function(){
-    return predicate_thresholds("think", "MC")
-}))
-display("predicate:think, qud:CC")
-viz(Infer({method:"forward", samples:1000}, function(){
-    return predicate_thresholds("think", "CC")
-}))
-display("predicate:BARE, qud:MC")
-viz(Infer({method:"forward", samples:1000}, function(){
-    return predicate_thresholds("BARE", "MC")
-}))
+// display("predicate:know, qud:MC")
+// viz(Infer({method:"forward", samples:1000}, function(){
+//     return predicate_thresholds("know", "MC")
+// }))
+// display("predicate:know, qud:CC")
+// viz(Infer({method:"forward", samples:1000}, function(){
+//     return predicate_thresholds("know", "CC")
+// }))
+// display("predicate:think, qud:MC")
+// viz(Infer({method:"forward", samples:1000}, function(){
+//     return predicate_thresholds("think", "MC")
+// }))
+// display("predicate:think, qud:CC")
+// viz(Infer({method:"forward", samples:1000}, function(){
+//     return predicate_thresholds("think", "CC")
+// }))
+// display("predicate:BARE, qud:MC")
+// viz(Infer({method:"forward", samples:1000}, function(){
+//     return predicate_thresholds("BARE", "MC")
+// }))
 
 
 // belief_prob is a tuple, the degree of speaker belief and ah belief
@@ -79,7 +90,7 @@ var meaning = function(utterance, speaker_belief, qud) {
   var threshold = predicate_thresholds(predicate, qud)
   
   if (predicate != "BARE") {
-    if (!_.includes(content, "doesn't")) {
+    if (!_.includes(content, "doesnt")) {
       return speaker_belief >= threshold?1:0
     } else {
       return speaker_belief <= 1 - threshold?1:0
@@ -106,26 +117,27 @@ var literalListener = cache(function(utterance, qud) {
   }})
 })
 
-display("u:BARE-dances-?, qud:MC")
-viz(literalListener("BARE-dances-?", "MC"))
-// display("u:BARE-dances-?, qud:CC")
-// viz(literalListener("BARE-dances-?", "CC"))
-display("u:know-dances-?, qud:MC")
-viz(literalListener("know-dances-?", "MC"))
-display("u:know-dances-?, qud:CC")
-viz(literalListener("know-dances-?", "CC"))
-display("u:think-dances-?, qud:MC")
-viz(literalListener("think-dances-?", "MC"))
-display("u:think-dances-?, qud:CC")
-viz(literalListener("think-dances-?", "CC"))
+// display("u:BARE-dances-?, qud:MC")
+// viz(literalListener("BARE-dances-?", "MC"))
+// // display("u:BARE-dances-?, qud:CC")
+// // viz(literalListener("BARE-dances-?", "CC"))
+// display("u:know-dances-?, qud:MC")
+// viz(literalListener("know-dances-?", "MC"))
+// display("u:know-dances-?, qud:CC")
+// viz(literalListener("know-dances-?", "CC"))
+// display("u:think-dances-?, qud:MC")
+// viz(literalListener("think-dances-?", "MC"))
+// display("u:think-dances-?, qud:CC")
+// viz(literalListener("think-dances-?", "CC"))
 
 
 
 var alpha = 3
 
+// set all costs to 0, revise later.
 var cost = function(utterance){
-  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0.5 
-  var negation_cost = _.includes(utterance, "doesn't") ? 0 : 0.5
+  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0 
+  var negation_cost = _.includes(utterance, "doesnt") ? 0 : 0
   return embedded_cost + negation_cost
 }
 
@@ -138,44 +150,58 @@ var speaker = cache(function(speaker_belief, qud) {
   }})
 })
 
-display("belief: 2, qud:MC")
-viz(speaker(2, "MC"))
-display("belief: 2, qud:CC")
-viz(speaker(2, "CC"))
-display("belief: 5, qud:MC")
-viz(speaker(5, "MC"))
-display("belief: 5, qud:CC")
-viz(speaker(5, "CC"))
-display("belief: 9, qud:MC")
-viz(speaker(9, "MC"))
-display("belief: 9, qud:CC")
-viz(speaker(9, "CC"))
+// display("belief: 2, qud:MC")
+// viz(speaker(2, "MC"))
+// display("belief: 2, qud:CC")
+// viz(speaker(2, "CC"))
+// display("belief: 5, qud:MC")
+// viz(speaker(5, "MC"))
+// display("belief: 5, qud:CC")
+// viz(speaker(5, "CC"))
+// display("belief: 9, qud:MC")
+// viz(speaker(9, "MC"))
+// display("belief: 9, qud:CC")
+// viz(speaker(9, "CC"))
 
-var pragmaticListener = function(utterance) {
+// var pragmaticListener = function(utterance) {
+//   Infer({model: function() {
+//     var speaker_belief = uniformDraw([0,1,2,3,4,5,6,7,8,9])
+//     var splitutt = utterance.split('-')
+//     var predicate = splitutt[0]
+//     var qud = predicate_qud(predicate)
+//     observe(speaker(speaker_belief, qud), utterance)
+//     return {belief: speaker_belief, qud:qud}
+//   }})
+// }
+
+
+
+
+var pragmaticListener = function(utterance,qud,cat_prior) {
   Infer({model: function() {
-    var speaker_belief = uniformDraw([0,1,2,3,4,5,6,7,8,9])
+    // var speaker_belief = uniformDraw([0,1,2,3,4,5,6,7,8,9])
+    var speaker_belief = categorical({ps: priors[cat_prior], vs: beliefs})
     var splitutt = utterance.split('-')
     var predicate = splitutt[0]
-    var qud = predicate_qud(predicate)
-    observe(speaker(speaker_belief, qud), utterance)
-    return {belief: speaker_belief, qud:qud}
+    observe(speaker(speaker_belief,qud), utterance)
+    return speaker_belief
   }})
 }
 
-display("u:know-dances-?, full + marginalized")
-var know = pragmaticListener("know-dances-?")
-// viz(know)
-viz(marginalize(know, "belief"))
-viz(marginalize(know, "qud"))
+// display("u:know-dances-?, full + marginalized")
+// var know = pragmaticListener("know-dances-?")
+// // viz(know)
+// viz(marginalize(know, "belief"))
+// viz(marginalize(know, "qud"))
 
-display("u:think-dances-?, full + marginalized")
-var think = pragmaticListener("think-dances-?")
-// viz(think)
-viz(marginalize(think, "belief"))
-viz(marginalize(think, "qud"))
+// display("u:think-dances-?, full + marginalized")
+// var think = pragmaticListener("think-dances-?")
+// // viz(think)
+// viz(marginalize(think, "belief"))
+// viz(marginalize(think, "qud"))
 
-display("u:BARE-dances-?")
-var bare = pragmaticListener("BARE-dances-?")
-// viz(bare)
-viz(marginalize(bare, "belief"))
-viz(marginalize(bare, "qud"))
+// display("u:BARE-dances-?")
+// var bare = pragmaticListener("BARE-dances-?")
+// // viz(bare)
+// viz(marginalize(bare, "belief"))
+// viz(marginalize(bare, "qud"))
