@@ -1,0 +1,41 @@
+prior_type,item_type,item,eventItem,Mean,CILow,CIHigh,YMin,YMax
+high_prior,Charley_H,Charley,Charley speaks Spanish,0.804632353,0.027948529,0.026472426,0.776683824,0.831104779
+high_prior,Danny_H,Danny,Danny ate the last cupcake,0.697062937,0.030851399,0.029375874,0.666211538,0.726438811
+high_prior,Emily_H,Emily,Emily bought a car yesterday,0.561555556,0.038675926,0.038374074,0.52287963,0.59992963
+high_prior,Emma_H,Emma,Emma studied on Saturday morning,0.680763889,0.028612847,0.029105903,0.652151042,0.709869792
+high_prior,Frank_H,Frank,Frank got a cat,0.67972028,0.031756993,0.028041958,0.647963287,0.707762238
+high_prior,Gace_H,Grace,Grace visited her sister,0.790144928,0.029856884,0.029661232,0.760288043,0.819806159
+high_prior,Isabella_H,Isabella,Isabella ate a steak on Sunday,0.517707006,0.025988854,0.027898089,0.491718153,0.545605096
+high_prior,Jackson_H,Jackson,Jackson ran 10 miles,0.774965035,0.031613636,0.029454545,0.743351399,0.80441958
+high_prior,Jayden_H,Jayden,Jayden rented a car,0.687794118,0.034643382,0.034066176,0.653150735,0.721860294
+high_prior,Jon_H,Jon,Jon walks to work,0.7559375,0.035707031,0.035626953,0.720230469,0.791564453
+high_prior,Josh_H,Josh,Josh learned to ride a bike yesterday,0.544575163,0.035295752,0.037586601,0.509279412,0.582161765
+high_prior,Josie_H,Josie,Josie went on vacation to France,0.73343949,0.031084395,0.026630573,0.702355096,0.760070064
+high_prior,Julian_H,Julian,Julian dances salsa,0.599493671,0.030824367,0.030511076,0.568669304,0.630004747
+high_prior,Mary_H,Mary,Mary is pregnant,0.815167785,0.039531879,0.034706376,0.775635906,0.849874161
+high_prior,Mia_H,Mia,Mia drank 2 cocktails last night,0.579022556,0.03368609,0.033697368,0.545336466,0.612719925
+high_prior,Olivia_H,Olivia,Olivia sleeps until noon,0.664776119,0.041347015,0.04119403,0.623429104,0.705970149
+high_prior,Owen_H,Owen,Owen shoveled snow last winter,0.746482759,0.035453448,0.030622414,0.71102931,0.777105172
+high_prior,Sophia_H,Sophia,Sophia got a tattoo,0.634248366,0.033009804,0.03229085,0.601238562,0.666539216
+high_prior,Tony_H,Tony,Tony had a drink last night,0.747279412,0.028825368,0.028617647,0.718454044,0.775897059
+high_prior,Zoe_H,Zoe,Zoe calculated the tip,0.745971223,0.033935252,0.034178058,0.712035971,0.780149281
+low_prior,Charley_L,Charley,Charley speaks Spanish,0.277066667,0.032415,0.034266667,0.244651667,0.311333333
+low_prior,Danny_L,Danny,Danny ate the last cupcake,0.27993007,0.035603147,0.038968531,0.244326923,0.318898601
+low_prior,Emily_L,Emily,Emily bought a car yesterday,0.151655629,0.030470199,0.030332781,0.12118543,0.181988411
+low_prior,Emma_L,Emma,Emma studied on Saturday morning,0.323098592,0.037477113,0.041346831,0.285621479,0.364445423
+low_prior,Frank_L,Frank,Frank got a cat,0.16965035,0.033384615,0.035965035,0.136265734,0.205615385
+low_prior,Gace_L,Grace,Grace visited her sister,0.24777027,0.034875,0.037231419,0.21289527,0.285001689
+low_prior,Isabella_L,Isabella,Isabella ate a steak on Sunday,0.125813953,0.030624031,0.032104651,0.095189922,0.157918605
+low_prior,Jackson_L,Jackson,Jackson ran 10 miles,0.186013986,0.031842657,0.035734266,0.154171329,0.221748252
+low_prior,Jayden_L,Jayden,Jayden rented a car,0.1756,0.042066667,0.041018333,0.133533333,0.216618333
+low_prior,Jon_L,Jon,Jon walks to work,0.235696203,0.035256329,0.036153481,0.200439873,0.271849684
+low_prior,Josh_L,Josh,Josh learned to ride a bike yesterday,0.236917293,0.037761278,0.04212218,0.199156015,0.279039474
+low_prior,Josie_L,Josie,Josie went on vacation to France,0.117286822,0.02923062,0.034972868,0.088056202,0.15225969
+low_prior,Julian_L,Julian,Julian dances salsa,0.401796875,0.040318359,0.03609375,0.361478516,0.437890625
+low_prior,Mary_L,Mary,Mary is pregnant,0.22540146,0.037018248,0.038395985,0.188383212,0.263797445
+low_prior,Mia_L,Mia,Mia drank 2 cocktails last night,0.224901961,0.036800654,0.03629085,0.188101307,0.26119281
+low_prior,Olivia_L,Olivia,Olivia sleeps until noon,0.210592105,0.037057566,0.037435855,0.173534539,0.248027961
+low_prior,Owen_L,Owen,Owen shoveled snow last winter,0.279503546,0.041925532,0.046115248,0.237578014,0.325618794
+low_prior,Sophia_L,Sophia,Sophia got a tattoo,0.415413534,0.037774436,0.044665414,0.377639098,0.460078947
+low_prior,Tony_L,Tony,Tony had a drink last night,0.2196,0.035005,0.034533333,0.184595,0.254133333
+low_prior,Zoe_L,Zoe,Zoe calculated the tip,0.192108844,0.034287415,0.034914966,0.157821429,0.22702381

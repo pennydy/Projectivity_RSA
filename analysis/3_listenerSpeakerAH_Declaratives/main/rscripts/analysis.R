@@ -404,6 +404,7 @@ full_analysis_data <- df.data.summary |>
 
 anyNA(full_analysis_data$speaker_response)
 
+
 full_analysis_data |>
   filter(predicate != "Polar") |>
   anyNA()

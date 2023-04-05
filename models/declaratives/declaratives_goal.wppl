@@ -1,0 +1,236 @@
+// adding goal ("belief" or "disbelief")
+// (the labels are not very informative. another way to think about them:
+//  "belief"--providing an answer to the qud, "disbelief"--performing certain speech act
+
+// why goal is introduced: 
+// 1. provide an alternative to hard-code the anti-veridical nature of 'think' in the semantics
+// i.e., the anti-veridical nature is pragmatically driven (use "think" to express disbelief)
+// (although modeling the anti-verdicality of "think" at the semantic level leads to more similar 
+// predications)
+// 2. (related to jt's comments on qud) the not-at-issue belief shouldn't be completely ignored--
+// they may be connected somehow (at least at the pragmatic speaker level) and both of they may 
+// affect speaker's choice of utterance
+
+// how it's being done:
+// check whether the speaker belief is the same as the ah belief. if they are the same, then 
+// the speaker is communicating something about "belief" (either their own--qud:CC or ah's--qud:MC). 
+// if they are not the same, then the speaker is doing something else. here, we consider it 
+// as speaker having a different goal--to convey their disbelief in the content/ah belief ("disbelief").
+// the speaker will balance between these two goals. we use phi/1-phi to weight them at the speaker level.
+
+// alternatively: (NOT BEING USED. commented out in code) so, the qud: the sentence is either about 
+// the speaker's belief (CC) or the ah's doxastic state (MC). when the qud is about the speaker's belief, 
+// the speaker can directly express it (goal: "belief") or perform certain speech act (goal: disbelief).
+// for instance, they can use "john thinks julian dances salsa" to indicate "i can't believe john thinks 
+// this way! it's definitely not true that julian dances salsa" and express their disbelief in "not dances." 
+// (i.e., saying "dances" but believing in "doesn't dance")
+
+// mysterious things:
+// 1. at the literal listener, it makes the prediction that "BARE" is very unlikely to be used to convey disbelief,
+// "know" is slightly more likely but overall still rarely used, and "think" is the most likely one to be used
+// among the three, but the probability of disbelief is still < 0.5 (so conveying "belief" is still the dominant
+// goal, at the literal listener level). overall, this is in line with the intuition.
+// 2. intuitively, it seems like "goals" and "quds" are somehow intertwined, but here we clearly distinguish them
+
+var beliefs = ["dances","doesn't dance"]
+var ah_beliefs = ["dances", "doesn't dance", null]
+
+var speaker_prior = function() {
+  return categorical({
+    vs: beliefs,
+    ps: [.73, .27]
+  })
+}
+
+var quds = ["MC", "CC"]
+
+var goals = ["disbelief", "belief"]
+
+// specify utterance alternatives, only include polar interrogatives for now
+var utterances = ["know-dances-.", 
+                  "know-doesn't dance-.",                 
+                  "think-dances-.", 
+                  "think-doesn't dance-.",                         
+                  "BARE-dances-.",
+                  "BARE-doesn't dance-."]
+
+
+var negated_content = {
+  "dances" : "doesn't dance",
+  "doesn't dance" : "dances"
+}
+
+
+var predicate_qud = function(predicate) {
+  if (predicate=="know") {
+    return categorical({ps: [0.8, 0.2], vs: ["MC", "CC"]})
+  }
+  if (predicate=="think"){
+    return categorical({ps: [0.3, 0.7], vs: ["MC", "CC"]})
+  } else { // BARE
+    return categorical({ps: [0, 1], vs: ["MC", "CC"]})
+  }
+}
+
+var meaning = function(utterance, belief_states) {
+  var splitutt = utterance.split('-')
+  var predicate = splitutt[0]
+  var content = splitutt[1]
+
+  var speaker_belief = belief_states.speaker_belief
+  var ah_belief = belief_states.ah_belief
+
+  if (predicate=="know") {
+    return speaker_belief == content && ah_belief == content
+  } else if (predicate=="think") {
+    return ah_belief == content // antiveridical: && speaker_belief != content 
+  } else {
+    return speaker_belief == content && ah_belief == null
+  }
+}
+
+// specify different quds
+// relates to mysterious things #2, the relationship between qud and goal (is "disbelief" 
+// a separate qud or something within in qud -> doesn't seem right)
+var qudFns = {
+  CC : function(belief_states) { return { speaker_belief: belief_states.speaker_belief }},
+//     return goal=="belief" ? { speaker_belief: belief_states.speaker_belief} :
+//     {speaker_belief:negated_content[belief_states.ah_belief]}
+//   },
+  MC : function(belief_states) {return { ah_belief: belief_states.ah_belief } }
+//   disbelief : function(belief_states) {return {speaker_belief, ah_belief}}
+}
+
+var goalFn = function(beliefs){
+  var speaker_belief = beliefs.speaker_belief
+  var ah_belief = beliefs.ah_belief
+  return (speaker_belief == ah_belief || ah_belief == null) ? "belief" : "disbelief"
+}
+
+// another attempt--relates to mysterious things #2: maybe qud and goals are related??
+// var goals_to_qud = function(predicate, goal) {
+//   predicate === "BARE" ? categorical({ps: [0, 1], vs: ["MC", "CC"]}) :
+//   goal === "disbelief" ? categorical([0.4, 0.6], ["MC", "CC"]) : 
+//   goal === "belief" ? categorical([0.6, 0.4], ["MC", "CC"]) :
+//   true
+// }
+
+var literalListener = cache(function(utterance,qud) {
+  return Infer({model: function(){
+    var speaker_belief = speaker_prior()
+    var ah_belief = _.includes(utterance, "BARE") ? categorical({ps:[0.146,0.054,0.9], vs:ah_beliefs}) : speaker_prior()
+    var belief_states = {speaker_belief, ah_belief}
+    var goal = goalFn(belief_states)
+    var qudFn = qudFns[qud]
+    var qudAnswer = qudFn(belief_states)
+    factor(meaning(utterance, belief_states)?1:0)
+    return {qudAnswer, goal}
+  }})
+})
+
+display("u:BARE-dances-.")
+var bare = literalListener("BARE-dances-.","MC")
+// viz(bare)
+viz(marginalize(bare, "qudAnswer"))
+viz(marginalize(bare, "goal"))
+
+display("u:know-dances-. MC")
+var know = literalListener("know-dances-.", "MC")
+// viz(know)
+viz(marginalize(know, "qudAnswer"))
+viz(marginalize(know, "goal"))
+
+display("u:know-dances-. CC")
+var know = literalListener("know-dances-.", "CC")
+// viz(know)
+viz(marginalize(know, "qudAnswer"))
+viz(marginalize(know, "goal"))
+
+display("u:think-dances-. MC")
+var think = literalListener("think-dances-.", "MC")
+// viz(think)
+viz(marginalize(think, "qudAnswer"))
+viz(marginalize(think, "goal"))
+
+display("u:think-dances-. CC")
+var think = literalListener("think-dances-.", "CC")
+// viz(think)
+viz(marginalize(think, "qudAnswer"))
+viz(marginalize(think, "goal"))
+
+
+var alpha = 1
+
+var cost = function(utterance){
+  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0.25
+  var negation_cost = _.includes(utterance, "doesn't") ? 0.25 : 0
+  return embedded_cost + negation_cost
+}
+
+var speaker = cache(function(beliefs, qud, phi) {
+  return Infer({model: function(){
+    var goal = goalFn(beliefs)
+   
+    var utterance = uniformDraw(utterances)
+    var splitutt = utterance.split('-')
+    var predicate = splitutt[0]
+    
+    var qudFn = qudFns[qud]
+    var qudAnswer = qudFn(beliefs)
+    
+    var L0 = literalListener(utterance, qud)
+    var L0_qud = marginalize(L0, "qudAnswer")
+    var L0_goal = marginalize(L0, "goal")
+    factor(alpha*(phi * (L0_qud.score(qudAnswer))+
+                 (1-phi) * (L0_goal.score(goal)))
+           - cost(utterance))
+    return utterance
+  }})
+})
+
+display("belief: dances, dances. MC. 0.9")
+viz(speaker({speaker_belief:"dances", ah_belief:"dances"}, "MC", 0.9))
+display("belief: dances, doesn't dance CC 0.9")
+viz(speaker({speaker_belief:"dances",ah_belief:"doesn't dance"}, "CC", 0.9))
+display("belief: dances, doesn't dance MC 0.9")
+viz(speaker({speaker_belief:"dances",ah_belief:"doesn't dance"}, "MC", 0.9))
+// display("belief: dances, null")
+// viz(speaker({speaker_belief:"dances",ah_belief:null}))
+
+
+var pragmaticListener = function(utterance) {
+  Infer({model: function() {
+    var splitutt = utterance.split('-')
+    var predicate = splitutt[0]
+    var qud = predicate_qud(predicate)
+    var phi = uniform(0,1)
+    
+    var speaker_belief = speaker_prior()
+    var ah_belief = _.includes(utterance, "BARE") ? categorical({ps:[0.146,0.054,0.9], vs:ah_beliefs}) : speaker_prior()
+    var beliefs = {speaker_belief: speaker_belief, ah_belief:ah_belief}
+
+    observe(speaker(beliefs, qud,phi), utterance)
+    return {speaker_belief : beliefs.speaker_belief, ah_belief : beliefs.ah_belief, phi: phi}
+  }})
+}
+
+
+display("u:know-dances-.")
+var know = pragmaticListener("know-dances-.")
+// viz(know)
+viz.table(marginalize(know, "speaker_belief"))
+viz.table(marginalize(know, "ah_belief"))
+viz(marginalize(know, "phi"))
+
+display("u:think-dances-.")
+var think = pragmaticListener("think-dances-.")
+// viz(think)
+viz.table(marginalize(think, "speaker_belief"))
+viz.table(marginalize(think, "ah_belief"))
+viz(marginalize(think, "phi"))
+
+display("u:BARE-dances-.")
+var bare = pragmaticListener("BARE-dances-.")
+// viz(bare)
+viz.table(marginalize(bare, "speaker_belief"))
+viz(marginalize(bare, "phi"))

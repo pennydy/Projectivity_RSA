@@ -1,0 +1,401 @@
+item,content,prior_type,state,n,prop
+Charley_H,Charley speaks Spanish,factH,1,1,0.002380952
+Charley_H,Charley speaks Spanish,factH,2,0,0
+Charley_H,Charley speaks Spanish,factH,3,3,0.007142857
+Charley_H,Charley speaks Spanish,factH,4,4,0.00952381
+Charley_H,Charley speaks Spanish,factH,5,10,0.023809524
+Charley_H,Charley speaks Spanish,factH,6,12,0.028571429
+Charley_H,Charley speaks Spanish,factH,7,26,0.061904762
+Charley_H,Charley speaks Spanish,factH,8,65,0.154761905
+Charley_H,Charley speaks Spanish,factH,9,103,0.245238095
+Charley_H,Charley speaks Spanish,factH,10,196,0.466666667
+Charley_L,Charley speaks Spanish,factL,1,86,0.192825112
+Charley_L,Charley speaks Spanish,factL,2,101,0.226457399
+Charley_L,Charley speaks Spanish,factL,3,82,0.183856502
+Charley_L,Charley speaks Spanish,factL,4,78,0.174887892
+Charley_L,Charley speaks Spanish,factL,5,46,0.103139013
+Charley_L,Charley speaks Spanish,factL,6,31,0.069506726
+Charley_L,Charley speaks Spanish,factL,7,5,0.011210762
+Charley_L,Charley speaks Spanish,factL,8,10,0.022421525
+Charley_L,Charley speaks Spanish,factL,9,5,0.011210762
+Charley_L,Charley speaks Spanish,factL,10,2,0.004484305
+Danny_H,Danny ate the last cupcake,factH,1,1,0.002347418
+Danny_H,Danny ate the last cupcake,factH,2,4,0.009389671
+Danny_H,Danny ate the last cupcake,factH,3,1,0.002347418
+Danny_H,Danny ate the last cupcake,factH,4,6,0.014084507
+Danny_H,Danny ate the last cupcake,factH,5,32,0.075117371
+Danny_H,Danny ate the last cupcake,factH,6,90,0.211267606
+Danny_H,Danny ate the last cupcake,factH,7,82,0.192488263
+Danny_H,Danny ate the last cupcake,factH,8,97,0.227699531
+Danny_H,Danny ate the last cupcake,factH,9,66,0.154929577
+Danny_H,Danny ate the last cupcake,factH,10,47,0.110328638
+Danny_L,Danny ate the last cupcake,factL,1,108,0.245454545
+Danny_L,Danny ate the last cupcake,factL,2,109,0.247727273
+Danny_L,Danny ate the last cupcake,factL,3,81,0.184090909
+Danny_L,Danny ate the last cupcake,factL,4,56,0.127272727
+Danny_L,Danny ate the last cupcake,factL,5,30,0.068181818
+Danny_L,Danny ate the last cupcake,factL,6,28,0.063636364
+Danny_L,Danny ate the last cupcake,factL,7,11,0.025
+Danny_L,Danny ate the last cupcake,factL,8,6,0.013636364
+Danny_L,Danny ate the last cupcake,factL,9,7,0.015909091
+Danny_L,Danny ate the last cupcake,factL,10,4,0.009090909
+Emily_H,Emily bought a car yesterday,factH,1,21,0.048837209
+Emily_H,Emily bought a car yesterday,factH,2,13,0.030232558
+Emily_H,Emily bought a car yesterday,factH,3,33,0.076744186
+Emily_H,Emily bought a car yesterday,factH,4,34,0.079069767
+Emily_H,Emily bought a car yesterday,factH,5,82,0.190697674
+Emily_H,Emily bought a car yesterday,factH,6,109,0.253488372
+Emily_H,Emily bought a car yesterday,factH,7,57,0.13255814
+Emily_H,Emily bought a car yesterday,factH,8,37,0.086046512
+Emily_H,Emily bought a car yesterday,factH,9,19,0.044186047
+Emily_H,Emily bought a car yesterday,factH,10,25,0.058139535
+Emily_L,Emily bought a car yesterday,factL,1,265,0.607798165
+Emily_L,Emily bought a car yesterday,factL,2,78,0.178899083
+Emily_L,Emily bought a car yesterday,factL,3,44,0.100917431
+Emily_L,Emily bought a car yesterday,factL,4,17,0.038990826
+Emily_L,Emily bought a car yesterday,factL,5,8,0.018348624
+Emily_L,Emily bought a car yesterday,factL,6,12,0.027522936
+Emily_L,Emily bought a car yesterday,factL,7,3,0.006880734
+Emily_L,Emily bought a car yesterday,factL,8,4,0.009174312
+Emily_L,Emily bought a car yesterday,factL,9,3,0.006880734
+Emily_L,Emily bought a car yesterday,factL,10,2,0.004587156
+Emma_H,Emma studied on Saturday morning,factH,1,0,0
+Emma_H,Emma studied on Saturday morning,factH,2,4,0.009237875
+Emma_H,Emma studied on Saturday morning,factH,3,3,0.006928406
+Emma_H,Emma studied on Saturday morning,factH,4,13,0.030023095
+Emma_H,Emma studied on Saturday morning,factH,5,19,0.043879908
+Emma_H,Emma studied on Saturday morning,factH,6,70,0.161662818
+Emma_H,Emma studied on Saturday morning,factH,7,87,0.200923788
+Emma_H,Emma studied on Saturday morning,factH,8,92,0.212471132
+Emma_H,Emma studied on Saturday morning,factH,9,84,0.193995381
+Emma_H,Emma studied on Saturday morning,factH,10,61,0.140877598
+Emma_L,Emma studied on Saturday morning,factL,1,110,0.25404157
+Emma_L,Emma studied on Saturday morning,factL,2,96,0.221709007
+Emma_L,Emma studied on Saturday morning,factL,3,62,0.143187067
+Emma_L,Emma studied on Saturday morning,factL,4,45,0.103926097
+Emma_L,Emma studied on Saturday morning,factL,5,31,0.071593533
+Emma_L,Emma studied on Saturday morning,factL,6,40,0.092378753
+Emma_L,Emma studied on Saturday morning,factL,7,25,0.057736721
+Emma_L,Emma studied on Saturday morning,factL,8,12,0.027713626
+Emma_L,Emma studied on Saturday morning,factL,9,4,0.009237875
+Emma_L,Emma studied on Saturday morning,factL,10,8,0.018475751
+Frank_H,Frank got a cat,factH,1,1,0.002267574
+Frank_H,Frank got a cat,factH,2,3,0.006802721
+Frank_H,Frank got a cat,factH,3,7,0.015873016
+Frank_H,Frank got a cat,factH,4,10,0.022675737
+Frank_H,Frank got a cat,factH,5,47,0.106575964
+Frank_H,Frank got a cat,factH,6,110,0.249433107
+Frank_H,Frank got a cat,factH,7,82,0.185941043
+Frank_H,Frank got a cat,factH,8,75,0.170068027
+Frank_H,Frank got a cat,factH,9,62,0.140589569
+Frank_H,Frank got a cat,factH,10,44,0.099773243
+Frank_L,Frank got a cat,factL,1,262,0.616470588
+Frank_L,Frank got a cat,factL,2,86,0.202352941
+Frank_L,Frank got a cat,factL,3,34,0.08
+Frank_L,Frank got a cat,factL,4,11,0.025882353
+Frank_L,Frank got a cat,factL,5,9,0.021176471
+Frank_L,Frank got a cat,factL,6,3,0.007058824
+Frank_L,Frank got a cat,factL,7,3,0.007058824
+Frank_L,Frank got a cat,factL,8,6,0.014117647
+Frank_L,Frank got a cat,factL,9,7,0.016470588
+Frank_L,Frank got a cat,factL,10,4,0.009411765
+Grace_H,Grace visited her sister,factH,1,0,0
+Grace_H,Grace visited her sister,factH,2,2,0.004395604
+Grace_H,Grace visited her sister,factH,3,4,0.008791209
+Grace_H,Grace visited her sister,factH,4,4,0.008791209
+Grace_H,Grace visited her sister,factH,5,8,0.017582418
+Grace_H,Grace visited her sister,factH,6,32,0.07032967
+Grace_H,Grace visited her sister,factH,7,50,0.10989011
+Grace_H,Grace visited her sister,factH,8,93,0.204395604
+Grace_H,Grace visited her sister,factH,9,110,0.241758242
+Grace_H,Grace visited her sister,factH,10,152,0.334065934
+Grace_L,Grace visited her sister,factL,1,117,0.284671533
+Grace_L,Grace visited her sister,factL,2,100,0.243309002
+Grace_L,Grace visited her sister,factL,3,85,0.206812652
+Grace_L,Grace visited her sister,factL,4,39,0.094890511
+Grace_L,Grace visited her sister,factL,5,24,0.058394161
+Grace_L,Grace visited her sister,factL,6,11,0.02676399
+Grace_L,Grace visited her sister,factL,7,17,0.04136253
+Grace_L,Grace visited her sister,factL,8,11,0.02676399
+Grace_L,Grace visited her sister,factL,9,4,0.00973236
+Grace_L,Grace visited her sister,factL,10,3,0.00729927
+Isabella_H,Isabella ate a steak on Sunday,factH,1,5,0.011415525
+Isabella_H,Isabella ate a steak on Sunday,factH,2,21,0.047945205
+Isabella_H,Isabella ate a steak on Sunday,factH,3,23,0.052511416
+Isabella_H,Isabella ate a steak on Sunday,factH,4,30,0.068493151
+Isabella_H,Isabella ate a steak on Sunday,factH,5,105,0.239726027
+Isabella_H,Isabella ate a steak on Sunday,factH,6,169,0.385844749
+Isabella_H,Isabella ate a steak on Sunday,factH,7,38,0.086757991
+Isabella_H,Isabella ate a steak on Sunday,factH,8,23,0.052511416
+Isabella_H,Isabella ate a steak on Sunday,factH,9,16,0.03652968
+Isabella_H,Isabella ate a steak on Sunday,factH,10,8,0.01826484
+Isabella_L,Isabella ate a steak on Sunday,factL,1,326,0.761682243
+Isabella_L,Isabella ate a steak on Sunday,factL,2,44,0.102803738
+Isabella_L,Isabella ate a steak on Sunday,factL,3,21,0.049065421
+Isabella_L,Isabella ate a steak on Sunday,factL,4,7,0.01635514
+Isabella_L,Isabella ate a steak on Sunday,factL,5,8,0.018691589
+Isabella_L,Isabella ate a steak on Sunday,factL,6,6,0.014018692
+Isabella_L,Isabella ate a steak on Sunday,factL,7,5,0.011682243
+Isabella_L,Isabella ate a steak on Sunday,factL,8,3,0.007009346
+Isabella_L,Isabella ate a steak on Sunday,factL,9,3,0.007009346
+Isabella_L,Isabella ate a steak on Sunday,factL,10,5,0.011682243
+Jackson_H,Jackson ran 10 miles,factH,1,2,0.004889976
+Jackson_H,Jackson ran 10 miles,factH,2,1,0.002444988
+Jackson_H,Jackson ran 10 miles,factH,3,3,0.007334963
+Jackson_H,Jackson ran 10 miles,factH,4,9,0.02200489
+Jackson_H,Jackson ran 10 miles,factH,5,5,0.012224939
+Jackson_H,Jackson ran 10 miles,factH,6,29,0.070904645
+Jackson_H,Jackson ran 10 miles,factH,7,51,0.124694377
+Jackson_H,Jackson ran 10 miles,factH,8,77,0.188264059
+Jackson_H,Jackson ran 10 miles,factH,9,98,0.239608802
+Jackson_H,Jackson ran 10 miles,factH,10,134,0.327628362
+Jackson_L,Jackson ran 10 miles,factL,1,222,0.485776805
+Jackson_L,Jackson ran 10 miles,factL,2,110,0.240700219
+Jackson_L,Jackson ran 10 miles,factL,3,63,0.13785558
+Jackson_L,Jackson ran 10 miles,factL,4,24,0.052516411
+Jackson_L,Jackson ran 10 miles,factL,5,11,0.024070022
+Jackson_L,Jackson ran 10 miles,factL,6,9,0.019693654
+Jackson_L,Jackson ran 10 miles,factL,7,8,0.01750547
+Jackson_L,Jackson ran 10 miles,factL,8,7,0.015317287
+Jackson_L,Jackson ran 10 miles,factL,9,3,0.006564551
+Jackson_L,Jackson ran 10 miles,factL,10,0,0
+Jayden_H,Jayden rented a car,factH,1,7,0.01627907
+Jayden_H,Jayden rented a car,factH,2,9,0.020930233
+Jayden_H,Jayden rented a car,factH,3,7,0.01627907
+Jayden_H,Jayden rented a car,factH,4,12,0.027906977
+Jayden_H,Jayden rented a car,factH,5,38,0.088372093
+Jayden_H,Jayden rented a car,factH,6,73,0.169767442
+Jayden_H,Jayden rented a car,factH,7,84,0.195348837
+Jayden_H,Jayden rented a car,factH,8,86,0.2
+Jayden_H,Jayden rented a car,factH,9,67,0.155813953
+Jayden_H,Jayden rented a car,factH,10,47,0.109302326
+Jayden_L,Jayden rented a car,factL,1,321,0.736238532
+Jayden_L,Jayden rented a car,factL,2,36,0.082568807
+Jayden_L,Jayden rented a car,factL,3,13,0.029816514
+Jayden_L,Jayden rented a car,factL,4,12,0.027522936
+Jayden_L,Jayden rented a car,factL,5,12,0.027522936
+Jayden_L,Jayden rented a car,factL,6,11,0.025229358
+Jayden_L,Jayden rented a car,factL,7,13,0.029816514
+Jayden_L,Jayden rented a car,factL,8,7,0.016055046
+Jayden_L,Jayden rented a car,factL,9,5,0.01146789
+Jayden_L,Jayden rented a car,factL,10,6,0.013761468
+Jon_H,Jon walks to work,factH,1,3,0.007194245
+Jon_H,Jon walks to work,factH,2,1,0.002398082
+Jon_H,Jon walks to work,factH,3,4,0.009592326
+Jon_H,Jon walks to work,factH,4,8,0.019184652
+Jon_H,Jon walks to work,factH,5,12,0.028776978
+Jon_H,Jon walks to work,factH,6,26,0.06235012
+Jon_H,Jon walks to work,factH,7,53,0.127098321
+Jon_H,Jon walks to work,factH,8,93,0.223021583
+Jon_H,Jon walks to work,factH,9,107,0.256594724
+Jon_H,Jon walks to work,factH,10,110,0.263788969
+Jon_L,Jon walks to work,factL,1,192,0.427616927
+Jon_L,Jon walks to work,factL,2,111,0.247216036
+Jon_L,Jon walks to work,factL,3,71,0.158129176
+Jon_L,Jon walks to work,factL,4,18,0.040089087
+Jon_L,Jon walks to work,factL,5,15,0.033407572
+Jon_L,Jon walks to work,factL,6,11,0.024498886
+Jon_L,Jon walks to work,factL,7,10,0.022271715
+Jon_L,Jon walks to work,factL,8,11,0.024498886
+Jon_L,Jon walks to work,factL,9,6,0.013363029
+Jon_L,Jon walks to work,factL,10,4,0.008908686
+Josh_H,Josh learned to ride a bike yesterday,factH,1,24,0.053932584
+Josh_H,Josh learned to ride a bike yesterday,factH,2,18,0.040449438
+Josh_H,Josh learned to ride a bike yesterday,factH,3,19,0.042696629
+Josh_H,Josh learned to ride a bike yesterday,factH,4,36,0.080898876
+Josh_H,Josh learned to ride a bike yesterday,factH,5,53,0.119101124
+Josh_H,Josh learned to ride a bike yesterday,factH,6,128,0.287640449
+Josh_H,Josh learned to ride a bike yesterday,factH,7,71,0.159550562
+Josh_H,Josh learned to ride a bike yesterday,factH,8,54,0.121348315
+Josh_H,Josh learned to ride a bike yesterday,factH,9,28,0.062921348
+Josh_H,Josh learned to ride a bike yesterday,factH,10,14,0.031460674
+Josh_L,Josh learned to ride a bike yesterday,factL,1,149,0.35391924
+Josh_L,Josh learned to ride a bike yesterday,factL,2,96,0.228028504
+Josh_L,Josh learned to ride a bike yesterday,factL,3,67,0.159144893
+Josh_L,Josh learned to ride a bike yesterday,factL,4,40,0.095011876
+Josh_L,Josh learned to ride a bike yesterday,factL,5,25,0.059382423
+Josh_L,Josh learned to ride a bike yesterday,factL,6,20,0.047505938
+Josh_L,Josh learned to ride a bike yesterday,factL,7,10,0.023752969
+Josh_L,Josh learned to ride a bike yesterday,factL,8,8,0.019002375
+Josh_L,Josh learned to ride a bike yesterday,factL,9,2,0.004750594
+Josh_L,Josh learned to ride a bike yesterday,factL,10,4,0.009501188
+Josie_H,Josie went on vacation to France,factH,1,3,0.006622517
+Josie_H,Josie went on vacation to France,factH,2,4,0.008830022
+Josie_H,Josie went on vacation to France,factH,3,2,0.004415011
+Josie_H,Josie went on vacation to France,factH,4,6,0.013245033
+Josie_H,Josie went on vacation to France,factH,5,35,0.077262693
+Josie_H,Josie went on vacation to France,factH,6,49,0.10816777
+Josie_H,Josie went on vacation to France,factH,7,81,0.178807947
+Josie_H,Josie went on vacation to France,factH,8,99,0.218543046
+Josie_H,Josie went on vacation to France,factH,9,88,0.194260486
+Josie_H,Josie went on vacation to France,factH,10,86,0.189845475
+Josie_L,Josie went on vacation to France,factL,1,314,0.760290557
+Josie_L,Josie went on vacation to France,factL,2,41,0.099273608
+Josie_L,Josie went on vacation to France,factL,3,13,0.031476998
+Josie_L,Josie went on vacation to France,factL,4,9,0.021791768
+Josie_L,Josie went on vacation to France,factL,5,12,0.02905569
+Josie_L,Josie went on vacation to France,factL,6,9,0.021791768
+Josie_L,Josie went on vacation to France,factL,7,4,0.00968523
+Josie_L,Josie went on vacation to France,factL,8,6,0.014527845
+Josie_L,Josie went on vacation to France,factL,9,2,0.004842615
+Josie_L,Josie went on vacation to France,factL,10,3,0.007263923
+Julian_H,Julian dances salsa,factH,1,0,0
+Julian_H,Julian dances salsa,factH,2,9,0.021028037
+Julian_H,Julian dances salsa,factH,3,13,0.030373832
+Julian_H,Julian dances salsa,factH,4,21,0.049065421
+Julian_H,Julian dances salsa,factH,5,67,0.156542056
+Julian_H,Julian dances salsa,factH,6,118,0.275700935
+Julian_H,Julian dances salsa,factH,7,72,0.168224299
+Julian_H,Julian dances salsa,factH,8,67,0.156542056
+Julian_H,Julian dances salsa,factH,9,32,0.074766355
+Julian_H,Julian dances salsa,factH,10,29,0.067757009
+Julian_L,Julian dances salsa,factL,1,39,0.089041096
+Julian_L,Julian dances salsa,factL,2,62,0.141552511
+Julian_L,Julian dances salsa,factL,3,84,0.191780822
+Julian_L,Julian dances salsa,factL,4,89,0.203196347
+Julian_L,Julian dances salsa,factL,5,76,0.173515982
+Julian_L,Julian dances salsa,factL,6,59,0.134703196
+Julian_L,Julian dances salsa,factL,7,6,0.01369863
+Julian_L,Julian dances salsa,factL,8,12,0.02739726
+Julian_L,Julian dances salsa,factL,9,6,0.01369863
+Julian_L,Julian dances salsa,factL,10,5,0.011415525
+Mary_H,Mary is pregnant,factH,1,11,0.025522042
+Mary_H,Mary is pregnant,factH,2,2,0.004640371
+Mary_H,Mary is pregnant,factH,3,4,0.009280742
+Mary_H,Mary is pregnant,factH,4,7,0.016241299
+Mary_H,Mary is pregnant,factH,5,8,0.018561485
+Mary_H,Mary is pregnant,factH,6,11,0.025522042
+Mary_H,Mary is pregnant,factH,7,14,0.032482599
+Mary_H,Mary is pregnant,factH,8,41,0.09512761
+Mary_H,Mary is pregnant,factH,9,85,0.197215777
+Mary_H,Mary is pregnant,factH,10,248,0.575406032
+Mary_L,Mary is pregnant,factL,1,207,0.475862069
+Mary_L,Mary is pregnant,factL,2,94,0.216091954
+Mary_L,Mary is pregnant,factL,3,53,0.12183908
+Mary_L,Mary is pregnant,factL,4,32,0.073563218
+Mary_L,Mary is pregnant,factL,5,16,0.036781609
+Mary_L,Mary is pregnant,factL,6,11,0.025287356
+Mary_L,Mary is pregnant,factL,7,7,0.016091954
+Mary_L,Mary is pregnant,factL,8,7,0.016091954
+Mary_L,Mary is pregnant,factL,9,5,0.011494253
+Mary_L,Mary is pregnant,factL,10,3,0.006896552
+Mia_H,Mia drank 2 cocktails last night,factH,1,7,0.016431925
+Mia_H,Mia drank 2 cocktails last night,factH,2,11,0.025821596
+Mia_H,Mia drank 2 cocktails last night,factH,3,24,0.056338028
+Mia_H,Mia drank 2 cocktails last night,factH,4,31,0.072769953
+Mia_H,Mia drank 2 cocktails last night,factH,5,69,0.161971831
+Mia_H,Mia drank 2 cocktails last night,factH,6,128,0.300469484
+Mia_H,Mia drank 2 cocktails last night,factH,7,69,0.161971831
+Mia_H,Mia drank 2 cocktails last night,factH,8,49,0.115023474
+Mia_H,Mia drank 2 cocktails last night,factH,9,24,0.056338028
+Mia_H,Mia drank 2 cocktails last night,factH,10,14,0.03286385
+Mia_L,Mia drank 2 cocktails last night,factL,1,237,0.538636364
+Mia_L,Mia drank 2 cocktails last night,factL,2,71,0.161363636
+Mia_L,Mia drank 2 cocktails last night,factL,3,40,0.090909091
+Mia_L,Mia drank 2 cocktails last night,factL,4,25,0.056818182
+Mia_L,Mia drank 2 cocktails last night,factL,5,19,0.043181818
+Mia_L,Mia drank 2 cocktails last night,factL,6,23,0.052272727
+Mia_L,Mia drank 2 cocktails last night,factL,7,8,0.018181818
+Mia_L,Mia drank 2 cocktails last night,factL,8,10,0.022727273
+Mia_L,Mia drank 2 cocktails last night,factL,9,5,0.011363636
+Mia_L,Mia drank 2 cocktails last night,factL,10,2,0.004545455
+Olivia_H,Olivia sleeps until noon,factH,1,14,0.032634033
+Olivia_H,Olivia sleeps until noon,factH,2,3,0.006993007
+Olivia_H,Olivia sleeps until noon,factH,3,13,0.03030303
+Olivia_H,Olivia sleeps until noon,factH,4,12,0.027972028
+Olivia_H,Olivia sleeps until noon,factH,5,17,0.03962704
+Olivia_H,Olivia sleeps until noon,factH,6,31,0.072261072
+Olivia_H,Olivia sleeps until noon,factH,7,74,0.172494172
+Olivia_H,Olivia sleeps until noon,factH,8,110,0.256410256
+Olivia_H,Olivia sleeps until noon,factH,9,85,0.198135198
+Olivia_H,Olivia sleeps until noon,factH,10,70,0.163170163
+Olivia_L,Olivia sleeps until noon,factL,1,223,0.510297483
+Olivia_L,Olivia sleeps until noon,factL,2,102,0.233409611
+Olivia_L,Olivia sleeps until noon,factL,3,40,0.091533181
+Olivia_L,Olivia sleeps until noon,factL,4,17,0.038901602
+Olivia_L,Olivia sleeps until noon,factL,5,14,0.032036613
+Olivia_L,Olivia sleeps until noon,factL,6,13,0.029748284
+Olivia_L,Olivia sleeps until noon,factL,7,4,0.009153318
+Olivia_L,Olivia sleeps until noon,factL,8,12,0.027459954
+Olivia_L,Olivia sleeps until noon,factL,9,9,0.020594966
+Olivia_L,Olivia sleeps until noon,factL,10,3,0.006864989
+Owen_H,Owen shoveled snow last winter,factH,1,3,0.006772009
+Owen_H,Owen shoveled snow last winter,factH,2,2,0.004514673
+Owen_H,Owen shoveled snow last winter,factH,3,1,0.002257336
+Owen_H,Owen shoveled snow last winter,factH,4,10,0.022573363
+Owen_H,Owen shoveled snow last winter,factH,5,10,0.022573363
+Owen_H,Owen shoveled snow last winter,factH,6,46,0.103837472
+Owen_H,Owen shoveled snow last winter,factH,7,45,0.101580135
+Owen_H,Owen shoveled snow last winter,factH,8,84,0.189616253
+Owen_H,Owen shoveled snow last winter,factH,9,97,0.218961625
+Owen_H,Owen shoveled snow last winter,factH,10,145,0.32731377
+Owen_L,Owen shoveled snow last winter,factL,1,169,0.399527187
+Owen_L,Owen shoveled snow last winter,factL,2,92,0.21749409
+Owen_L,Owen shoveled snow last winter,factL,3,53,0.125295508
+Owen_L,Owen shoveled snow last winter,factL,4,27,0.063829787
+Owen_L,Owen shoveled snow last winter,factL,5,18,0.042553191
+Owen_L,Owen shoveled snow last winter,factL,6,22,0.052009456
+Owen_L,Owen shoveled snow last winter,factL,7,13,0.030732861
+Owen_L,Owen shoveled snow last winter,factL,8,6,0.014184397
+Owen_L,Owen shoveled snow last winter,factL,9,15,0.035460993
+Owen_L,Owen shoveled snow last winter,factL,10,8,0.01891253
+Sophia_H,Sophia got a tattoo,factH,1,5,0.011389522
+Sophia_H,Sophia got a tattoo,factH,2,4,0.009111617
+Sophia_H,Sophia got a tattoo,factH,3,11,0.025056948
+Sophia_H,Sophia got a tattoo,factH,4,14,0.031890661
+Sophia_H,Sophia got a tattoo,factH,5,52,0.118451025
+Sophia_H,Sophia got a tattoo,factH,6,102,0.232346241
+Sophia_H,Sophia got a tattoo,factH,7,92,0.209567198
+Sophia_H,Sophia got a tattoo,factH,8,78,0.177676538
+Sophia_H,Sophia got a tattoo,factH,9,46,0.104783599
+Sophia_H,Sophia got a tattoo,factH,10,35,0.079726651
+Sophia_L,Sophia got a tattoo,factL,1,55,0.128805621
+Sophia_L,Sophia got a tattoo,factL,2,62,0.145199063
+Sophia_L,Sophia got a tattoo,factL,3,63,0.147540984
+Sophia_L,Sophia got a tattoo,factL,4,62,0.145199063
+Sophia_L,Sophia got a tattoo,factL,5,69,0.161592506
+Sophia_L,Sophia got a tattoo,factL,6,55,0.128805621
+Sophia_L,Sophia got a tattoo,factL,7,24,0.056206089
+Sophia_L,Sophia got a tattoo,factL,8,13,0.030444965
+Sophia_L,Sophia got a tattoo,factL,9,12,0.028103044
+Sophia_L,Sophia got a tattoo,factL,10,12,0.028103044
+Tony_H,Tony had a drink last night,factH,1,0,0
+Tony_H,Tony had a drink last night,factH,2,1,0.002380952
+Tony_H,Tony had a drink last night,factH,3,6,0.014285714
+Tony_H,Tony had a drink last night,factH,4,3,0.007142857
+Tony_H,Tony had a drink last night,factH,5,22,0.052380952
+Tony_H,Tony had a drink last night,factH,6,45,0.107142857
+Tony_H,Tony had a drink last night,factH,7,70,0.166666667
+Tony_H,Tony had a drink last night,factH,8,101,0.24047619
+Tony_H,Tony had a drink last night,factH,9,111,0.264285714
+Tony_H,Tony had a drink last night,factH,10,61,0.145238095
+Tony_L,Tony had a drink last night,factL,1,238,0.533632287
+Tony_L,Tony had a drink last night,factL,2,92,0.206278027
+Tony_L,Tony had a drink last night,factL,3,43,0.096412556
+Tony_L,Tony had a drink last night,factL,4,21,0.047085202
+Tony_L,Tony had a drink last night,factL,5,12,0.02690583
+Tony_L,Tony had a drink last night,factL,6,14,0.031390135
+Tony_L,Tony had a drink last night,factL,7,9,0.020179372
+Tony_L,Tony had a drink last night,factL,8,6,0.013452915
+Tony_L,Tony had a drink last night,factL,9,4,0.00896861
+Tony_L,Tony had a drink last night,factL,10,7,0.015695067
+Zoe_H,Zoe calculated the tip,factH,1,2,0.004474273
+Zoe_H,Zoe calculated the tip,factH,2,0,0
+Zoe_H,Zoe calculated the tip,factH,3,3,0.006711409
+Zoe_H,Zoe calculated the tip,factH,4,6,0.013422819
+Zoe_H,Zoe calculated the tip,factH,5,13,0.029082774
+Zoe_H,Zoe calculated the tip,factH,6,42,0.093959732
+Zoe_H,Zoe calculated the tip,factH,7,61,0.136465324
+Zoe_H,Zoe calculated the tip,factH,8,108,0.241610738
+Zoe_H,Zoe calculated the tip,factH,9,99,0.22147651
+Zoe_H,Zoe calculated the tip,factH,10,113,0.252796421
+Zoe_L,Zoe calculated the tip,factL,1,241,0.575178998
+Zoe_L,Zoe calculated the tip,factL,2,80,0.190930788
+Zoe_L,Zoe calculated the tip,factL,3,41,0.097852029
+Zoe_L,Zoe calculated the tip,factL,4,17,0.040572792
+Zoe_L,Zoe calculated the tip,factL,5,11,0.026252983
+Zoe_L,Zoe calculated the tip,factL,6,5,0.011933174
+Zoe_L,Zoe calculated the tip,factL,7,8,0.019093079
+Zoe_L,Zoe calculated the tip,factL,8,8,0.019093079
+Zoe_L,Zoe calculated the tip,factL,9,5,0.011933174
+Zoe_L,Zoe calculated the tip,factL,10,3,0.007159905
