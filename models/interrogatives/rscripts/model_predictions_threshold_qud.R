@@ -285,20 +285,20 @@ agr_qud = PL_prior %>%
 ggplot(agr_qud %>% 
          distinct(utterance, qud, .keep_all = TRUE), aes(x=utterance,y=qud_prob,fill=qud)) +
   geom_bar(stat="identity",position = position_dodge2(preserve = "single"))+
-  # scale_fill_manual(values=cbPalette[2:4]) +
+  scale_fill_grey() +
   scale_y_continuous(name = "Posterior speaker belief\nin the embedded content") +
-  scale_x_discrete(name = "QUD")
+  scale_x_discrete(name = "Utterance")
 ggsave("../graphs/threshold_qud/threshold_qud-PL-qud.pdf",width=12,height=5)
 
-# prior and inferred qud prob
-ggplot(agr_qud, aes(x=prior_mean,y=qud_prob,color=predicate)) +
-  geom_point(alpha=0.6) +
-  geom_smooth(method="lm",fullrange=TRUE)+
-  facet_grid(qud~utterance) +
-  scale_color_manual(values=cbPalette[2:4]) +
-  scale_y_continuous(name = "Posterior speaker belief\nin the embedded content") +
-  scale_x_continuous(name = "Rating of prior belief in the embedded content")
-ggsave("../graphs/threshold_qud/threshold_qud-PL-qud.pdf",width=12,height=5)
+# # not needed: prior and inferred qud prob (no correlation between nai and prior)
+# ggplot(arg_qud, aes(x=prior_mean,y=qud_prob,color=predicate)) +
+#   geom_point(alpha=0.6) +
+#   geom_smooth(method="lm",fullrange=TRUE)+
+#   facet_grid(qud~utterance) +
+#   scale_color_manual(values=cbPalette[2:4]) +
+#   scale_y_continuous(name = "Posterior QUD Likelihood") +
+#   scale_x_continuous(name = "Rating of prior belief in the embedded content")
+# ggsave("../graphs/threshold_qud/threshold_qud-PL-qud.pdf",width=12,height=5)
 
 
 ggplot(agr_belief, aes(x=prior_mean,y=posterior_belief_emb,color=predicate)) +
