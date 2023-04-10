@@ -148,8 +148,9 @@ var literalListener = cache(function(utterance, qud) {
 //     var speaker_belief = beta(4,2)
     var speaker_belief = uniform(0,1)
     factor(meaning(utterance, speaker_belief, qud))
-    return Math.trunc(Math.trunc((speaker_belief-0.01) * 100)/10) // put 1 to bin9
-//     return speaker_belief
+//    return Math.trunc(Math.trunc((speaker_belief-0.01) * 100)/10) // put 1 to bin9
+    var speaker_belief = speaker_belief==1?9:Math.trunc(Math.trunc(speaker_belief * 100)/10)
+    return speaker_belief
   }})
 })
 
@@ -199,31 +200,29 @@ var speaker = cache(function(speaker_belief, qud) {
 // display("belief: 9, qud:CC")
 // viz(speaker(9, "CC"))
 
-// var pragmaticListener = function(utterance) {
+var pragmaticListener = function(utterance, cat_prior) {
+ Infer({model: function() {
+   var speaker_belief = categorical({ps: priors[cat_prior], vs: beliefs})
+   var splitutt = utterance.split('-')
+   var predicate = splitutt[0]
+   var qud = predicate_qud(predicate)
+   observe(speaker(speaker_belief, qud), utterance)
+   return {belief: speaker_belief, qud:qud}
+ }})
+}
+
+
+// var pragmaticListener = function(utterance,qud,cat_prior) {
 //   Infer({model: function() {
-//     var speaker_belief = uniformDraw([0,1,2,3,4,5,6,7,8,9])
+//     // var speaker_belief = uniformDraw([0,1,2,3,4,5,6,7,8,9])
+//     var speaker_belief = categorical({ps: priors[cat_prior], vs: beliefs})
+//      // console.log(speaker_belief)
 //     var splitutt = utterance.split('-')
 //     var predicate = splitutt[0]
-//     var qud = predicate_qud(predicate)
-//     observe(speaker(speaker_belief, qud), utterance)
-//     return {belief: speaker_belief, qud:qud}
+//     observe(speaker(speaker_belief,qud), utterance)
+//     return speaker_belief
 //   }})
 // }
-
-
-
-
-var pragmaticListener = function(utterance,qud,cat_prior) {
-  Infer({model: function() {
-    // var speaker_belief = uniformDraw([0,1,2,3,4,5,6,7,8,9])
-    var speaker_belief = categorical({ps: priors[cat_prior], vs: beliefs})
-    // console.log(speaker_belief)
-    var splitutt = utterance.split('-')
-    var predicate = splitutt[0]
-    observe(speaker(speaker_belief,qud), utterance)
-    return speaker_belief
-  }})
-}
 
 // display("u:know-dances-?, full + marginalized")
 // var know = pragmaticListener("know-dances-?")
