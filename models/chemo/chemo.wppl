@@ -154,6 +154,7 @@ var speaker = cache(function(belief_tuple, qud) {
     var utterance = utterancePrior()
     var qudFn = qudFns[qud]
     var qudAnswer = qudFn(belief_tuple)
+    var literalL = literalListener(utterance,qud)
     factor(alpha*(literalListener(utterance,qud).score(qudAnswer) 
                   - cost(utterance)))
     return utterance
@@ -170,9 +171,9 @@ var pragmaticListener = cache(function(utterance) {
     ////////////////////////
     var belief_tuple = {speaker_belief:speaker_belief, ah_belief:ah_belief}
     observe(speaker(belief_tuple, qud), utterance)
-    return belief_tuple
+    // return belief_tuple
     // in order to turn this into a joint inference listener:
-    // return [belief_tuple, qud]
+    return {belief_tuple: belief_tuple, qud: qud}
   }})
 })
 

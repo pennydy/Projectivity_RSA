@@ -22,13 +22,16 @@ cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00",
 # read in models
 #cognitives <- read_file("../models/cognitives.wppl")
 # cognitives_test <- read_file("../models/cognitives-?only.wppl")
-chemo <- read_file("../../chemo.wppl")
+chemo <- read_file("../chemo.wppl")
 
 # evaluate the models
 eval_webppl <- function(command) {
   webppl(paste(chemo,command,sep="\n"))
 }
 # view(eval_webppl)
+u = "know-dances-?"
+q = "ah_belief"
+LL_tmp = eval_webppl(paste("literalListener('",u,"','",q,"')",sep=""))
 
 # prepare the plots ----
 
@@ -126,6 +129,11 @@ ggsave("../graphs/chemo/chemo-LL.pdf",width=15,height=5)
 
 #  pragmatic speaker -----
 
+sp_belief = "dances"
+ah_belief = "not dances"
+q = "speaker_belief"
+PS_tmp = eval_webppl(paste("speaker({speaker_belief:'",sp_belief,"', ah_belief:'",ah_belief,"'},'",q,"')",sep=""))
+
 PS = data.frame(qud = character(), speaker_belief = character(), ah_belief = character(), utterance = character(), prob = numeric())
 
 for (sp_belief in beliefs) {
@@ -151,17 +159,16 @@ ggsave("../graphs/chemo/chemo-PS-prior.pdf",width=10,height=6)
 
 # pragmatic listener ----
 
-# currently implemented as just returning belief tuples, but ideally would be a joint inference model
-# also inferring qud. not implemented for purely technical boring reasons: 
-# rwebppl can't parse joint inference webppl output)
+# returning joint inference
 
-PL = data.frame(utterance = character(), speaker_belief = character(), ah_belief = character(), prob = numeric())
+PL = data.frame(utterance = character(), speaker_belief = character(), ah_belief = character(), prob = numeric(), qud=character())
+
 
 for (u in utterances) {
   PL_tmp = eval_webppl(paste("pragmaticListener('",u,"')",sep=""))
   for (i in 1:nrow(PL_tmp)) {
     PL = PL %>% 
-      add_row(utterance = u, speaker_belief = PL_tmp$speaker_belief[i], ah_belief = PL_tmp$ah_belief[i], prob = PL_tmp$prob[i])
+      add_row(utterance = u, speaker_belief = PL_tmp$speaker_belief[i], ah_belief = PL_tmp$ah_belief[i], prob = PL_tmp$prob[i], qud=PL_tmp$qud[i])
   }
 }
 

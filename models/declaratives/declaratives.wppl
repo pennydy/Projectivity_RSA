@@ -1,6 +1,6 @@
 // using binary beliefs states instead of threshold
-var beliefs = ["dances","doesn't dance"]
-var ah_beliefs = ["dances", "doesn't dance", null]
+var beliefs = ["dances","doesnt dance"]
+var ah_beliefs = ["dances", "doesnt dance", null]
 
 
 // if not by-item:
@@ -57,21 +57,28 @@ var priors = {
 
 var quds = ["MC", "CC"]
 
-// specify utterance alternatives, only include polar interrogatives for now
+// specify utterance alternatives
 var utterances = ["know-dances-.", 
-                  "know-doesn't dance-.",                 
+                  "know-doesnt dance-.",                 
                   "think-dances-.", 
-                  "think-doesn't dance-.",                         
+                  "think-doesnt dance-.",
+                  "say-dances-.",
+                  "say-doesnt dance-.",
+                  "inform-dances-.",
+                  "inform-doesnt dance-.",
                   "BARE-dances-.",
-                  "BARE-doesn't dance-."]
+                  "BARE-doesnt dance-."]
 
 
 var predicate_qud = function(predicate) {
   if (predicate=="know") {
-    return categorical({ps: [0.8, 0.2], vs: ["MC", "CC"]})
-  }
-  if (predicate=="think"){
+    return categorical({ps: [0.85, 0.15], vs: ["MC", "CC"]})
+  } else if (predicate=="think"){
     return categorical({ps: [0.7, 0.3], vs: ["MC", "CC"]})
+  } else if (predicate=="inform"){
+    return categorical({ps:[0.8, 0.2], vs: ["MC", "CC"]})
+  } else if (predicate=="say") {
+    return categorical({ps:[0.35, 0.65], vs:["MC", "CC"]})
   } else { // BARE
     return categorical({ps: [0, 1], vs: ["MC", "CC"]})
   }
@@ -88,11 +95,14 @@ var meaning = function(utterance, belief_states) {
   if (predicate=="know") {
     return speaker_belief == content && ah_belief == content
   } else if (predicate=="think") {
-    return ah_belief == content // antiveridical: && speaker_belief != content 
+    return ah_belief == content // && speaker_belief != content // antiveridical for think
+  } else if (_.includes(["say","inform"],predicate)) {
+    return ah_belief == content 
   } else {
     return speaker_belief == content && ah_belief == null
   }
 }
+
 
 // specify different quds
 var qudFns = {
@@ -150,7 +160,7 @@ var alpha = 3
 
 var cost = function(utterance){
   var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0.25
-  var negation_cost = _.includes(utterance, "doesn't") ? 0.25 : 0
+  var negation_cost = _.includes(utterance, "doesnt") ? 0.25 : 0
   return embedded_cost + negation_cost
 }
 
@@ -166,10 +176,10 @@ var speaker = cache(function(beliefs, qud) {
 
 // display("belief: dances, dances. MC")
 // viz(speaker({speaker_belief:"dances", ah_belief:"dances"}, "MC"))
-// display("belief: dances, doesn't dance CC")
-// viz(speaker({speaker_belief:"dances",ah_belief:"doesn't dance"}, "CC"))
-// display("belief: dances, doesn't dance MC")
-// viz(speaker({speaker_belief:"dances",ah_belief:"doesn't dance"}, "MC"))
+// display("belief: dances, doesnt dance CC")
+// viz(speaker({speaker_belief:"dances",ah_belief:"doesnt dance"}, "CC"))
+// display("belief: dances, doesnt dance MC")
+// viz(speaker({speaker_belief:"dances",ah_belief:"doesnt dance"}, "MC"))
 
 
 var pragmaticListener = function(utterance,cat_prior) {
@@ -178,7 +188,7 @@ var pragmaticListener = function(utterance,cat_prior) {
     var predicate = splitutt[0]
     var qud = predicate_qud(predicate)
     var speaker_prior = priors[cat_prior]
-    // scale it first ("dances" and "doesn't dance" sum to 0.1) and add prob for null (0.9)
+    // scale it first ("dances" and "doesnt dance" sum to 0.1) and add prob for null (0.9)
     var ah_prior = map(function(belief) {  belief * 0.1; }, speaker_prior).concat(0.9)
     
     var speaker_belief = categorical({ps: speaker_prior, vs: beliefs})

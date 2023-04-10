@@ -1,0 +1,11 @@
+﻿predicate,qud,prob
+BARE,MC,0
+BARE,CC,1
+think,MC,0.7
+think,CC,0.3
+know,MC,0.85
+know,CC,0.15
+say,MC,0.35
+say,CC,0.65
+inform,MC,0.8
+inform,CC,0.2
