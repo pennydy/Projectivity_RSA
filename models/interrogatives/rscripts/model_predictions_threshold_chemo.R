@@ -28,7 +28,7 @@ ggplot(item_priors, aes(x=state, y=prop)) +
   scale_x_continuous(breaks=seq(from = 0, to = 1, by = .1),
                      name = "Speaker belief states") +
   scale_y_continuous(name = "Probability of prior speaker belief state")
-ggsave("../prior.pdf",width=14,height=8)
+# ggsave("../prior.pdf",width=14,height=8)
 
 priors <- unique(item_priors$item)
 
@@ -363,12 +363,6 @@ write.csv(PL_20,"../results/PL20.csv", row.names=FALSE)
 write.csv(PL_30,"../results/PL30.csv", row.names=FALSE)
 write.csv(PL_35,"../results/PL35.csv", row.names=FALSE)
 
-PL <- read.csv("../results/PL.csv")
-PL_10 <- read.csv("../results/PL10.csv")
-PL_20 <- read.csv("../results/PL20.csv")
-PL_30 <- read.csv("../results/PL30.csv")
-PL_35 <- read.csv("../results/PL35.csv")
-
 PL_summary = PL %>% 
   left_join(item_prior, by=c("prior")) %>% 
   mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "neg",
@@ -474,6 +468,12 @@ for (item in priors[36:40]){
 #   ggsave(file_path,width=12,height=5)
 # }
 
+PL <- read.csv("../results/PL.csv")
+PL_10 <- read.csv("../results/PL10.csv")
+PL_20 <- read.csv("../results/PL20.csv")
+PL_30 <- read.csv("../results/PL30.csv")
+PL_35 <- read.csv("../results/PL35.csv")
+
 PL_all <- rbind(PL, PL_10, PL_20, PL_30, PL_35) %>% 
   left_join(item_prior, by=c("prior")) %>% 
   mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "neg",
@@ -502,5 +502,24 @@ ggplot(agr, aes(x=prior_mean,y=posterior_belief_emb,color=predicate)) +
   scale_color_manual(values=cbPalette[2:4]) +
   scale_y_continuous(name = "Posterior speaker belief\nin the embedded content") +
   scale_x_continuous(name = "Rating of prior belief in the embedded content")
-ggsave("../graphs/threshold_chemo/threshold_chemo-PL-prior-qud.pdf",width=12,height=5)
+ggsave("../graphs/threshold_chemo/threshold_chemo-PL-sp-prior.pdf",width=12,height=5)
 
+
+agr_ah = PL_all %>%
+  filter(predicate!="BARE") %>% 
+  mutate(predicate = fct_relevel(predicate, "think", "know")) %>% # reorder for the graph
+  distinct(ah_belief, utterance, prior, .keep_all = TRUE) %>%
+  group_by(utterance,prior_mean,polarity,predicate) %>%
+  summarize(posterior_belief_p = sum(ah_prob*ah_belief)) %>%
+  mutate(posterior_belief_emb = case_when(polarity == "neg" ~ 1 - posterior_belief_p,
+                                          TRUE ~ posterior_belief_p),
+         prior_mean = ifelse(polarity=="neg", 1-prior_mean, prior_mean))
+
+ggplot(agr_ah, aes(x=prior_mean,y=posterior_belief_emb,color=predicate)) +
+  geom_point(alpha=0.6) +
+  geom_smooth(method="lm", fullrange=TRUE) +
+  facet_grid(.~polarity) +
+  scale_color_manual(values=cbPalette[3:4]) +
+  scale_y_continuous(name = "Posterior ah belief\nin the embedded content") +
+  scale_x_continuous(name = "Rating of prior belief in the embedded content")
+ggsave("../graphs/threshold_chemo/threshold_chemo-PL-ah-prior.pdf",width=12,height=5)

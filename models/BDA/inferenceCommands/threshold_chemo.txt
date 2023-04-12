@@ -18,7 +18,7 @@ var posteriors = Infer({model: function(){
     // ideally, should still sample the threshold from beta distribution (meaning the threshold is also probabilistic)
     think_sp_threshold: 0.1, // uniformDrift({a: 0.00001, b:1, w:0.01}),
     think_ah_threshold: 0.1 , // uniformDrift({a: 0.00001, b:1, w:0.01}),
-    know_sp_threshold: uniformDrift({a: 0.00001, b:1, w:0.01}),
+    know_sp_threshold: uniformDrift({a: 0.00001, b:1}),
     know_ah_threshold: 0.2, // uniformDrift({a: 0.00001, b:1, w:0.01}),
     BARE_sp_threshold: 0.5, // uniformDrift({a: 0.00001, b:1, w:0.01}),
 
@@ -59,9 +59,8 @@ var posteriors = Infer({model: function(){
     console.log("listenerDist: " + listenerDist)
     var beliefs_response = {speaker_belief: d.speaker_response.toString(), ah_belief: d.ah_response.toString()}
     console.log(beliefs_response)
-    // don't need : extend(model(p), {beliefs: d.beliefs, items: d.items, speaker_belief : d.speaker_beliefs, ah_belief : d.ah_beliefs})
     observe(listenerDist, beliefs_response)
-    console.log("result: " + stringify(observe(listenerDist, beliefs_response)))
+    console.log("result: " + stringify( beliefs_response))
 
   })
 
