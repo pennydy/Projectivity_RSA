@@ -21,11 +21,14 @@ eval_webppl <- function(command) {
 
 # read in by-item priors
 item_priors <- read_csv("../data/binned-priors.csv")
+item_priors$state <- item_priors$state / 10
 ggplot(item_priors, aes(x=state, y=prop)) +
   geom_bar(stat="identity") +
-  facet_wrap(.~item) +
-  scale_x_continuous(breaks=seq(from = 0, to = 10, by = 1))
-ggsave("../prior.pdf",width=12,height=8)
+  facet_wrap(~item,ncol = 6) +
+  scale_x_continuous(breaks=seq(from = 0, to = 1, by = .1),
+                     name = "Speaker belief states") +
+  scale_y_continuous(name = "Probability of prior speaker belief state")
+ggsave("../prior.pdf",width=14,height=8)
 
 priors <- unique(item_priors$item)
 
@@ -263,7 +266,12 @@ for (ah in ah_beliefs) {
 # speaker_qud_prob/ah_qud_prob: conditional distribution of speaker belief/ah belief given the qud
 # state_prob: the probability of each state (i.e., each combination of <speaker_belief, ah_belief, qud>)
 
+# very slow, run 10 items at a time
 PL = data.frame(utterance = character(), qud = character(), prior = character(), speaker_belief = character(), ah_belief = character(), speaker_prob = numeric(), ah_prob = numeric(), qud_prob = numeric(), speaker_qud_prob = numeric(), ah_qud_prob = numeric())
+PL_10 = data.frame(utterance = character(), qud = character(), prior = character(), speaker_belief = character(), ah_belief = character(), speaker_prob = numeric(), ah_prob = numeric(), qud_prob = numeric(), speaker_qud_prob = numeric(), ah_qud_prob = numeric())
+PL_20 = data.frame(utterance = character(), qud = character(), prior = character(), speaker_belief = character(), ah_belief = character(), speaker_prob = numeric(), ah_prob = numeric(), qud_prob = numeric(), speaker_qud_prob = numeric(), ah_qud_prob = numeric())
+PL_30 = data.frame(utterance = character(), qud = character(), prior = character(), speaker_belief = character(), ah_belief = character(), speaker_prob = numeric(), ah_prob = numeric(), qud_prob = numeric(), speaker_qud_prob = numeric(), ah_qud_prob = numeric())
+PL_35 = data.frame(utterance = character(), qud = character(), prior = character(), speaker_belief = character(), ah_belief = character(), speaker_prob = numeric(), ah_prob = numeric(), qud_prob = numeric(), speaker_qud_prob = numeric(), ah_qud_prob = numeric())
 
 # # testing pragmatic listener
 # u = "think-dances-?"
@@ -310,7 +318,7 @@ PL = data.frame(utterance = character(), qud = character(), prior = character(),
 
 for (u in utterances) {
   # for (q in quds) {
-    for (pr in priors[0:10]) {
+    for (pr in priors[36:40]) {
       PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",pr,"')",sep="")) %>% 
       # PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",q,"','",pr,"')",sep="")) %>% 
         group_by(Iteration) %>% 
@@ -343,13 +351,23 @@ for (u in utterances) {
         
       
       for (i in 1:nrow(PL_tmp)) {
-        PL = PL %>%
+        PL_35 = PL_35 %>%
           add_row(utterance = u, qud = PL_tmp$qud[i], prior = pr, speaker_belief = PL_tmp$speaker_belief[i], ah_belief = PL_tmp$ah_belief[i], speaker_prob = PL_tmp$speaker_prob[i], ah_prob = PL_tmp$ah_prob[i], qud_prob = PL_tmp$qud_prob[i], speaker_qud_prob = PL_tmp$speaker_qud_prob[i], ah_qud_prob = PL_tmp$ah_qud_prob[i])
       }
     }
   # }
 }
 write.csv(PL, "../results/PL.csv", row.names=FALSE)
+write.csv(PL_10,"../results/PL10.csv", row.names=FALSE)
+write.csv(PL_20,"../results/PL20.csv", row.names=FALSE)
+write.csv(PL_30,"../results/PL30.csv", row.names=FALSE)
+write.csv(PL_35,"../results/PL35.csv", row.names=FALSE)
+
+PL <- read.csv("../results/PL.csv")
+PL_10 <- read.csv("../results/PL10.csv")
+PL_20 <- read.csv("../results/PL20.csv")
+PL_30 <- read.csv("../results/PL30.csv")
+PL_35 <- read.csv("../results/PL35.csv")
 
 PL_summary = PL %>% 
   left_join(item_prior, by=c("prior")) %>% 
@@ -360,6 +378,41 @@ PL_summary = PL %>%
                                str_detect(utterance, "BARE") ~ "BARE",
                                TRUE ~ "ERROR"))
 
+PL_summary_10 = PL_10 %>% 
+  left_join(item_prior, by=c("prior")) %>% 
+  mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "neg",
+                              TRUE ~ "pos"),
+         predicate = case_when(str_detect(utterance, "think") ~ "think",
+                               str_detect(utterance, "know") ~ "know",
+                               str_detect(utterance, "BARE") ~ "BARE",
+                               TRUE ~ "ERROR"))
+
+PL_summary_20 = PL_20 %>% 
+  left_join(item_prior, by=c("prior")) %>% 
+  mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "neg",
+                              TRUE ~ "pos"),
+         predicate = case_when(str_detect(utterance, "think") ~ "think",
+                               str_detect(utterance, "know") ~ "know",
+                               str_detect(utterance, "BARE") ~ "BARE",
+                               TRUE ~ "ERROR"))
+
+PL_summary_30 = PL_30 %>% 
+  left_join(item_prior, by=c("prior")) %>% 
+  mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "neg",
+                              TRUE ~ "pos"),
+         predicate = case_when(str_detect(utterance, "think") ~ "think",
+                               str_detect(utterance, "know") ~ "know",
+                               str_detect(utterance, "BARE") ~ "BARE",
+                               TRUE ~ "ERROR"))
+
+PL_summary_35 = PL_35 %>% 
+  left_join(item_prior, by=c("prior")) %>% 
+  mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "neg",
+                              TRUE ~ "pos"),
+         predicate = case_when(str_detect(utterance, "think") ~ "think",
+                               str_detect(utterance, "know") ~ "know",
+                               str_detect(utterance, "BARE") ~ "BARE",
+                               TRUE ~ "ERROR"))
 
 # make bins go from .1 - 1
 # .1 means "belief in p is < .1"
@@ -369,11 +422,22 @@ PL_summary = PL %>%
 PL_summary$speaker_belief = (as.numeric(PL_summary$speaker_belief) + 1)/10
 PL_summary$ah_belief = (as.numeric(PL_summary$ah_belief) + 1)/10
 
+PL_summary_10$speaker_belief = (as.numeric(PL_summary_10$speaker_belief) + 1)/10
+PL_summary_10$ah_belief = (as.numeric(PL_summary_10$ah_belief) + 1)/10
+
+PL_summary_20$speaker_belief = (as.numeric(PL_summary_20$speaker_belief) + 1)/10
+PL_summary_20$ah_belief = (as.numeric(PL_summary_20$ah_belief) + 1)/10
+
+PL_summary_30$speaker_belief = (as.numeric(PL_summary_25$speaker_belief) + 1)/10
+PL_summary_30$ah_belief = (as.numeric(PL_summary_25$ah_belief) + 1)/10
+
+PL_summary_35$speaker_belief = (as.numeric(PL_summary_35$speaker_belief) + 1)/10
+PL_summary_35$ah_belief = (as.numeric(PL_summary_35$ah_belief) + 1)/10
 
 # plot by-item prior speaker belief results, marginalize over qud
-for (item in priors[0:10]){
+for (item in priors[36:40]){
   file_path <- paste0("../graphs/threshold_chemo/PL_item/marginal/marginal-sp-",item,".pdf")
-  ggplot(PL_summary %>% 
+  ggplot(PL_summary_35 %>% 
            filter(prior==item) %>% 
            distinct(speaker_belief, utterance, .keep_all = TRUE),
          aes(x=speaker_belief, y=speaker_prob)) +
@@ -385,9 +449,9 @@ for (item in priors[0:10]){
 }
 
 # plot by-item prior speaker belief, given different quds
-for (item in priors[0:10]){
+for (item in priors[36:40]){
   file_path <- paste0("../graphs/threshold_chemo/PL_item/sp/sp-",item,".pdf")
-  ggplot(PL_summary %>% 
+  ggplot(PL_summary_35 %>% 
            filter(prior==item) %>% 
            distinct(speaker_belief, utterance, qud, .keep_all = TRUE),
          aes(x=speaker_belief, y=speaker_qud_prob)) +
@@ -410,8 +474,19 @@ for (item in priors[0:10]){
 #   ggsave(file_path,width=12,height=5)
 # }
 
+PL_all <- rbind(PL, PL_10, PL_20, PL_30, PL_35) %>% 
+  left_join(item_prior, by=c("prior")) %>% 
+  mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "neg",
+                              TRUE ~ "pos"),
+         predicate = case_when(str_detect(utterance, "think") ~ "think",
+                               str_detect(utterance, "know") ~ "know",
+                               str_detect(utterance, "BARE") ~ "BARE",
+                               TRUE ~ "ERROR"),
+         speaker_belief = (as.numeric(speaker_belief) + 1)/10,
+         ah_belief = (as.numeric(ah_belief) + 1)/10)
+
 # plot speaker_belief ~ prior belief, marginalize over qud
-agr = PL_summary %>%
+agr = PL_all %>%
   mutate(predicate = fct_relevel(predicate, "BARE", "think", "know")) %>% # reorder for the graph
   distinct(speaker_belief, utterance, prior, .keep_all = TRUE) %>%
   group_by(utterance,prior_mean,polarity,predicate) %>%
@@ -427,5 +502,5 @@ ggplot(agr, aes(x=prior_mean,y=posterior_belief_emb,color=predicate)) +
   scale_color_manual(values=cbPalette[2:4]) +
   scale_y_continuous(name = "Posterior speaker belief\nin the embedded content") +
   scale_x_continuous(name = "Rating of prior belief in the embedded content")
-ggsave("../graphs/threshold_chemo/threshold_qud-PL-prior-qud.pdf",width=12,height=5)
+ggsave("../graphs/threshold_chemo/threshold_chemo-PL-prior-qud.pdf",width=12,height=5)
 

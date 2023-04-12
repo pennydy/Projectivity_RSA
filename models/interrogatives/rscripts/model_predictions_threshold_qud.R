@@ -291,7 +291,7 @@ ggplot(agr_qud %>%
 ggsave("../graphs/threshold_qud/threshold_qud-PL-qud.pdf",width=12,height=5)
 
 # # not needed: prior and inferred qud prob (no correlation between nai and prior)
-# ggplot(arg_qud, aes(x=prior_mean,y=qud_prob,color=predicate)) +
+# ggplot(agr_qud, aes(x=prior_mean,y=qud_prob,color=predicate)) +
 #   geom_point(alpha=0.6) +
 #   geom_smooth(method="lm",fullrange=TRUE)+
 #   facet_grid(qud~utterance) +

@@ -1,0 +1,75 @@
+var stringify = function(x){return JSON.stringify(x)}
+
+// sample parameters to be estimated
+var posteriors = Infer({model: function(){
+// not using joint inference here: the parameters are independent
+  var p = {
+    alpha: 3,// uniformDrift({a: 0, b: 10, w: 0.01}),
+    // think_sp_alpha: uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // think_sp_beta: uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // think_ah_alpha: uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // think_ah_beta: uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // know_sp_alpha: uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // know_sp_beta: uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // know_ah_alpha: uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // know_ah_beta: uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // BARE_sp_alpha: uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // BARE_sp_beta: uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // ideally, should still sample the threshold from beta distribution (meaning the threshold is also probabilistic)
+    think_sp_threshold: 0.1, // uniformDrift({a: 0.00001, b:1, w:0.01}),
+    think_ah_threshold: 0.1 , // uniformDrift({a: 0.00001, b:1, w:0.01}),
+    know_sp_threshold: uniformDrift({a: 0.00001, b:1, w:0.01}),
+    know_ah_threshold: 0.2, // uniformDrift({a: 0.00001, b:1, w:0.01}),
+    BARE_sp_threshold: 0.5, // uniformDrift({a: 0.00001, b:1, w:0.01}),
+
+    embedCost: 0, // uniformDrift({a: 0, b: 2, w: 0.5/20}),
+    negCost: 0 // uniformDrift({a: 0, b: 2, w: 0.5/20})
+  }
+
+//  more efficient if we have the pragListener distrubtion ready and then observe the empirical results
+//  but need to do this within mapData, since we need the utterance and item of each response
+//   var m = model(p)
+//   console.log("sampled parameters: "+stringify(p))
+//   var listenerDist = pragmaticListener("UTTERANCE","ITEM",m,p)
+//   console.log("listenerDist: " + listenerDist)
+
+// for (u in utterance) {
+//     for (i in item) {
+//         var m = model(p)
+//         var listenerDist = pragmaticListener(u, i, m, p)
+//         console.log("listenerDist: " + listenerDist)
+
+//         mapData({data: df}, function(d){
+//             // d: a row of the long-form empirical data, with the joint {speaker_belief: "0", ah_belief: "1"}
+//             if (d.utterance == u & d.item == i) {
+//                 var beliefs_response = {speaker_belief: d.speaker_response.toString(), ah_belief: d.ah_response.toString()}
+//                 console.log(beliefs_response)
+//                 // don't need : extend(model(p), {beliefs: d.beliefs, items: d.items, speaker_belief : d.speaker_beliefs, ah_belief : d.ah_beliefs})
+//                 observe(listenerDist, beliefs_response)
+//                 console.log("result: " + stringify(observe(listenerDist, beliefs_response)))
+//             } // don't need else? 
+//         })
+//     }
+// }
+  mapData({data: df}, function(d){
+
+    // d: a row of the long-form empirical data, with the joint {speaker_belief: "0", ah_belief: "1"}
+    var m = model(p)
+    var listenerDist = pragmaticListener(d.utterance,d.item,m,p)
+    console.log("listenerDist: " + listenerDist)
+    var beliefs_response = {speaker_belief: d.speaker_response.toString(), ah_belief: d.ah_response.toString()}
+    console.log(beliefs_response)
+    // don't need : extend(model(p), {beliefs: d.beliefs, items: d.items, speaker_belief : d.speaker_beliefs, ah_belief : d.ah_beliefs})
+    observe(listenerDist, beliefs_response)
+    console.log("result: " + stringify(observe(listenerDist, beliefs_response)))
+
+  })
+
+  return p
+}, method: "MCMC",
+samples: NUM_SAMPLES,
+lag: LAG, burn: BURN_IN,
+verbose: true})
+
+posteriors
+
