@@ -457,6 +457,8 @@ color_mapping <- c("Polar"=toString(cbPalette[1]), "think"=toString(cbPalette[2]
 ###### Analysis ######
 emm_options(pbkrtest.limit = 3450)
 emm_options(lmerTest.limit = 3450)
+
+# only include "know", "think" and "BARE"
 analysis_data <- df.data.summary |>
   filter(predicate %in% c("know", "think", "Polar")) |>
   mutate(utterance_type = as.character(utterance_type),
@@ -472,7 +474,7 @@ analysis_data <- df.data.summary |>
          centered_prior_rating = prior_rating_embedded - mean(prior_rating_embedded), 
          centered_embedded_content = embedded_content - mean(embedded_content))
 
-contrasts(analysis_data$embedded_content)
+contrasts(as.factor(analysis_data$embedded_content))
 # table(analysis_data$predicate, analysis_data$centered_embedded_content, analysis_data$item)
 
 speaker_model <- lmer(speaker_response ~ predicate + centered_prior_rating + centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item),
@@ -647,4 +649,12 @@ full_ah_bayesian <- brm(ah_response ~ predicate * centered_prior_rating * center
                    file="../cache/full_brm_ah")
 summary(full_ah_bayesian)
 
+full_analysis_data_ref <- full_analysis_data %>% 
+  filter(predicate!="Polar") %>% 
+  mutate(predicate = relevel(as.factor(predicate), ref = "know"))
 
+full_ah_bayesian_ref <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item),
+                        data=full_analysis_data_ref,
+                        control=list(max_treedepth = 15, adapt_delta = 0.99),
+                        file="../cache/full_brm_ah_ref")
+summary(full_ah_bayesian_ref)

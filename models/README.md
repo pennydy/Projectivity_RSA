@@ -1,8 +1,10 @@
 # models
-contains models that we have explored. 
+this folder contains models that we have explored. 
 
 ## General information
-`chemo`: consider interrogatives and declaratives as alternatives. include both speaker belief and attitude holder belief. 
+`BDA`: all files for Bayesian Data Analysis.
+
+`chemo`: the original chemo model and its variants. consider interrogatives and declaratives as alternatives. include both speaker belief and attitude holder belief. 
 - chemo.wppl
 - chemo_production.wppl: attempts to reverse engineer the production probability based on empirical results for the pragmatic listener.
 
@@ -13,9 +15,11 @@ contains models that we have explored.
 `interrogatives`: consider only interrogatives. 
 - threshold_qud.wppl: includes only the speaker belief. introduces belief threshold for each predicate. threshold is determined by predicate and qud.
 - threshold_chemo.wppl: includes both speaker belief and ah belief, and the threshold for each type of belief varies by predicate. qud selects which belief is at-issue.
+- threshold_mix.wppl: includes both speaker belief and ah belief in the meaning function (i.e., the meaning function involves checking both the speaker belief and the ah belief against their respective predicate-specific threshold), but only infers the speaker belief.
 
-## Structure of this repository
+## Main structure of this folder
 ```bash
+├── BDA
 ├── chemo
 │   ├── chemo.wppl
 │   ├── chemo_production.wppl
@@ -36,6 +40,7 @@ contains models that we have explored.
 ├── interrogatives
 │   ├── threshold_qud.wppl
 │   ├── threshold_chemo.wppl
+│   ├── threshold_mix.wppl
 │   ├── data
 │   │   ├── binned-priors.csv
 │   │   ├── predicate-nai.csv
@@ -43,8 +48,10 @@ contains models that we have explored.
 │   │   results
 │   │   ├── threshold_qud
 │   │   ├── threshold_chemo
+│   │   ├── threshold_mix
 │   │   rscripts
 ```
+## Structure of the sub-folders
 - `.wppl`: wppl model
 - data: normed data from previous studies
 - graphs: graphs of model predictions

@@ -4,30 +4,62 @@ library(jsonlite)
 library(rwebppl)
 
 source("./inferenceHelpers.R")
-# source("./BDA_vizhelpers.R")
+source("./BDA_vizhelpers.R")
 
 # read the pre-processed empirical data
+
+
+# empirical_df <- read.csv("../../data/2_listenerSpeakerAH/main/bda_data.csv")
+# df <- empirical_df %>% 
+#   mutate(speaker_response = trunc(trunc(speaker_response * 100)/10),
+#          ah_response = trunc(trunc(ah_response * 100)/10)) %>%
+#   filter(predicate %in% c("think", "know", "BARE")) # for now
+
+# testing -> 3 bins 
 df <- read.csv("../../data/2_listenerSpeakerAH/main/bda_data.csv") %>% 
-  mutate(speaker_response = trunc(trunc(speaker_response * 100)/10),
-         ah_response = trunc(trunc(ah_response * 100)/10)) %>% 
-         # beliefs_response = paste("{speaker_belief:'",speaker_response,"', ah_belief:'",ah_response,"'}",sep="")) %>% 
-  filter(predicate %in% c("think", "know", "BARE")) %>%  # for now
-  head(3)
+  mutate(speaker_response = case_when(speaker_response > 0.6 ~ 2,
+                                      speaker_response < 0.4 ~ 0,
+                                      TRUE ~ 1),
+         ah_response = case_when(ah_response > 0.6 ~ 2,
+                                 ah_response < 0.4 ~ 0,
+                                 TRUE ~ 1)) %>%
+  # mutate(speaker_response = ifelse(speaker_response == 1, 9,
+  #                                  trunc(trunc(speaker_response*100) / 10 ))) %>%
+  filter(predicate %in% c("think", "know", "BARE")) %>% 
+  # testing: one item, one utterance
+  # filter(uttearnce=="know-dances-?" & item=="Frank_H") 
+  # testing: one item, all utterances
+  filter(item=="Frank_H")
+  # testing: multiple items, all utterances
+  # filter(item %in% c("Frank_H", "Frank_L", "Charley_H", "Charley_L","Danny_H", "Danny_L", "Emily_H", "Emily_L","Emma_H", "Emma_L", "Grace_H", "Grace_L"))
+
 
 # make the model 
-# model <- makeModel("modelAndSemantics.txt")
-model <- makeModel("engine.txt")
+# model <- makeModel("threshold_chemo.txt")
+model <- makeModel("threshold_mix.txt")
 
 # generate the posterior
 # we will have different models for comparison, so will keep this format
-thresholdChemoScript <- wrapInference(model,"threshold_chemo", 2000, 10, 50)
+# thresholdChemoScript <- wrapInference(model,"threshold_chemo", 2500, 10, 500)
+# 
+# thresholdChemoPosteriors <- webppl(thresholdChemoScript, data = df, data_var = "df", random_seed = 3333)
 
-thresholdChemoPosteriors <- webppl(thresholdChemoScript, data = df, data_var = "df", random_seed = 3333)
+thresholdMixScript <- wrapInference(model,"threshold_mix", 2500, 10, 500) # sample:4000, lag: 10, burn: 500
 
-saveRDS(thresholdChemoPosteriors, "results/thresholdChemoPosteriors.RDS")
+thresholdMixPosteriors <- webppl(thresholdMixScript, data = df, data_var = "df", random_seed = 3333)
+graphPosteriors(thresholdMixPosteriors) + ggtitle("Continuous posteriors")
+# saveRDS(thresholdMixPosteriors, "results/thresholdMixPosteriors_enumerate.RDS")
+
+
+thresholdMixPosteriors_know <-readRDS("results/thresholdMixPosteriors_know_frank.RDS")
+graphPosteriors(thresholdMixPosteriors_know) + ggtitle("Continuous posteriors")
+
+# saveRDS(thresholdMixPosteriors, "results/thresholdMixPosteriors_know_frank.RDS")
+
+# saveRDS(thresholdChemoPosteriors, "results/thresholdChemoPosteriors.RDS")
 
 # load the posteriors instead of re-running
-# thresholdChemoPosteriors <- readRDS("results/thresholdChemoPosteriors.RDS")
+thresholdChemoPosteriors <- readRDS("results/thresholdChemoPosteriors.RDS")
 
 graphPosteriors(thresholdChemoPosteriors) + ggtitle("Continuous posteriors")
 
@@ -35,24 +67,38 @@ ggsave("results/thresholdChemoPosteriors.png")
 
 # PREDICTIVES
 
-thresholdChemoEstimates <- getEstimates(thresholdChemoPosteriors) 
+# thresholdChemoEstimates <- getEstimates(thresholdChemoPosteriors) 
 
-continuousPredictionScript <- wrapPrediction(model, thresholdChemoEstimates,
-                                             "START color size STOP", 
-                                             "color_size",
-                                             "continuous")
+# thresholdChemoPredictionScript <- wrapPrediction(model, thresholdChemoEstimates,
+#                                                  "know-dances-?", 
+#                                                  "Charley_H")
 
-continuousPredictives <- webppl(continuousPredictionScript, data = unique(df %>%  select(condition,states,utterances)), data_var = "df")
+# chemoPredictives <- webppl(thresholdChemoPredictionScript, data = unique(df %>%  select(utterance, item)), data_var = "df")
+
+thresholdMixEstimates <- getEstimates(thresholdMixPosteriors) 
+
+thresholdMixPredictionScript <- wrapPrediction(model, thresholdMixEstimates,
+                                                 "know-dances-?", 
+                                                 "Frank_H")
+
+thresholdMixPredictives <- webppl(thresholdMixPredictionScript, data = unique(df %>%  select(utterance, item)), data_var = "df")
 
 graphPredictives(continuousPredictives, d_collapsed)
 
 ggsave("results/continuousPredictives.png", width = 4, height = 3, units = "in")
 
 
+
+
+
+
+
 # DEGEN 2020-STYLE POSTERIOR GRAPHS 
 
 graphNoisePosteriors(continuousPosteriors %>% filter(Parameter %in% c("colorNoiseVal","sizeNoiseVal")))
 ggsave("results/continuousPosteriors_degen.pdf")
+
+
 
 # # GRAPH PREDICTIVES BY RED EXP / BY SCENE VARIATION
 

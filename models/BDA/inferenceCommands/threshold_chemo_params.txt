@@ -1,0 +1,49 @@
+// sample parameters to be estimated
+var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BURN_IN, model: function(){
+// not using joint inference here: the parameters are independent
+  var p = {
+    alpha: uniformDrift({a: 0, b: 10, w: 1}),
+    // think_sp_alpha: 0.1, // uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // think_sp_beta: 10, // uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // think_ah_alpha: 0.1, // uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // think_ah_beta: 10, // uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // know_sp_alpha: 10, // uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // know_sp_beta: 1, // uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // know_ah_alpha: 0.1, // uniformDrift({a: 0.00001, b:10, w:0.01}),
+    // know_ah_beta: 10, // uniformDrift({a: 0.00001, b:10, w:0.01}),
+
+    // ideally, should still sample the threshold from beta distribution (meaning the threshold is also probabilistic)
+    // think_sp_threshold: 0.1, // uniformDrift({a: 0.00001, b:1, w:0.01}),
+    // think_ah_threshold: 0.1, // uniformDrift({a: 0.00001, b:1, w:0.01}),
+    // know_sp_threshold: uniformDrift({a: 0.00001, b:1}),
+    // know_ah_threshold: uniformDrift({a: 0.00001, b:1, w:0.01}),
+    // BARE_sp_threshold: 0.5, // uniformDrift({a: 0.00001, b:1, w:0.01}),
+
+    embedCost: uniformDrift({a: 0, b: 5, w:0.5}),
+    negCost: uniformDrift({a: 0, b: 5, w: 0.5})
+  }
+
+//  more efficient if we have the pragListener distrubtion ready and then observe the empirical results
+//  but need to do this within mapData, since we need the utterance and item of each response
+
+
+  var m = model(p)
+  mapData({data: df}, function(d){
+    // loop through the df dataframe. d: a row of the long-form empirical data
+    console.log("sampled parameters: "+stringify(p))
+    var listenerDist = pragmaticListener(d.utterance,d.item,m,p)
+    // console.log("listenerDist: " + listenerDist)
+
+    var beliefs_response = {"speaker_belief": d.speaker_response.toString(), "ah_belief": d.ah_response.toString()}
+    observe(listenerDist, beliefs_response)
+
+  })
+
+  console.log("final: "+stringify(p))
+  return p
+
+}, verbose: true})
+
+
+posteriors
+

@@ -11,12 +11,12 @@ makeModel <- function(header) {
 # load different models (different posteriors)
 wrapInference <- function(model, modelName, samples, lag, burn) {
   
-  if(modelName == "threshold_chemo") {
-    inferenceCommand <- read_file("./inferenceCommands/threshold_chemo.txt")
-  } else if(modelName == "threshold_qud") {
-    inferenceCommand <- read_file("./inferenceCommands/threshold_qud.txt")
-  }  else {
-    print("Wrong modelName")
+  if (modelName == "threshold_chemo") {
+    inferenceCommand <- read_file("./inferenceCommands/threshold_chemo_params.txt")
+  # } else if (modelName == "threshold_qud") {
+  #   inferenceCommand <- read_file("./inferenceCommands/threshold_qud.txt")
+  }  else if (modelName == "threshold_mix") {
+    inferenceCommand <- read_file("./inferenceCommands/threshold_mix_params.txt")
   }
 
   inferenceCommand <- gsub("NUM_SAMPLES", samples, inferenceCommand, fixed = TRUE)
@@ -44,21 +44,12 @@ getEstimates <- function(posteriors) {
   
 }
 
-wrapPrediction = function(model, estimates, overmodifyingUtterance, targetReferent, inferenceType) {
+wrapPrediction = function(model, estimates, utterance, item) {
   
-  if(inferenceType == "incrementalContinuous" | inferenceType == "incremental" ) {
-    
-    predictionCommand <- read_file("../_shared/inferenceCommands/main/getIncrementalPredictions.txt")
-    
-  } else if (inferenceType == "continuous" | inferenceType == "vanilla" ) {
-    
-    predictionCommand <- read_file("../_shared/inferenceCommands/main/getGlobalPredictions.txt")
-    
-  }
-  
-  predictionCommand <- paste((sprintf("var estimates = %s[0]", toJSON(estimates, digits = NA))), predictionCommand, sep = "\n")
-  predictionCommand <- gsub("OVERMODIFYING_UTTERANCE", overmodifyingUtterance, predictionCommand, fixed = TRUE)
-  predictionCommand <- gsub("TARGET_REFERENT", targetReferent, predictionCommand, fixed = TRUE)
+  predictionCommand <- read_file("./getPredictions.txt")
+
+  predictionCommand <- gsub("UTTERANCE", utterance, predictionCommand, fixed = TRUE)
+  predictionCommand <- gsub("ITEM", item, predictionCommand, fixed = TRUE)
   
   return(paste(read_file(model), predictionCommand, sep = "\n"))
   

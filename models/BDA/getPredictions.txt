@@ -1,0 +1,16 @@
+var predictives = map(function(d) {
+
+//   var m = extend(model(estimates), {states : d.states, utterances : d.utterances}); 
+var m = extend(model(estimates))
+  return {
+    // this should be: state (in the 1-10 range, not 0-9)  * prob of each state
+
+    speaker_belief: pragmaticListener("UTTERANCE", "ITEM", m, estimates),
+//   size_color: Math.exp(globalUtteranceSpeaker("TARGET_REFERENT",m,estimates,semantics(estimates)).score("OVERMODIFYING_UTTERANCE")),
+//   color: Math.exp(globalUtteranceSpeaker("TARGET_REFERENT",m,estimates,semantics(estimates)).score("START color STOP")),
+//   size: Math.exp(globalUtteranceSpeaker("TARGET_REFERENT",m,estimates,semantics(estimates)).score("START size STOP"))
+}; 
+  
+}, df)
+
+predictives

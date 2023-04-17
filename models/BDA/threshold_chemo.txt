@@ -1,15 +1,30 @@
 var stringify = function(x){return JSON.stringify(x)}
 
 var model = function(params) {
-    console.log("in model: "+stringify(params))
+    // console.log("in model: "+stringify(params))
     return {
-      items: ["Charley_H","Charley_L","Danny_H","Danny_L","Emily_H","Emily_L","Emma_H","Emma_L",
-      "Frank_H","Frank_L","Grace_H","Grace_L","Isabella_H","Isabella_L","Jackson_H","Jackson_L",
-      "Jayden_H","Jayden_L","Jon_H","Jon_L","Josh_H","Josh_L","Josie_H","Josie_L","Julian_H",
-      "Julian_L","Mary_H","Mary_L","Mia_H","Mia_L","Olivia_H","Olivia_L","Owen_H","Owen_L",
-      "Sophia_H","Sophia_L","Tony_H","Tony_L","Zoe_H","Zoe_L"],
+      // items: ["Charley_H","Charley_L","Danny_H","Danny_L","Emily_H","Emily_L","Emma_H","Emma_L",
+      // "Frank_H","Frank_L","Grace_H","Grace_L","Isabella_H","Isabella_L","Jackson_H","Jackson_L",
+      // "Jayden_H","Jayden_L","Jon_H","Jon_L","Josh_H","Josh_L","Josie_H","Josie_L","Julian_H",
+      // "Julian_L","Mary_H","Mary_L","Mia_H","Mia_L","Olivia_H","Olivia_L","Owen_H","Owen_L",
+      // "Sophia_H","Sophia_L","Tony_H","Tony_L","Zoe_H","Zoe_L"],
       beliefs: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], 
+      // beliefs: ["0","1","2"],
       utterances : ['know-dances-?', 'know-doesnt_dance-?', 'think-dances-?', 'think-doesnt_dance-?', 'BARE-dances-?'],
+      // priors : {
+      //   Charley_H: [0.2, 0.2, 0.6],
+      //   Charley_L: [0.6, 0.2, 0.2],
+      //   Frank_H : [0.1, 0.1, 0.8],
+      //   Frank_L: [0.8, 0.1, 0.1],
+      //   Danny_H: [0.3, 0.5, 0.2],
+      //   Danny_L: [0.5, 0.3, 0.2],
+      //   Emily_H: [0.3, 0.1, 0.6],
+      //   Emily_L: [0.6, 0.3, 0.1],
+      //   Emma_H: [0.4, 0.2, 0.4],
+      //   Emma_L: [0.4, 0.3, 0.3],
+      //   Grance_H: [0.1, 0.3, 0.6],
+      //   Grace_L: [0.4, 0.4, 0.2]
+      // },
       priors : {
         Charley_H : [0.002380952, 0.00000001, 0.007142857, 0.00952381, 0.023809524, 0.028571429, 0.061904762, 0.154761905, 0.245238095, 0.466666667],
         Charley_L : [0.192825112, 0.226457399, 0.183856502, 0.174887892, 0.103139013, 0.069506726, 0.011210762, 0.022421525, 0.011210762, 0.004484305],
@@ -61,9 +76,12 @@ var model = function(params) {
         "BARE-dances-?" : 0
       },
       predicate_thresholds: { // will sample from beta distribution
-        "know": [params.know_sp_threshold, params.know_ah_threshold],
-        "think": [params.think_sp_threshold, params.think_ah_threshold],
-        "BARE": [params.BARE_sp_threshold, null]
+        know: [beta(10, 3), beta(1, 10)],
+        think: [beta(0.1, 20), beta(0.2, 20)],
+        BARE: [0.5, null]
+        // "know": [0.9, 0.1],
+        // "think": [0.1, 0.1],
+        // "BARE": [0.5, null]
       }
     }
   }
@@ -87,34 +105,23 @@ var predicate_qud = function(predicate) {
 // var predicate_thresholds = function(params) {
 
 //     return {
-//         // know: [beta(params.know_sp_alpha, params.know_sp_beta), beta(params.know_ah_alpha, params.know_ah_beta)],
-//         // think: [beta(params.think_sp_alpha, params.think_sp_beta), beta(params.think_ah_alpha, params.think_ah_beta)],
-//         // BARE: [beta(params.BARE_sp_alpha, params.BARE_sp_beta), null]
-//         know: [params.know_sp_threshold, params.know_ah_threshold],
-//         think: [params.think_sp_threshold, params.think_ah_threshold],
-//         BARE: [params.BARE_sp_threshold, null]
+//         know: [beta(params.know_sp_alpha, params.know_sp_beta), beta(params.know_ah_alpha, params.know_ah_beta)],
+//         think: [beta(params.think_sp_alpha, params.think_sp_beta), beta(params.think_ah_alpha, params.think_ah_beta)],
+//         BARE: [beta(params.BARE_sp_alpha, params.BARE_sp_beta), null]
+//         // know: [params.know_sp_threshold, params.know_ah_threshold],
+//         // think: [params.think_sp_threshold, params.think_ah_threshold],
+//         // BARE: [params.BARE_sp_threshold, null]
 //     }
+  
 // }
 
-// var predicate_thresholds = function(params) {
 
-//     return {
-//         // know: [beta(params.know_sp_alpha, params.know_sp_beta), beta(params.know_ah_alpha, params.know_ah_beta)],
-//         // think: [beta(params.think_sp_alpha, params.think_sp_beta), beta(params.think_ah_alpha, params.think_ah_beta)],
-//         // BARE: [beta(params.BARE_sp_alpha, params.BARE_sp_beta), null]
-//         know: [params.know_sp_threshold, params.know_ah_threshold],
-//         think: [params.think_sp_threshold, params.think_ah_threshold],
-//         BARE: [params.BARE_sp_threshold, null]
-//     }
-// }
-
-var meaning = function(utterance, beliefs,model) {
+var meaning = function(utterance, beliefs, model) {
     var splitutt = utterance.split('-')
     var predicate = splitutt[0]
     var content = splitutt[1]
     // console.log("check in meaning: "+stringify(model.predicate_thresholds))
     var thresholds = model.predicate_thresholds[predicate]  // a tuple [sp_threshold, ah_threshold]
-    // console.log(thresholds)
     var speaker_threshold = thresholds[0]
     var ah_threshold = thresholds[1]
 
@@ -139,13 +146,12 @@ var qudFns = {
 }
 
 
-var globalLiteralListener =  function(utterance, qud, model) {
-    return Infer({method: 'MCMC', samples: 4000, lag: 100, burn: 50, model: function() {
+var literalListener =  function(utterance, qud, model) {
+    return Infer({method: 'MCMC', samples: 4000, lag: 100, burn: 50, model: function() { 
 
         var speaker_belief = uniform(0,1)
         var ah_belief = _.includes(utterance, "BARE") ? null : uniform(0,1)
         var beliefs = {speaker_belief, ah_belief}
-        // var meaning = meaning(utterance,beliefs,model,predicate_thresholds)
 
         factor(meaning(utterance,beliefs,model))
         // var speaker_belief = speaker_belief < 0.4 ? 0 : (speaker_belief > 0.6 ? 2 : 1)
@@ -160,13 +166,13 @@ var globalLiteralListener =  function(utterance, qud, model) {
     }
 })}
 
-var globalPragmaticSpeaker = cache(function(beliefs, qud, model, params) {
+var speaker = cache(function(beliefs, qud, model, params) {
     return Infer({model: function() {
         // console.log("in PS, qud: " + qud +  " beliefs: " + stringify(beliefs))
         var utterance = uniformDraw(model.utterances)
         var qudFn = qudFns[qud]
         var qudAnswer = qudFn(beliefs)
-        var listener = globalLiteralListener(utterance, qud, model)
+        var listener = literalListener(utterance, qud, model)
         // console.log("listener: " + listener.score(qudAnswer))
         factor(params.alpha * (listener.score(qudAnswer) - model.utterancesCosts[utterance]))
         return utterance } })
@@ -176,7 +182,7 @@ var globalPragmaticSpeaker = cache(function(beliefs, qud, model, params) {
 // pragmatic listener
 var pragmaticListener = function(utterance, cat_prior, model, params) {
   return Infer({model: function(){
-    var speaker_belief = categorical({ps: model.priors[cat_prior], vs: model.beliefs}) // or model.sp_belief ? 
+    var speaker_belief = categorical({ps: model.priors[cat_prior], vs: model.beliefs}) 
     var ah_belief = _.includes(utterance, "BARE") ? "null" : categorical({ps: model.priors[cat_prior], vs: model.beliefs})
     var beliefs = {speaker_belief: speaker_belief, ah_belief:ah_belief}
     // console.log(" sampled beliefs: " + stringify(beliefs))
@@ -186,7 +192,7 @@ var pragmaticListener = function(utterance, cat_prior, model, params) {
     var qud = predicate_qud(predicate)
     // console.log("in PL, qud: " + qud )
 
-    var speaker = globalPragmaticSpeaker(beliefs, qud, model, params)
+    var speaker = speaker(beliefs, qud, model, params)
     // console.log("in PL, speaker: " + speaker)
 
     observe(speaker, utterance)
