@@ -1,10 +1,77 @@
+var stringify = function(x){return JSON.stringify(x)}
+
+var predicate_thresholds = { 
+    know: [beta(10, 3), beta(1, 10)],
+    think: [beta(0.1, 20), beta(0.2, 20)],
+    BARE: [0.5, null]
+  }
+
+var meaning = function(utterance, beliefs) {
+    var splitutt = utterance.split('-')
+    var predicate = splitutt[0]
+    var content = splitutt[1]
+    // console.log("check in meaning: "+stringify(model.predicate_thresholds))
+    var thresholds = predicate_thresholds[predicate]  // a tuple [sp_threshold, ah_threshold]
+    var speaker_threshold = thresholds[0]
+    var ah_threshold = thresholds[1]
+    // console.log(thresholds)
+
+    var speaker_belief = beliefs.speaker_belief
+    var ah_belief = beliefs.ah_belief
+
+    if (predicate != "BARE") {
+        if (!_.includes(content, "doesnt")) {
+          return speaker_belief >= speaker_threshold && ah_belief >= ah_threshold
+        } else {
+          return speaker_belief <= 1 - speaker_threshold && ah_belief <= 1 - ah_threshold
+        }
+      } else { // BARE
+        var prob = Math.pow(Math.abs(speaker_threshold - speaker_belief),0.5)
+        return flip(1 - prob) && ah_belief == null
+      }
+}
+
+var literalListener = cache(function(utterance) {
+    return Infer({method: 'MCMC', samples: 4000, lag: 100, burn: 50, model: function() { 
+        // console.log("in LL")
+        var speaker_belief = uniform(0,1)
+        var ah_belief = _.includes(utterance, "BARE") ? null : uniform(0,1)
+        var beliefs = {speaker_belief, ah_belief}
+
+        condition(meaning(utterance,beliefs))
+        // for testing: beliefs into 3 bins
+        var speaker_belief = speaker_belief < 0.4 ? 0 : (speaker_belief > 0.6 ? 2 : 1)
+        // var speaker_belief = speaker_belief==1?9:Math.trunc(Math.trunc(speaker_belief * 100)/10)
+
+        // console.log("in LL, qud: " + qud +  " qudAnswer: " + stringify(qudAnswer))
+        return speaker_belief
+    }
+})})
+
+
+var literalDistLists = {
+    "know-dances-?" : literalListener("know-dances-?"),
+    "know-doesnt_dance-?" : literalListener("know-doesnt_dance-?"),
+    "think-dances-?" : literalListener("think-dances-?"),
+    "think-doesnt_dance-?" : literalListener("think-doesnt_dance-?"),
+    "BARE-dances-?" : literalListener("BARE-dances-?")
+}
+
+console.log("finish literal list")
+
+
 // sample parameters to be estimated
 var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BURN_IN, model: function(){
 
       var p = {
-        alpha: Math.round(uniformDrift({a: 0, b: 10, w: 1}) * 1000) / 1000,
+        alpha: Math.round(uniformDrift({a: 0.001, b: 10, w: 1}) * 1000) / 1000,
         embedCost: Math.round(uniformDrift({a: 0, b: 5, w:0.5/10}) * 1000) / 1000,
         negCost: Math.round(uniformDrift({a: 0, b: 5, w: 0.5/10}) * 1000) / 1000
+
+
+        // alpha: uniformDrift({a: 0, b: 10, w: 1}),
+        // embedCost: uniformDrift({a: 0, b: 5, w:0.5/10}),
+        // negCost: uniformDrift({a: 0, b: 5, w: 0.5/10})
 
         // use uniformDraw instead
         // alpha: uniformDraw(_.range(0, 10,0.5)),
@@ -17,8 +84,8 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
     // hacky way to make it more efficient if we have the pragListener distrubtion ready and then observe the empirical results
     
     // pass the pre-calculated the literal listener distribution to the model
-    // var m = extend(model(p),{literalDistLists: literalDistLists})
-    var m = model(p)
+    var m = extend(model(p),{literalDistLists: literalDistLists})
+    // var m = model(p)
     //   console.log(m)
       var listenerDistLists = {
         // "Charley_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Charley_H",m,p), 

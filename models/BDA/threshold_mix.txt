@@ -72,12 +72,6 @@ var model = function(params) {
         "think-dances-?" : params.embedCost,
         "think-doesnt_dance-?" : params.embedCost + params.negCost,
         "BARE-dances-?" : 0
-      },
-
-      predicate_thresholds : { // will sample from beta distribution
-        know: [beta(10, 3), beta(1, 10)],
-        think: [beta(0.1, 20), beta(0.2, 20)],
-        BARE: [0.5, null]
       }
     }
   }
@@ -97,54 +91,12 @@ var predicate_qud = function(predicate) {
 }
 
 
-var meaning = function(utterance, beliefs, model) {
-    var splitutt = utterance.split('-')
-    var predicate = splitutt[0]
-    var content = splitutt[1]
-    // console.log("check in meaning: "+stringify(model.predicate_thresholds))
-    var thresholds = model.predicate_thresholds[predicate]  // a tuple [sp_threshold, ah_threshold]
-    var speaker_threshold = thresholds[0]
-    var ah_threshold = thresholds[1]
-
-    var speaker_belief = beliefs.speaker_belief
-    var ah_belief = beliefs.ah_belief
-
-    if (predicate != "BARE") {
-        if (!_.includes(content, "doesnt")) {
-          return speaker_belief >= speaker_threshold && ah_belief >= ah_threshold
-        } else {
-          return speaker_belief <= 1 - speaker_threshold && ah_belief <= 1 - ah_threshold
-        }
-      } else { // BARE
-        var prob = Math.pow(Math.abs(speaker_threshold - speaker_belief),0.5)
-        return flip(1 - prob) && ah_belief == null
-      }
-}
-
-
-var literalListener = cache(function(utterance, model) {
-    return Infer({method: 'MCMC', samples: 4000, lag: 100, burn: 50, model: function() { 
-        // console.log("in LL")
-        var speaker_belief = uniform(0,1)
-        var ah_belief = _.includes(utterance, "BARE") ? null : uniform(0,1)
-        var beliefs = {speaker_belief, ah_belief}
-
-        condition(meaning(utterance,beliefs, model))
-        // for testing: beliefs into 3 bins
-        var speaker_belief = speaker_belief < 0.4 ? 0 : (speaker_belief > 0.6 ? 2 : 1)
-        // var speaker_belief = speaker_belief==1?9:Math.trunc(Math.trunc(speaker_belief * 100)/10)
-
-        // console.log("in LL, qud: " + qud +  " qudAnswer: " + stringify(qudAnswer))
-        return speaker_belief
-    }
-})})
-
 var speaker = cache(function(belief, model, params) {
     return Infer({model: function() {
         // console.log("in PS, belief: " + stringify(belief))
         var utterance = uniformDraw(model.utterances)
-        var listener = literalListener(utterance, model)
-        // var listener = model.literalDistLists[utterance]
+        // var listener = literalListener(utterance, model)
+        var listener = model.literalDistLists[utterance]
         // console.log("listener:" + listener)
         // console.log("listener score: " + listener.score(belief))
         factor(params.alpha * (listener.score(belief) - model.utterancesCosts[utterance]))
@@ -154,7 +106,7 @@ var speaker = cache(function(belief, model, params) {
 
 // pragmatic listener
 var pragmaticListener = cache(function(utterance, cat_prior, model, params) {
-  return Infer({method:"enumerate", model: function(){
+  return Infer({method: 'enumerate', model: function(){
     // console.log("in PL. utterance: " + utterance )
 
     // for testing: beliefs into 3 bins
