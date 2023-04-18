@@ -119,10 +119,12 @@ var pragmaticListener = cache(function(utterance, cat_prior, model, params) {
 
     var prior_distribution = Categorical({ps: model.priors[cat_prior], vs: model.beliefs}) 
 
-    flip(MC_prob) ? observe(speaker(speaker_belief, model, params), utterance) : 
+    // BW: add some noise to the posterior
+    flip(0.001) ? null : flip(MC_prob) ? observe(speaker(speaker_belief, model, params), utterance) : 
         observe(prior_distribution, speaker_belief)
 
     return speaker_belief // don't infer qud for now? 
   }})
 })
+
 

@@ -46,10 +46,15 @@ model <- makeModel("threshold_mix.txt")
 
 thresholdMixScript <- wrapInference(model,"threshold_mix", 2500, 10, 500) # sample:4000, lag: 10, burn: 500
 
+# Create a script that can be used in the WebPPL interpeter (for testing)
+
+dataHeader = sprintf("var df = %s", toJSON(head(df)))
+write_file(paste(dataHeader, thresholdMixScript, sep = "\n"), file = "testScript.txt")
+
+# Do inference in R
 thresholdMixPosteriors <- webppl(thresholdMixScript, data = df, data_var = "df", random_seed = 3333)
 graphPosteriors(thresholdMixPosteriors) + ggtitle("Continuous posteriors")
 # saveRDS(thresholdMixPosteriors, "results/thresholdMixPosteriors_enumerate.RDS")
-
 
 thresholdMixPosteriors_know <-readRDS("results/thresholdMixPosteriors_know_frank.RDS")
 graphPosteriors(thresholdMixPosteriors_know) + ggtitle("Continuous posteriors")
