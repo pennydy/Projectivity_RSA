@@ -3,8 +3,8 @@
 # create the basic RSA model (speaker and listener functions)
 makeModel <- function(header) {
   
-  # return(paste(read_file(header), read_file("engine.txt"), sep = "\n"))
-  return(read_file(header))
+  return(paste(read_file(header), read_file("./literalListener.txt"), sep = "\n"))
+  # return(read_file(header))
   
 }
 
@@ -13,8 +13,8 @@ wrapInference <- function(model, modelName, samples, lag, burn) {
   
   if (modelName == "threshold_chemo") {
     inferenceCommand <- read_file("./inferenceCommands/threshold_chemo_params.txt")
-  # } else if (modelName == "threshold_qud") {
-  #   inferenceCommand <- read_file("./inferenceCommands/threshold_qud.txt")
+  } else if (modelName == "threshold_qud") {
+    inferenceCommand <- read_file("./inferenceCommands/threshold_qud.txt")
   }  else if (modelName == "threshold_mix") {
     inferenceCommand <- read_file("./inferenceCommands/threshold_mix_params.txt")
   }
@@ -44,13 +44,9 @@ getEstimates <- function(posteriors) {
   
 }
 
-wrapPrediction = function(model, estimates, utterance, item) {
-  
+wrapPrediction = function(model, estimates) {
   predictionCommand <- read_file("./getPredictions.txt")
-
-  predictionCommand <- gsub("UTTERANCE", utterance, predictionCommand, fixed = TRUE)
-  predictionCommand <- gsub("ITEM", item, predictionCommand, fixed = TRUE)
-  
-  return(paste(read_file(model), predictionCommand, sep = "\n"))
-  
+  predictionCommand <- paste((sprintf("var estimates = %s[0]", toJSON(estimates, digits = NA))), predictionCommand, sep = "\n")
+  return(paste(read_file(model), read_file("./literalListener.txt"), predictionCommand, sep = "\n"))
+  # return(paste(read_file(model), predictionCommand, sep = "\n"))
 }

@@ -4,9 +4,6 @@ var beliefs = [0,1,2,3,4,5,6,7,8,9]
 
 // var beliefs = map(function(x) {x.toString()}, beliefs)
 
-
-var quds = ["MC", "CC"]
-
 var priors = {
   Charley_H : [0.002380952, 0.00000001, 0.007142857, 0.00952381, 0.023809524, 0.028571429, 0.061904762, 0.154761905, 0.245238095, 0.466666667],
   Charley_L : [0.192825112, 0.226457399, 0.183856502, 0.174887892, 0.103139013, 0.069506726, 0.011210762, 0.022421525, 0.011210762, 0.004484305],
@@ -23,7 +20,7 @@ var priors = {
   Isabella_H : [0.011415525, 0.047945205, 0.052511416, 0.068493151, 0.239726027, 0.385844749, 0.086757991, 0.052511416, 0.03652968, 0.01826484],
   Isabella_L : [0.761682243, 0.102803738, 0.049065421, 0.01635514, 0.018691589, 0.014018692, 0.011682243, 0.007009346, 0.007009346, 0.011682243],
   Jackson_H : [0.004889976, 0.002444988, 0.007334963, 0.02200489, 0.012224939, 0.070904645, 0.124694377, 0.188264059, 0.239608802, 0.327628362],
-  Jackson_L : [0.485776805, 0.240700219, 0.13785558, 0.052516411, 0.024070022, 0.019693654, 0.01750547, 0.015317287, 0.006564551, 0.0],
+  Jackson_L : [0.485776805, 0.240700219, 0.13785558, 0.052516411, 0.024070022, 0.019693654, 0.01750547, 0.015317287, 0.006564551,  0.00000001],
   Jayden_H : [0.01627907, 0.020930233, 0.01627907, 0.027906977, 0.088372093, 0.169767442, 0.195348837, 0.2, 0.155813953, 0.109302326],
   Jayden_L : [0.736238532, 0.082568807, 0.029816514, 0.027522936, 0.027522936, 0.025229358, 0.029816514, 0.016055046, 0.01146789, 0.013761468],
   Jon_H : [0.007194245, 0.002398082, 0.009592326, 0.019184652, 0.028776978, 0.06235012, 0.127098321, 0.223021583, 0.256594724, 0.263788969],
@@ -66,15 +63,15 @@ var utterances = ["know-dances-?",
 // return speaker belief threshold
 var predicate_thresholds = function(predicate) {
   if (predicate == "know") {
-      return [beta(10,3),beta(1,10)]
+      return beta(10,3)
   } else if (predicate == "think") {
-      return [beta(0.1,20),beta(0.2,20)] // ah -> uncertain, any belief prob is possible
+      return beta(0.1,20) 
 //   } else if (predicate == "say") {
 //     return [beta(1,10), beta(2,15)] // ah -> uncertain
 //   } else if (predicate == "inform") {
 //     return [beta(10,2), beta(4,8)] // ah -> uncertain more likely to believe in p (if they inform others)
   } else {
-    return [0.5,null]
+    return 0.5
   }
 }
 
@@ -93,45 +90,33 @@ var predicate_qud = function(predicate) {
 }
 
 
-// belief_prob is a tuple, the degree of speaker belief and ah belief
-var meaning = function(utterance, belief_probs) {
+var meaning = function(utterance, speaker_belief) {
   var splitutt = utterance.split('-')
   var predicate = splitutt[0]
   var content = splitutt[1]
+
   
-  var speaker_belief = belief_probs.speaker_belief
-  var ah_belief = belief_probs.ah_belief
-  
-  var thresholds = predicate_thresholds(predicate)
-  var speaker_threshold = thresholds[0]
-  var ah_threshold = thresholds[1]
+  var speaker_threshold = predicate_thresholds(predicate)
   
   if (predicate != "BARE") {
     if (!_.includes(content, "doesnt")) {
-      return speaker_belief >= speaker_threshold && ah_belief >= ah_threshold
+      return speaker_belief >= speaker_threshold 
     } else {
-      return speaker_belief <= 1 - speaker_threshold && ah_belief <= 1 - ah_threshold
+      return speaker_belief <= 1 - speaker_threshold
     }
   } else { // BARE
     var prob = Math.pow(Math.abs(speaker_threshold - speaker_belief),0.5)
-    return flip(1 - prob) && ah_belief == null
+    return flip(1 - prob)
   }
 }
 
-// specify different quds
-var qudFns = {
-  CC : function(belief_states) {return { speaker_belief: belief_states.speaker_belief} },
-  MC : function(belief_states) {return { ah_belief: belief_states.ah_belief } }
-}
 
 var literalListener = cache(function(utterance) {
-  return Infer({method: 'MCMC', samples: 4000, lag: 100, burn: 50, model: function(){
+  return Infer({method: 'MCMC', samples: 4000, lag: 0, burn: 0, model: function(){
 
     var speaker_belief = uniform(0,1)
-    var ah_belief = _.includes(utterance, "BARE") ? null : uniform(0,1)
-    var belief_probs = {speaker_belief, ah_belief}
     
-    condition(meaning(utterance, belief_probs)?1:0)
+    condition(meaning(utterance, speaker_belief))
     
 //     var speaker_belief = speaker_belief < 0.4 ? 0 : (speaker_belief > 0.6 ? 2 : 1)
     var speaker_belief = speaker_belief==1?9:Math.trunc(Math.trunc(speaker_belief * 100)/10)
@@ -158,12 +143,26 @@ var literalListener = cache(function(utterance) {
 // // viz(marginalize(know, "speaker_belief"))
 // // viz(marginalize(know, "ah_belief"))
 
-var alpha = 3
+var alpha = 0.6
 
 var cost = function(utterance){
-  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0
-  var negation_cost = _.includes(utterance, "doesnt") ? 0 : 0
+  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 3.67
+  var negation_cost = _.includes(utterance, "doesnt") ? 3.62 : 0
   return embedded_cost + negation_cost
+
+//   if (utterance == "know-dances-?") {
+//     return 1.28
+//   } else if (utterance == "know-doesnt_dance-?") {
+//     return 3.5
+//   } else if (utterance == "think-dances-?") {
+//     return 1.28
+//   } else if (utterance == "think-doesnt_dance-?") {
+//     return 3.5
+//   } else if (utterance == "BARE-dances-?") {
+//     return 0
+//   } else {
+//     console.log("ERROR!")
+//   }
 }
 
 // Speaker, chooses an utterance to convey a particular answer of the qud
@@ -173,8 +172,8 @@ var speaker = cache(function(speaker_belief) {
 //     var qudFn = qudFns[qud]
 //     var qudAnswer = qudFn(beliefs)
 //     var literalL = literalListener(utterance, qud).score(qudAnswer)
-    var literalL = literalListener(utterance).score(speaker_belief)
-    factor(alpha*(literalL) - cost(utterance)) 
+    var literalL = literalListener(utterance).score(speaker_belief) 
+    factor(alpha*(literalL - cost(utterance))) 
     return utterance
   }})
 })
@@ -186,18 +185,21 @@ var speaker = cache(function(speaker_belief) {
 
 
 var pragmaticListener = function(utterance, item) {
-  Infer({method: 'MCMC', samples: 4000, lag: 100, burn: 50, model: function() {
+  Infer({method:'enumerate', model: function() {
     var speaker_belief = uniformDraw(_.range(0, 10, 1))
     
     var splitutt = utterance.split('-')
     var predicate = splitutt[0]
     var MC_prob = predicate_qud(predicate)["MC"]
-    var CC_prob = predicate_qud(predicate)["CC"] // should be 1-MC_prob
+    var CC_prob = predicate_qud(predicate)["CC"] // same as 1-MC_prob
 
     var prior_belief = priors[item]
     var prior_distribution = Categorical({vs: beliefs, ps:prior_belief})
     
-    flip(MC_prob) ? observe(speaker(speaker_belief), utterance) : observe(prior_distribution, speaker_belief)
+    var speaker_distribution = speaker(speaker_belief)
+
+    flip(0.0001) ? null : flip(MC_prob) ? observe(speaker_distribution, utterance) : 
+        observe(prior_distribution, speaker_belief)
     
     return speaker_belief
   }})

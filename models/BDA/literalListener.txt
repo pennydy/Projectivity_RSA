@@ -1,0 +1,54 @@
+var predicate_thresholds = function(predicate) {
+  if (predicate == "know") {
+      return beta(10,3)
+  } else if (predicate == "think") {
+      return beta(0.1,20) 
+//   } else if (predicate == "say") {
+//     return [beta(1,10), beta(2,15)] // ah -> uncertain
+//   } else if (predicate == "inform") {
+//     return [beta(10,2), beta(4,8)] // ah -> uncertain more likely to believe in p (if they inform others)
+  } else {
+    return 0.5
+  }
+}
+
+var meaning = function(utterance, speaker_belief) {
+    var splitutt = utterance.split('-')
+    var predicate = splitutt[0]
+    var content = splitutt[1]
+    var speaker_threshold = predicate_thresholds(predicate)
+
+    if (predicate != "BARE") {
+        if (!_.includes(content, "doesnt")) {
+          return speaker_belief >= speaker_threshold
+        } else {
+          return speaker_belief <= 1 - speaker_threshold 
+        }
+      } else { // BARE
+        var prob = Math.pow(Math.abs(speaker_threshold - speaker_belief),0.5)
+        return flip(1 - prob) 
+      }
+}
+
+var literalListener = cache(function(utterance) {
+    return Infer({method: 'MCMC', samples: 4000, lag: 0, burn: 0, model: function() { 
+        // console.log("in LL")
+        var speaker_belief = uniform(0,1)
+
+        condition(meaning(utterance,speaker_belief))
+        // for testing: beliefs into 3 bins
+        // var speaker_belief = speaker_belief < 0.4 ? 0 : (speaker_belief > 0.6 ? 2 : 1)
+        var speaker_belief = speaker_belief==1?9:Math.trunc(Math.trunc(speaker_belief * 100)/10)
+
+        return speaker_belief
+    }
+})})
+
+
+var literalDistLists = {
+    "know-dances-?" : literalListener("know-dances-?"),
+    "know-doesnt_dance-?" : literalListener("know-doesnt_dance-?"),
+    "think-dances-?" : literalListener("think-dances-?"),
+    "think-doesnt_dance-?" : literalListener("think-doesnt_dance-?"),
+    "BARE-dances-?" : literalListener("BARE-dances-?")
+}

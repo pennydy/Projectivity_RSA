@@ -5,6 +5,7 @@ library(rwebppl)
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("../helpers.R")
+source("../../BDA/BDA_vizhelpers.R") # to load graphPredictives()
 
 # Helper functions for the graph
 theme_set(theme_bw())
@@ -142,8 +143,8 @@ ggplot(PS, aes(x=speaker_belief, y=prob)) +
   geom_bar(stat="identity") +
   facet_grid(.~utterance) +
   scale_x_continuous(breaks=seq(0,1,by=.1)) + 
-  xlab("Production probability") +
-  ylab("Speaker belief") +
+  ylab("Production probability") +
+  xlab("Speaker belief") +
   coord_flip()
 ggsave("../graphs/threshold_mix/threshold_mix-PS-byUtterance.pdf",width=12,height=5)
 
@@ -158,16 +159,18 @@ ggsave("../graphs/threshold_mix/threshold_chemo-PS-byBelief.pdf",width=12,height
 
 
 # pragmatic listener ----
-# only infer speaker belief. TODO: jointly infer qud
+# only infer speaker belief.
 # # testing pragmatic listener
-# u = "know-dances-?"
-# pr = "Charley_H"
+# u = "think-doesnt_dance-?"
+# pr = "Owen_H"
 # PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",pr,"')",sep=""))
-#   
-# PL_test_know_H <- PL_tmp %>% 
+# sum((PL_tmp$support +1 )/10 * PL_tmp$prob)
+
+# using enumerate, so don't need to calculate the prob.
+# PL_test_bare_H <- PL_tmp %>%
 #   mutate(odds = exp(score),
-#          prob = odds / (1+odds)) %>% 
-#   group_by(value) %>% 
+#          prob = odds / (1+odds)) %>%
+#   group_by(value) %>%
 #   summarize(mean_prob=mean(prob)) %>%
 #   mutate(sum_means = sum(mean_prob)) %>%
 #   mutate(prob=mean_prob/sum_means) %>%
@@ -177,24 +180,24 @@ PL = data.frame(utterance = character(), prior = character(), speaker_belief = n
 
 for (u in utterances) {
   for (pr in priors) {
-    PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",pr,"')",sep="")) %>% 
+    PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",pr,"')",sep="")) # %>% 
       # PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",q,"','",pr,"')",sep="")) %>% 
-      mutate(odds = exp(score),
-             prob = odds / (1+odds)) %>% 
-      group_by(value) %>% 
-      summarize(mean_prob=mean(prob)) %>%
-      mutate(sum_means = sum(mean_prob)) %>%
-      mutate(prob=mean_prob/sum_means)  %>% 
-      select(value, prob)
+      # mutate(odds = exp(score),
+      #        prob = odds / (1+odds)) %>% 
+      # group_by(value) %>% 
+      # summarize(mean_prob=mean(prob)) %>%
+      # mutate(sum_means = sum(mean_prob)) %>%
+      # mutate(prob=mean_prob/sum_means)  %>% 
+      # select(value, prob)
     
     for (i in 1:nrow(PL_tmp)) {
       PL = PL %>%
-        add_row(utterance = u, prior = pr, speaker_belief = PL_tmp$value[i], speaker_prob = PL_tmp$prob[i])
+        add_row(utterance = u, prior = pr, speaker_belief = PL_tmp$support[i], speaker_prob = PL_tmp$prob[i])
     }
   }
 }
 # save the dataframe
-write.csv(PL, "../results/threshold_mix/PL.csv", row.names=FALSE)
+write.csv(PL, "../results/threshold_mix/PL_bda.csv", row.names=FALSE)
 
 PL_summary = PL %>% 
   left_join(priors_by_condition, by=c("prior")) %>% 
@@ -213,26 +216,27 @@ PL_summary = PL %>%
 # 1 means "belief in p is >= .9 and <= 1"
 PL_summary$speaker_belief = (PL_summary$speaker_belief + 1)/10
 
-# plot by-item prior speaker belief results, marginalize over qud
-for (item in priors){
-  file_path <- paste0("../graphs/threshold_mix/PL_item/sp-",item,".pdf")
-  ggplot(PL_summary %>% 
-           filter(prior==item) %>% 
-           distinct(speaker_belief, utterance, .keep_all = TRUE),
-         aes(x=speaker_belief, y=speaker_prob)) +
-    geom_bar(stat="identity") +
-    facet_grid(.~utterance) +
-    # scale_fill_manual(values=cbPalette)
-    scale_x_continuous(breaks=seq(0,1,by=.1))
-  ggsave(file_path,width=12,height=5)
-}
+# # plot by-item prior speaker belief results, marginalize over qud
+# for (item in priors){
+#   file_path <- paste0("../graphs/threshold_mix/PL_item/sp-",item,".pdf")
+#   ggplot(PL_summary %>% 
+#            filter(prior==item) %>% 
+#            distinct(speaker_belief, utterance, .keep_all = TRUE),
+#          aes(x=speaker_belief, y=speaker_prob)) +
+#     geom_bar(stat="identity") +
+#     facet_grid(.~utterance) +
+#     # scale_fill_manual(values=cbPalette)
+#     scale_x_continuous(breaks=seq(0,1,by=.1))
+#   ggsave(file_path,width=12,height=5)
+# }
 
 
 # plot speaker_belief ~ prior belief
 agr = PL_summary %>%
-  mutate(predicate = fct_relevel(predicate, "BARE", "think", "know")) %>% # reorder for the graph
+  mutate(predicate = ifelse(predicate == "BARE", "Polar", predicate)) %>% 
+  mutate(predicate = fct_relevel(predicate, "Polar", "think", "know")) %>% # reorder for the graph
   distinct(speaker_belief, utterance, prior, .keep_all = TRUE) %>%
-  group_by(utterance,prior_mean,polarity,predicate) %>%
+  group_by(utterance,prior_mean,polarity,predicate, prior) %>%
   summarize(posterior_belief_p = sum(speaker_prob*speaker_belief)) %>%
   mutate(posterior_belief_emb = case_when(polarity == "neg" ~ 1 - posterior_belief_p,
                                           TRUE ~ posterior_belief_p),
@@ -240,7 +244,8 @@ agr = PL_summary %>%
          polarity = case_when(polarity=="pos" ~ "Embedded: p",
                               polarity=="neg" ~ "Embedded: not p",
                               TRUE ~ "Polar")) %>% 
-  mutate(polarity = fct_relevel(polarity, rev))
+  mutate(polarity = fct_relevel(polarity, rev)) %>% 
+  ungroup()
 
 combine_summary <- agr %>% 
   group_by(predicate, polarity) %>%  # collapse prior condition
@@ -271,5 +276,30 @@ ggplot(agr,aes(x=prior_mean,y=posterior_belief_emb, color=predicate)) +
                      name = "Posterior speaker belief\nin the embedded content") +
   scale_x_continuous(breaks=seq(0,1,by=0.2),
                      name = "Rating of prior belief in the embedded content")
-ggsave("../graphs/threshold_mix/threshold_mix-PL-prior.pdf",width=7,height=3)
+# ggsave("../graphs/threshold_mix/threshold_mix-PL-prior.pdf",width=7,height=3)
 
+
+
+### model-empirical comparison
+# reading the empirical results
+df <- read.csv("../../../data/2_listenerSpeakerAH/main/bda_data.csv") %>% 
+  mutate(speaker_response_bin = ifelse(speaker_response == 1, 9,
+                                       trunc(trunc(speaker_response*100) / 10 ))) %>%
+  filter(predicate %in% c("think", "know", "Polar"))
+
+df_collapsed <- df %>% 
+  group_by(predicate, item, polarity) %>%
+  summarize(prob = mean(speaker_response)) %>% 
+  ungroup() %>% 
+  mutate(polarity = case_when(polarity=="pos" ~ "Embedded: p",
+                              polarity=="neg" ~ "Embedded: not p",
+                              TRUE ~ "Polar"))
+
+predictives <- agr %>% 
+  rename(prob = posterior_belief_emb,
+         item = prior) %>% 
+  select(c('predicate', 'polarity', 'prob', 'item')) %>% 
+  filter(!item %in% c("Sophia_H", "Sophia_L", "Mia_H", "Mia_L"))
+
+# loaded from BDA_vizhelpers.R
+graphPredictives(predictives, df_collapsed)

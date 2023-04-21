@@ -120,14 +120,12 @@ var pragmaticListener = cache(function(utterance, cat_prior, model, params) {
 
     var prior_distribution = Categorical({ps: model.priors[cat_prior], vs: model.beliefs}) 
 
-    // BW: add some noise to the posterior
-    flip(0.001) ? null : flip(MC_prob) ? observe(speaker(speaker_belief, model, params), utterance) : 
+    flip(MC_prob) ? observe(speaker(speaker_belief, model, params), utterance) : 
         observe(prior_distribution, speaker_belief)
 
     return speaker_belief // don't infer qud for now? 
   }})
 })
-
 
 
 var stringify = function(x){return JSON.stringify(x)}
@@ -164,7 +162,7 @@ var meaning = function(utterance, beliefs) {
 }
 
 var literalListener = cache(function(utterance) {
-    return Infer({method: 'MCMC', samples: 1000, lag: 0, burn: 0, model: function() { 
+    return Infer({method: 'MCMC', samples: 4000, lag: 100, burn: 50, model: function() { 
         // console.log("in LL")
         var speaker_belief = uniform(0,1)
         var ah_belief = _.includes(utterance, "BARE") ? null : uniform(0,1)
@@ -475,7 +473,7 @@ var posteriors = Infer({method: "MCMC", samples: 2500, lag: 10, burn: 500, model
     
       })
     
-      // console.log("final: "+stringify(p))
+      console.log("final: "+stringify(p))
       return p
     
     }, verbose: true})
