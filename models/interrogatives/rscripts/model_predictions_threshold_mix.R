@@ -197,7 +197,7 @@ for (u in utterances) {
   }
 }
 # save the dataframe
-write.csv(PL, "../results/threshold_mix/PL_bda.csv", row.names=FALSE)
+# write.csv(PL, "../results/threshold_mix/PL_bda.csv", row.names=FALSE)
 
 PL_summary = PL %>% 
   left_join(priors_by_condition, by=c("prior")) %>% 
@@ -300,6 +300,21 @@ predictives <- agr %>%
          item = prior) %>% 
   select(c('predicate', 'polarity', 'prob', 'item')) %>% 
   filter(!item %in% c("Sophia_H", "Sophia_L", "Mia_H", "Mia_L"))
+
+
+predictives$type = "prediction"
+df_test <- df_collapsed
+df_test$type = "observation"
+
+predictives <- rbind(predictives, 
+                     df_test) %>%
+  spread(type, prob)
+
+correlation <- predictives %>% 
+  group_by(polarity) %>% 
+  summarise(r = cor(observation, prediction, method="pearson"),
+            r_squared = round(r ^ 2, digits=3)) %>% 
+  ungroup()
 
 # loaded from BDA_vizhelpers.R
 graphPredictives(predictives, df_collapsed)

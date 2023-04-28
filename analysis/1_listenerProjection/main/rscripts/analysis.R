@@ -37,7 +37,9 @@ df.data.all <- df.data.clean |>
     belief_response > 0.5 & utterance_type == "neg" ~ "not_p",
     belief_response > 0.5 & utterance_type != "neg" ~ "p",
     belief_response <= 0.5 & utterance_type == "neg" ~ "p",
-    belief_response <= 0.5 & utterance_type != "neg" ~ "not_p")) |>
+    belief_response <= 0.5 & utterance_type != "neg" ~ "not_p")) 
+
+df.data.all <- df.data.all %>% 
   pivot_longer(cols = c(p, not_p),
                names_to = "belief_content",
                values_to = "belief_rating") |>

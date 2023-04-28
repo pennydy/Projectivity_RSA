@@ -1,0 +1,19 @@
+var predicate_thresholds = function(predicate) {
+  if (predicate == "know") {
+      return beta(10,1)
+  } else if (predicate == "think") {
+      return beta(0.1,20) 
+//   } else if (predicate == "say") {
+//     return [beta(1,10), beta(2,15)] // ah -> uncertain
+//   } else if (predicate == "inform") {
+//     return [beta(10,2), beta(4,8)] // ah -> uncertain more likely to believe in p (if they inform others)
+  } else {
+    return 0.45
+  }
+}
+
+var thresholds = {
+    "know": predicate_thresholds("know"),
+    "think": predicate_thresholds("think"),
+    "BARE": predicate_thresholds("BARE")
+} 

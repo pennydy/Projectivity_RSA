@@ -15,7 +15,9 @@ this folder contains models that we have explored.
 `interrogatives`: consider only interrogatives. 
 - threshold_qud.wppl: includes only the speaker belief. introduces belief threshold for each predicate. threshold is determined by predicate and qud.
 - threshold_chemo.wppl: includes both speaker belief and ah belief, and the threshold for each type of belief varies by predicate. qud selects which belief is at-issue.
-- threshold_mix.wppl: includes both speaker belief and ah belief in the meaning function (i.e., the meaning function involves checking both the speaker belief and the ah belief against their respective predicate-specific threshold), but only infers the speaker belief.
+<!-- - threshold_mix.wppl: includes both speaker belief and ah belief in the meaning function (i.e., the meaning function involves checking both the speaker belief and the ah belief against their respective predicate-specific threshold), but only infers the speaker belief. -->
+- threshold_mix.wppl: includes only speaker belief. pragmatic listener samples speaker beliefs from either the speaker production probability or the prior belief distribution (based on the qud). literal listener samples beliefs from a uniform prior.
+- threshold_cg.wppl (formerly threshold_wonky): includes only speaker belief. both literal and pragmaitc listener samples beliefs from either a uniform distribution or a prior belief distribution based on how likely they think the common ground is shared. the `_qud.wppl` varient of this model assumes this cg likelihood is based on the qud.
 
 ## Main structure of this folder
 ```bash
@@ -41,6 +43,8 @@ this folder contains models that we have explored.
 │   ├── threshold_qud.wppl
 │   ├── threshold_chemo.wppl
 │   ├── threshold_mix.wppl
+│   ├── threshold_cg.wppl
+│   ├── threshold_cg_qud.wppl
 │   ├── data
 │   │   ├── binned-priors.csv
 │   │   ├── predicate-nai.csv

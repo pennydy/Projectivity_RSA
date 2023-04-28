@@ -1,10 +1,12 @@
 # adapted from Brandon https://github.com/bwaldon/crossling_reference/blob/master/_shared/inferenceHelpers.r
 
 # create the basic RSA model (speaker and listener functions)
-makeModel <- function(header) {
-  
-  return(paste(read_file(header), read_file("./literalListener.txt"), sep = "\n"))
-  # return(read_file(header))
+makeModel <- function(header, modelName) {
+  if (modelName == "threshold_cg") {
+    return(paste(read_file(header), read_file("./literalListener_cg.txt"), sep = "\n"))
+  } else {
+    return(paste(read_file(header), read_file("./literalListener.txt"), sep = "\n"))
+  }
   
 }
 
@@ -17,6 +19,8 @@ wrapInference <- function(model, modelName, samples, lag, burn) {
     inferenceCommand <- read_file("./inferenceCommands/threshold_qud.txt")
   }  else if (modelName == "threshold_mix") {
     inferenceCommand <- read_file("./inferenceCommands/threshold_mix_params.txt")
+  } else if (modelName == "threshold_cg") {
+    inferenceCommand <- read_file("./inferenceCommands/threshold_cg_params.txt")
   }
 
   inferenceCommand <- gsub("NUM_SAMPLES", samples, inferenceCommand, fixed = TRUE)
@@ -37,7 +41,7 @@ getEstimates <- function(posteriors) {
   estimates <- posteriors %>%
     group_by(Parameter) %>%
     summarize(estimate = estimate_mode(value)) %>% 
-    mutate(estimate = ifelse(estimate < 0, 0, estimate)) %>%
+    # mutate(estimate = ifelse(estimate < 0, 0, estimate)) %>%
     pivot_wider(names_from = Parameter, values_from = estimate)
   
   return(estimates)
