@@ -8,14 +8,14 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
         // embedCost: Math.round(uniformDrift({a: -2, b: 2, w:0.01}) * 100) / 100,
         // negCost: Math.round(uniformDrift({a: -2, b: 2, w: 0.01}) * 100) / 100
 
-        alpha: uniformDrift({a: 0, b: 5, w: 0.05}),
-        embedCost: uniformDrift({a: -2, b: 4, w:0.01}),
-        negCost: uniformDrift({a: -2, b: 4, w: 0.01})
+        alpha: uniformDrift({a: 0, b: 10, w: 0.01}),
+        embedCost: uniformDrift({a: 0, b: 4, w:0.05}),
+        negCost: uniformDrift({a: 0, b: 4, w:0.05}),
 
         // use uniformDraw instead
-        // alpha: uniformDraw(_.range(0.1, 5, 0.5)),
-        // embedCost: uniformDraw(_.range(-2, 4, 0.2)),
-        // embedNegCost: uniformDraw(_.range(-2, 4, 0.2))
+        // alpha: uniformDraw(_.range(0.01, 5, 0.05)),
+        // embedCost: uniformDraw(_.range(0, 6, 0.05)),
+        // negCost: uniformDraw(_.range(0, 6, 0.05))
 
         // alpha : uniformDraw(_.range(0.5, 10, 0.5)),
         // know_p: uniformDraw(_.range(0, 5, 0.2)),
@@ -24,7 +24,7 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
         // think_np: uniformDraw(_.range(0, 5, 0.2))
       }
 
-    //   console.log("outside mapData: " + stringify(p))
+      // console.log("outside mapData: " + stringify(p))
     
     // hecky way to make it more efficient if we have the pragListener distrubtion ready and then observe the empirical results
     
@@ -207,17 +207,17 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
                     "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Mia_L",m,p),
                     "BARE-dances-?" : pragmaticListener("BARE-dances-?","Mia_L",m,p)},
 
-        // "Olivia_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Olivia_H",m,p), 
-        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Olivia_H",m,p),
-        //             "think-dances-?" : pragmaticListener("think-dances-?","Olivia_H",m,p),
-        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Olivia_H",m,p),
-        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Olivia_H",m,p)},
+        "Olivia_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Olivia_H",m,p), 
+                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Olivia_H",m,p),
+                    "think-dances-?" : pragmaticListener("think-dances-?","Olivia_H",m,p),
+                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Olivia_H",m,p),
+                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Olivia_H",m,p)},
 
-        // "Olivia_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Olivia_L",m,p), 
-        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Olivia_L",m,p),
-        //             "think-dances-?" : pragmaticListener("think-dances-?","Olivia_L",m,p),
-        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Olivia_L",m,p),
-        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Olivia_L",m,p)},
+        "Olivia_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Olivia_L",m,p), 
+                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Olivia_L",m,p),
+                    "think-dances-?" : pragmaticListener("think-dances-?","Olivia_L",m,p),
+                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Olivia_L",m,p),
+                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Olivia_L",m,p)},
 
         // "Owen_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Owen_H",m,p), 
         //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Owen_H",m,p),
@@ -280,7 +280,8 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
         // console.log(d.utterance)
         // console.log(d.item)
 
-        console.log(listenerDist)
+        // console.log(d.speaker_response_bin)
+        // console.log(listenerDist.params.dist)
         
         // console.log("sampled parameters: "+stringify(p))
 

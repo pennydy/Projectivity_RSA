@@ -1,0 +1,39 @@
+var stringify = function(x){return JSON.stringify(x)}
+
+// sample parameters to be estimated
+var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BURN_IN, model: function(){
+
+      var p = {
+        alpha: uniformDrift({a: 0.1, b: 5, w: 0.1}),
+        embedCost: uniformDrift({a: 0, b: 4, w:0.02}),
+        negCost: uniformDrift({a: 0, b: 4, w: 0.02})
+      }
+ 
+    var m = extend(model(p)) //{literalDistLists: literalDistLists}, {thresholds:speaker_thresholds}
+
+      
+      mapData({data: df}, function(d){
+        // loop through the df dataframe. d: a row of the long-form empirical data
+
+
+        // var listenerDist = listenerDistLists[d.item][d.utterance]
+        // console.log(d.utterance)
+        // console.log(d.item)
+        // console.log(d.speaker_response_bin)
+        // console.log(listenerDist.params.dist)
+        
+        var listenerDist = pragmaticListener(d.utterance,d.item,m,p)
+        // console.log("listenerDist: " + listenerDist)
+
+        // console.log("before sampling from the listenerDist ")
+        observe(listenerDist, d.speaker_response_bin)
+        // console.log("done sampling from the listenerDist ")
+    
+      })
+    
+      return p
+    
+    }, verbose: true})
+    
+    
+    posteriors

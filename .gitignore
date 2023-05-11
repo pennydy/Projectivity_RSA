@@ -21,6 +21,8 @@ analysis/2_listenerSpeakerAH/main/cache/
 analysis/3_listenerSpeakerAH_Declaratives/pilot/cache/
 analysis/3_listenerSpeakerAH_Declaratives/main/cache/
 
-models/threshold.wppl
+models/threshold.wppl 
 models/certainty/
-models/chemo/graphs/chemo_production/
+models/chemo/graphs/chemo_production/cogsci
+models/chemo/graphs/chemo_production/*.pdf
+models/BDA/results/chemo_production_pilot/

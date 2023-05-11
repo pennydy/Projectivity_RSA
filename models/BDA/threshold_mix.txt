@@ -23,7 +23,7 @@ var model = function(params) {
         //     Grace_L: [0.4, 0.4, 0.2]
         // },
 
-        beliefs: [0,1,2,3,4,5,6,7,8,9],
+        beliefs: [1,2,3,4,5,6,7,8,9,10],
         priors : {
             Charley_H : [0.002380952, 0.00000001, 0.007142857, 0.00952381, 0.023809524, 0.028571429, 0.061904762, 0.154761905, 0.245238095, 0.466666667],
             Charley_L : [0.192825112, 0.226457399, 0.183856502, 0.174887892, 0.103139013, 0.069506726, 0.011210762, 0.022421525, 0.011210762, 0.004484305],
@@ -102,7 +102,7 @@ var speaker = cache(function(belief, model, params) {
         var listener = model.literalDistLists[utterance]
         // console.log("listener:" + listener)
         // console.log("listener score: " + listener.score(belief))
-        factor(params.alpha * (listener.score(belief) - model.utterancesCosts[utterance]))
+        factor(params.alpha * (listener.score(belief) - model.utterancesCosts[utterance]) )
         return utterance } })
   })
 
@@ -114,7 +114,7 @@ var pragmaticListener = function(utterance, cat_prior, model, params) {
 
     // for testing: beliefs into 3 bins
     // var speaker_belief = uniformDraw(_.range(0, 3, 1))
-    var speaker_belief = uniformDraw(_.range(0, 10, 1))
+    var speaker_belief = uniformDraw(_.range(1, 11, 1))
 
     // console.log("speaker_Belief: " + speaker_belief)
     var splitutt = utterance.split('-')

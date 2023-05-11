@@ -53,17 +53,13 @@ var utterances = ["know-dances-?",
                   "know-doesnt_dance-?",                 
                   "think-dances-?", 
                   "think-doesnt_dance-?",
-//                   "say-dances-?",
-//                   "say-doesnt_dance-?",
-//                   "inform-dances-?",
-//                   "inform-doesnt_dance-?",
                   "BARE-dances-?"]
 
 
 // return speaker belief threshold
 var predicate_thresholds = function(predicate) {
   if (predicate == "know") {
-      return beta(10,3)
+      return beta(10,1)
   } else if (predicate == "think") {
       return beta(0.1,20) 
   } else {
@@ -81,9 +77,9 @@ var meaning = function(utterance, speaker_belief) {
 
   if (predicate != "BARE") {
     if (!_.includes(content, "doesnt")) {
-      return speaker_belief >= speaker_threshold 
+      return speaker_belief > speaker_threshold 
     } else {
-      return speaker_belief <= 1 - speaker_threshold
+      return speaker_belief < 1 - speaker_threshold
     }
   } else { // BARE
     // var prob = Math.pow(Math.abs(speaker_threshold - speaker_belief),0.1)
@@ -100,7 +96,7 @@ var literalListener = cache(function(utterance, cg, item) {
     
     // if cg (prior knowledge shared): the actual prior distribution
     // else, default back to the uniform prior
-    var belief_dist = cg ? priors[item] : [1,1,1,1,1,1,1,1,1,1]
+    var belief_dist = cg=='TRUE' ? priors[item] : [1,1,1,1,1,1,1,1,1,1]
     var speaker_belief = categorical({ps:belief_dist, 
                                       vs:beliefs})
     
@@ -125,11 +121,11 @@ var literalListener = cache(function(utterance, cg, item) {
 // var think = literalListener("think-dances-?", false, "Charley_H")
 // viz(think)
 
-var alpha = 3
+var alpha = 4.92
 
 var cost = function(utterance){
-  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0
-  var negation_cost = _.includes(utterance, "doesnt") ? 0 : 0
+  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 2.91
+  var negation_cost = _.includes(utterance, "doesnt") ? -0.89 : 0
   return embedded_cost + negation_cost
 }
 
@@ -157,19 +153,19 @@ var speaker = cache(function(speaker_belief, cg, item) {
 var pragmaticListener = function(utterance, item) {
   Infer({method: "enumerate", model: function() {
     
-    var cg_prob = uniformDraw(_.range(0,1,0.1))
-    var cg = flip(cg_prob)
+    // var cg_prob = uniformDraw(_.range(0,1,0.1))
+    var cg = flip(1) ? 'TRUE' : "FALSE"
     // if cg (prior knowledge shared): the actual prior distribution
     // else, default back to the uniform prior
-    var belief_dist = cg ? priors[item] : [1,1,1,1,1,1,1,1,1,1]
+    var belief_dist = cg == 'TRUE' ? priors[item] : [1,1,1,1,1,1,1,1,1,1]
     var speaker_belief = categorical({ps:belief_dist, 
                                       vs:normalized_beliefs})
 
     observe(speaker(speaker_belief,cg, item), utterance)
 
-    return {speaker_belief, cg}
+    // return {speaker_belief, cg}
     
-    // return speaker_belief
+    return speaker_belief
   }})
 }
 

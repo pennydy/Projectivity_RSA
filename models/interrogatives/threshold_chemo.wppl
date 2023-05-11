@@ -76,6 +76,7 @@ var predicate_thresholds = function(predicate) {
   }
 }
 
+
 var predicate_qud = function(predicate) {
   if (predicate=="know") {
     return categorical({ps: [0.85, 0.15], vs: ["MC", "CC"]})

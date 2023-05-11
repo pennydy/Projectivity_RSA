@@ -48,9 +48,11 @@ utterances
 # define the QUD 
 quds = c("MC", "CC")
 
+# define predicates
+predicates = c("think", "know", "BARE")
+
 # define beliefs
-speaker_beliefs = seq(0,9,by=1)
-states <- speaker_beliefs + 1
+speaker_beliefs = seq(0,9,by=1)+ 1
 
 
 # priors
@@ -65,6 +67,25 @@ combined_prior <- mean(priors_by_condition$prior_mean)
 
 # read in by-predicate qud priors
 qud_priors <- read.csv("../data/predicate-nai.csv")
+
+# predicate_threshold ----
+# p <- "think"
+# threshold_tmp = eval_webppl(paste("viz_predicate_thresholds('",p,"')",sep=""))
+
+thresholds = data.frame(predicate = character(), value = numeric(), score = numeric())
+
+for (p in predicates) {
+  threshold_tmp = eval_webppl(paste("viz_predicate_thresholds('",p,"')",sep=""))
+  for (i in 1:nrow(threshold_tmp)) {
+    thresholds = thresholds %>%
+      add_row(predicate = p, value = threshold_tmp$value[i], score = threshold_tmp$score[i])
+  }
+}
+ggplot(thresholds, aes(x=value)) +
+  theme_bw() +
+  facet_wrap(~predicate, scales="free") +
+  geom_density()
+ggsave("../graphs/predicate_threshold.pdf",width=6,height=3)
 
 # literal listener ----
 # # testing literal listener
@@ -105,14 +126,16 @@ for (u in utterances) {
 # .2 means "belief in p is >= .1 and < .1"
 # ...
 # 1 means "belief in p is >= .9 and <= 1"
-LL$speaker_belief = (LL$speaker_belief + 1)/10
+# beliefs in the range (1,10)
+LL$speaker_belief = (LL$speaker_belief)/10
 
 ggplot(LL, aes(x=speaker_belief, y=prob)) +
   geom_bar(stat="identity") +
   facet_grid(~utterance, scales = "free_y") +
   # scale_fill_manual(values=cbPalette)
-  scale_x_continuous(breaks=seq(0,1,by=.1))
-ggsave("../graphs/threshold_mix/threshold_mix-LL.pdf",width=12,height=5)
+  scale_x_continuous(breaks=seq(0,1,by=.1), name = "speaker belief") + 
+  scale_y_continuous(name = "probabiltiy")
+ggsave("../graphs/threshold_mix/threshold_mix-LL.pdf",width=10,height=3)
 
 
 #  pragmatic speaker -----
@@ -135,7 +158,7 @@ for (sp_belief in speaker_beliefs) {
 # .2 means "belief in p is >= .1 and < .1"
 # ...
 # 1 means "belief in p is >= .9 and <= 1"
-PS$speaker_belief = (PS$speaker_belief + 1)/10
+PS$speaker_belief = (PS$speaker_belief)/10
 
 
 # plot SP, given speaker belief 
@@ -146,7 +169,7 @@ ggplot(PS, aes(x=speaker_belief, y=prob)) +
   ylab("Production probability") +
   xlab("Speaker belief") +
   coord_flip()
-ggsave("../graphs/threshold_mix/threshold_mix-PS-byUtterance.pdf",width=12,height=5)
+# ggsave("../graphs/threshold_mix/threshold_mix-PS-estimate.pdf",width=12,height=5)
 
 
 ggplot(PS, aes(x=utterance, y=prob)) +
@@ -214,7 +237,7 @@ PL_summary = PL %>%
 # .2 means "belief in p is >= .1 and < .1"
 # ...
 # 1 means "belief in p is >= .9 and <= 1"
-PL_summary$speaker_belief = (PL_summary$speaker_belief + 1)/10
+PL_summary$speaker_belief = (PL_summary$speaker_belief)/10
 
 # # plot by-item prior speaker belief results, marginalize over qud
 # for (item in priors){
@@ -276,15 +299,13 @@ ggplot(agr,aes(x=prior_mean,y=posterior_belief_emb, color=predicate)) +
                      name = "Posterior speaker belief\nin the embedded content") +
   scale_x_continuous(breaks=seq(0,1,by=0.2),
                      name = "Rating of prior belief in the embedded content")
-# ggsave("../graphs/threshold_mix/threshold_mix-PL-prior.pdf",width=7,height=3)
+ggsave("../../BDA/graphs/thresholdMix_predictives-estimate.pdf",width=7,height=3)
 
 
 
 ### model-empirical comparison
 # reading the empirical results
 df <- read.csv("../../../data/2_listenerSpeakerAH/main/bda_data.csv") %>% 
-  mutate(speaker_response_bin = ifelse(speaker_response == 1, 9,
-                                       trunc(trunc(speaker_response*100) / 10 ))) %>%
   filter(predicate %in% c("think", "know", "Polar"))
 
 df_collapsed <- df %>% 
@@ -299,7 +320,7 @@ predictives <- agr %>%
   rename(prob = posterior_belief_emb,
          item = prior) %>% 
   select(c('predicate', 'polarity', 'prob', 'item')) %>% 
-  filter(!item %in% c("Sophia_H", "Sophia_L", "Mia_H", "Mia_L"))
+  filter(!item %in% c("Sophia_H","Sophia_L", "Mia_H", "Mia_L"))
 
 
 predictives$type = "prediction"
@@ -312,9 +333,10 @@ predictives <- rbind(predictives,
 
 correlation <- predictives %>% 
   group_by(polarity) %>% 
-  summarise(r = cor(observation, prediction, method="pearson"),
+  summarise(r = cor(observation, prediction),
             r_squared = round(r ^ 2, digits=3)) %>% 
   ungroup()
 
 # loaded from BDA_vizhelpers.R
 graphPredictives(predictives, df_collapsed)
+ggsave("../../BDA/graphs/thresholdMix_predictives-polar_empirical-estimate.pdf",width=6,height=3)

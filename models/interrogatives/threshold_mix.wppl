@@ -1,8 +1,8 @@
 var stringify = function(x){return JSON.stringify(x)}
 
-var normalized_beliefs = [0,1,2,3,4,5,6,7,8,9]
+var normalized_beliefs = [1,2,3,4,5,6,7,8,9,10]
 
-var beliefs = [0,.1,.2,.3,.4,.5,.6,.7,.8,.9]
+var beliefs = [.1,.2,.3,.4,.5,.6,.7,.8,.9,1]
 
 var priors = {
   Charley_H : [0.002380952, 0.00000001, 0.007142857, 0.00952381, 0.023809524, 0.028571429, 0.061904762, 0.154761905, 0.245238095, 0.466666667],
@@ -63,7 +63,7 @@ var utterances = ["know-dances-?",
 // return speaker belief threshold
 var predicate_thresholds = function(predicate) {
   if (predicate == "know") {
-      return beta(10,1)
+      return beta(20,1)
   } else if (predicate == "think") {
       return beta(0.1,20) 
 //   } else if (predicate == "say") {
@@ -73,6 +73,13 @@ var predicate_thresholds = function(predicate) {
   } else {
     return 0.5
   }
+}
+
+
+var viz_predicate_thresholds = function(predicate) {
+  return Infer({method:"forward", samples:4000, model:function(){
+    predicate_thresholds(predicate)
+  }})
 }
 
 var predicate_qud = function(predicate) {
@@ -100,16 +107,16 @@ var meaning = function(utterance, speaker_belief) {
   
   if (predicate != "BARE") {
     if (!_.includes(content, "doesnt")) {
-      return speaker_belief >= speaker_threshold 
+      return speaker_belief > speaker_threshold 
     } else {
-      return speaker_belief <= 1 - speaker_threshold
+      return speaker_belief < 1 - speaker_threshold
     }
   } else { // BARE
-    var prob = Math.pow(Math.abs(speaker_threshold - speaker_belief),0.1)
-    return flip(1 - prob)
-    // var diff = Math.abs(speaker_threshold - speaker_belief) 
-    // var prob = diff > 0.1 ? Math.pow(diff, 0.1) : Math.pow(diff, 2)
-    // return flip(1-prob)
+    // var prob = Math.pow(Math.abs(speaker_threshold - speaker_belief),0.1)
+    // return flip(1 - prob)
+    var diff = Math.abs(speaker_threshold - speaker_belief) 
+    var prob = diff > 0.1 ? Math.pow(diff, 0.1) : Math.pow(diff, 2)
+    return flip(1-prob)
     // return speaker_belief == speaker_threshold + 0.05 || speaker_belief == speaker_threshold - 0.05 
   }
 }
@@ -122,7 +129,7 @@ var literalListener = cache(function(utterance) {
     // var speaker_belief = categorical({ps:[1,1,1,1,1,1,1,1,1,1], vs:beliefs})
 
     condition(meaning(utterance, speaker_belief))
-    var speaker_belief = speaker_belief==1?9:Math.trunc(Math.trunc(speaker_belief * 100)/10)
+    var speaker_belief = speaker_belief==1?10:Math.trunc(Math.trunc(speaker_belief * 100)/10)+1
     
     // return speaker_belief * 10
     return speaker_belief
@@ -146,26 +153,26 @@ var literalListener = cache(function(utterance) {
 // // viz(marginalize(know, "speaker_belief"))
 // // viz(marginalize(know, "ah_belief"))
 
-var alpha = 0.69
+var alpha = 3
 
 var cost = function(utterance){
-  // var embedded_cost = _.includes(utterance, "BARE") ? 0 : -1.09
-  // var negation_cost = _.includes(utterance, "doesnt") ? 3.7 : 0
-  // return embedded_cost + negation_cost
+  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0.8
+  var negation_cost = _.includes(utterance, "doesnt") ? -0.2 : 0
+  return embedded_cost + negation_cost
 
-  if (utterance == "know-dances-?") {
-    return -0.94
-  } else if (utterance == "know-doesnt_dance-?") {
-    return 3.99
-  } else if (utterance == "think-dances-?") {
-    return -0.94
-  } else if (utterance == "think-doesnt_dance-?") {
-    return 3.99
-  } else if (utterance == "BARE-dances-?") {
-    return 0
-  } else {
-    console.log("ERROR!")
-  }
+  // if (utterance == "know-dances-?") {
+  //   return -0.94
+  // } else if (utterance == "know-doesnt_dance-?") {
+  //   return 3.99
+  // } else if (utterance == "think-dances-?") {
+  //   return -0.94
+  // } else if (utterance == "think-doesnt_dance-?") {
+  //   return 3.99
+  // } else if (utterance == "BARE-dances-?") {
+  //   return 0
+  // } else {
+  //   console.log("ERROR!")
+  // }
 }
 
 // Speaker, chooses an utterance to convey a particular answer of the qud
@@ -189,7 +196,7 @@ var speaker = cache(function(speaker_belief) {
 
 var pragmaticListener = function(utterance, item) {
   Infer({method:'enumerate', model: function() {
-    var speaker_belief = uniformDraw(_.range(0, 10, 1))
+    var speaker_belief = uniformDraw(_.range(1, 11, 1))
     
     var splitutt = utterance.split('-')
     var predicate = splitutt[0]

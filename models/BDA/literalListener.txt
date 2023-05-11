@@ -1,6 +1,6 @@
 var predicate_thresholds = function(predicate) {
   if (predicate == "know") {
-      return beta(10,3)
+      return beta(20,1)
   } else if (predicate == "think") {
       return beta(0.1,20) 
 //   } else if (predicate == "say") {
@@ -8,7 +8,7 @@ var predicate_thresholds = function(predicate) {
 //   } else if (predicate == "inform") {
 //     return [beta(10,2), beta(4,8)] // ah -> uncertain more likely to believe in p (if they inform others)
   } else {
-    return 0.5// or mid point? which will be 0.45 if we ar sampling from 0-1 (excluding 1) range
+    return 0.5 // or mid point? which will be 0.45 if we ar sampling from 0-1 (excluding 1) range
   }
 }
 
@@ -20,16 +20,16 @@ var meaning = function(utterance, speaker_belief) {
 
     if (predicate != "BARE") {
         if (!_.includes(content, "doesnt")) {
-          return speaker_belief >= speaker_threshold
+          return speaker_belief > speaker_threshold
         } else {
-          return speaker_belief <= 1 - speaker_threshold 
+          return speaker_belief < 1 - speaker_threshold 
         }
       } else { // BARE
-        var prob = Math.pow(Math.abs(speaker_threshold - speaker_belief),0.1)
-        return flip(1 - prob) 
-        // var diff = Math.abs(speaker_threshold - speaker_belief) 
-        // var prob = diff > 0.1 ? Math.pow(diff, 0.1) : Math.pow(diff, 2)
-        // return flip(1-prob)
+        // var prob = Math.pow(Math.abs(speaker_threshold - speaker_belief),0.1)
+        // return flip(1 - prob) 
+        var diff = Math.abs(speaker_threshold - speaker_belief) 
+        var prob = diff > 0.1 ? Math.pow(diff, 0.1) : Math.pow(diff, 2)
+        return flip(1-prob)
         // return speaker_belief == speaker_threshold + 0.05 || speaker_belief == speaker_threshold - 0.05 
       }
 }
@@ -44,7 +44,7 @@ var literalListener = cache(function(utterance) {
         condition(meaning(utterance,speaker_belief))
         // for testing: beliefs into 3 bins
         // var speaker_belief = speaker_belief < 0.4 ? 0 : (speaker_belief > 0.6 ? 2 : 1)
-        var speaker_belief = speaker_belief==1?9:Math.trunc(Math.trunc(speaker_belief * 100)/10)
+        var speaker_belief = speaker_belief==1?10:Math.trunc(Math.trunc(speaker_belief * 100)/10) + 1
         return speaker_belief
 
         // not sure why this is needed

@@ -4,20 +4,37 @@ var stringify = function(x){return JSON.stringify(x)}
 var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BURN_IN, model: function(){
 
       var p = {
-
-
         alpha: uniformDrift({a: 0.1, b: 5, w: 0.1}),
-        embedCost: uniformDrift({a: 0, b: 4, w:0.01}),
-        negCost: uniformDrift({a: -2, b: 4, w: 0.01}),
-        // wonkiness: uniformDrift({a: 0.01, b: 1, w: 0.01})
+        embedCost: uniformDrift({a: 0, b: 4, w:0.02}),
+        negCost: uniformDrift({a: -2, b: 4, w: 0.02}),
+        cgProb: uniformDrift({a: 0.01, b: 1, w: 0.02})
       }
-    
+
+      // var predicate_thresholds = function(predicate) {
+      //   if (predicate == "know") {
+      //       return beta(10,3)
+      //   } else if (predicate == "think") {
+      //       return beta(0.1,20) 
+      // //   } else if (predicate == "say") {
+      // //     return [beta(1,10), beta(2,15)] // ah -> uncertain
+      // //   } else if (predicate == "inform") {
+      // //     return [beta(10,2), beta(4,8)] // ah -> uncertain more likely to believe in p (if they inform others)
+      //   } else {
+      //     return 0.55 // bin 1-10
+      //   }
+      // }
+      
+      // var speaker_thresholds = {
+      //   "know" : predicate_thresholds("know"),
+      //   "think" : predicate_thresholds("think"),
+      //   "BARE" : predicate_thresholds("BARE")
+      // }
+ 
     // hecky way to make it more efficient if we have the pragListener distrubtion ready and then observe the empirical results
     
     // pass the pre-calculated the literal listener distribution to the model
-    var m = extend(model(p),{thresholds: thresholds})
-    // var m = model(p)
-    //   console.log(m)
+    var m = extend(model(p)) //{literalDistLists: literalDistLists}, {thresholds:speaker_thresholds}
+      // console.log(m)
       var listenerDistLists = {
         // "Charley_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Charley_H",m,p), 
         //                 "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Charley_H",m,p),
@@ -30,7 +47,7 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
         //                 "think-dances-?" : pragmaticListener("think-dances-?","Charley_L",m,p),
         //                 "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Charley_L",m,p),
         //                 "BARE-dances-?" : pragmaticListener("BARE-dances-?","Charley_L",m,p)},
-        
+
         "Frank_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Frank_H",m,p), 
                     "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Frank_H",m,p),
                     "think-dances-?" : pragmaticListener("think-dances-?","Frank_H",m,p),
@@ -48,11 +65,13 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
                     "think-dances-?" : pragmaticListener("think-dances-?","Danny_H",m,p),
                     "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Danny_H",m,p),
                     "BARE-dances-?" : pragmaticListener("BARE-dances-?","Danny_H",m,p)},
+        
         "Danny_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Danny_L",m,p), 
                     "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Danny_L",m,p),
                     "think-dances-?" : pragmaticListener("think-dances-?","Danny_L",m,p),
                     "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Danny_L",m,p),
                     "BARE-dances-?" : pragmaticListener("BARE-dances-?","Danny_L",m,p)},
+        
         "Emily_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Emily_H",m,p), 
                     "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Emily_H",m,p),
                     "think-dances-?" : pragmaticListener("think-dances-?","Emily_H",m,p),
@@ -109,17 +128,17 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
         //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Jackson_L",m,p),
         //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Jackson_L",m,p)},
 
-        "Jayden_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Jayden_H",m,p), 
-                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Jayden_H",m,p),
-                    "think-dances-?" : pragmaticListener("think-dances-?","Jayden_H",m,p),
-                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Jayden_H",m,p),
-                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Jayden_H",m,p)},
+        // "Jayden_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Jayden_H",m,p), 
+        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Jayden_H",m,p),
+        //             "think-dances-?" : pragmaticListener("think-dances-?","Jayden_H",m,p),
+        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Jayden_H",m,p),
+        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Jayden_H",m,p)},
 
-        "Jayden_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Jayden_L",m,p), 
-                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Jayden_L",m,p),
-                    "think-dances-?" : pragmaticListener("think-dances-?","Jayden_L",m,p),
-                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Jayden_L",m,p),
-                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Jayden_L",m,p)},
+        // "Jayden_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Jayden_L",m,p), 
+        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Jayden_L",m,p),
+        //             "think-dances-?" : pragmaticListener("think-dances-?","Jayden_L",m,p),
+        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Jayden_L",m,p),
+        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Jayden_L",m,p)},
             
         "Jon_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Jon_H",m,p), 
                     "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Jon_H",m,p),
@@ -133,29 +152,29 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
                     "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Jon_L",m,p),
                     "BARE-dances-?" : pragmaticListener("BARE-dances-?","Jon_L",m,p)},
 
-        "Josh_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Josh_H",m,p), 
-                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Josh_H",m,p),
-                    "think-dances-?" : pragmaticListener("think-dances-?","Josh_H",m,p),
-                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Josh_H",m,p),
-                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Josh_H",m,p)},
+        // "Josh_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Josh_H",m,p), 
+        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Josh_H",m,p),
+        //             "think-dances-?" : pragmaticListener("think-dances-?","Josh_H",m,p),
+        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Josh_H",m,p),
+        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Josh_H",m,p)},
         
-        "Josh_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Josh_L",m,p), 
-                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Josh_L",m,p),
-                    "think-dances-?" : pragmaticListener("think-dances-?","Josh_L",m,p),
-                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Josh_L",m,p),
-                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Josh_L",m,p)},
+        // "Josh_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Josh_L",m,p), 
+        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Josh_L",m,p),
+        //             "think-dances-?" : pragmaticListener("think-dances-?","Josh_L",m,p),
+        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Josh_L",m,p),
+        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Josh_L",m,p)},
                     
-        "Josie_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Josie_H",m,p), 
-                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Josie_H",m,p),
-                    "think-dances-?" : pragmaticListener("think-dances-?","Josie_H",m,p),
-                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Josie_H",m,p),
-                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Josie_H",m,p)},
+        // "Josie_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Josie_H",m,p), 
+        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Josie_H",m,p),
+        //             "think-dances-?" : pragmaticListener("think-dances-?","Josie_H",m,p),
+        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Josie_H",m,p),
+        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Josie_H",m,p)},
 
-        "Josie_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Josie_L",m,p), 
-                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Josie_L",m,p),
-                    "think-dances-?" : pragmaticListener("think-dances-?","Josie_L",m,p),
-                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Josie_L",m,p),
-                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Josie_L",m,p)},
+        // "Josie_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Josie_L",m,p), 
+        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Josie_L",m,p),
+        //             "think-dances-?" : pragmaticListener("think-dances-?","Josie_L",m,p),
+        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Josie_L",m,p),
+        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Josie_L",m,p)},
 
         // "Julian_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Julian_H",m,p), 
         //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Julian_H",m,p),
@@ -169,29 +188,29 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
         //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Julian_L",m,p),
         //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Julian_L",m,p)},
 
-        "Mary_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Mary_H",m,p), 
-                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Mary_H",m,p),
-                    "think-dances-?" : pragmaticListener("think-dances-?","Mary_H",m,p),
-                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Mary_H",m,p),
-                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Mary_H",m,p)},
+        // "Mary_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Mary_H",m,p), 
+        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Mary_H",m,p),
+        //             "think-dances-?" : pragmaticListener("think-dances-?","Mary_H",m,p),
+        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Mary_H",m,p),
+        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Mary_H",m,p)},
 
-        "Mary_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Mary_L",m,p), 
-                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Mary_L",m,p),
-                    "think-dances-?" : pragmaticListener("think-dances-?","Mary_L",m,p),
-                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Mary_L",m,p),
-                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Mary_L",m,p)},
+        // "Mary_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Mary_L",m,p), 
+        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Mary_L",m,p),
+        //             "think-dances-?" : pragmaticListener("think-dances-?","Mary_L",m,p),
+        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Mary_L",m,p),
+        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Mary_L",m,p)},
 
-        "Mia_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Mia_H",m,p), 
-                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Mia_H",m,p),
-                    "think-dances-?" : pragmaticListener("think-dances-?","Mia_H",m,p),
-                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Mia_H",m,p),
-                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Mia_H",m,p)},
+        // "Mia_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Mia_H",m,p), 
+        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Mia_H",m,p),
+        //             "think-dances-?" : pragmaticListener("think-dances-?","Mia_H",m,p),
+        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Mia_H",m,p),
+        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Mia_H",m,p)},
 
-        "Mia_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Mia_L",m,p), 
-                    "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Mia_L",m,p),
-                    "think-dances-?" : pragmaticListener("think-dances-?","Mia_L",m,p),
-                    "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Mia_L",m,p),
-                    "BARE-dances-?" : pragmaticListener("BARE-dances-?","Mia_L",m,p)},
+        // "Mia_L" : {"know-dances-?" : pragmaticListener("know-dances-?","Mia_L",m,p), 
+        //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Mia_L",m,p),
+        //             "think-dances-?" : pragmaticListener("think-dances-?","Mia_L",m,p),
+        //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Mia_L",m,p),
+        //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Mia_L",m,p)},
 
         // "Olivia_H" : {"know-dances-?" : pragmaticListener("know-dances-?","Olivia_H",m,p), 
         //             "know-doesnt_dance-?" : pragmaticListener("know-doesnt_dance-?","Olivia_H",m,p),
@@ -253,22 +272,19 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
         //             "think-doesnt_dance-?" : pragmaticListener("think-doesnt_dance-?","Zoe_L",m,p),
         //             "BARE-dances-?" : pragmaticListener("BARE-dances-?","Zoe_L",m,p)}
 
-
-
-
       }
 
       
       mapData({data: df}, function(d){
         // loop through the df dataframe. d: a row of the long-form empirical data
 
+
         var listenerDist = listenerDistLists[d.item][d.utterance]
         // console.log(d.utterance)
         // console.log(d.item)
-
-        // console.log(listener.params.dist)
+        // console.log(d.speaker_response_bin)
+        // console.log(listenerDist.params.dist)
         
-        // console.log("sampled parameters: "+stringify(p))
         // var listenerDist = pragmaticListener(d.utterance,d.item,m,p)
         // console.log("listenerDist: " + listenerDist)
 
@@ -278,7 +294,6 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
     
       })
     
-      console.log("final: "+stringify(p))
       return p
     
     }, verbose: true})

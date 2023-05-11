@@ -64,13 +64,13 @@ graphPredictives <- function(predictives, df) {
     spread(type, prob)
   
   correlation <- predictives %>% 
-    group_by(polarity) %>%
+    # group_by(polarity) %>%
     summarize(r = cor(observation, prediction),
               r_squared = round(r ^ 2, digits=3)) %>% 
     ungroup()
   
-  ggplot(predictives %>% 
-           mutate(predicate = fct_relevel(predicate, "Polar", "think", "know")), aes(x = prediction, y = observation)) +
+  ggplot(predictives, aes(x = prediction, y = observation)) +
+    # geom_point(aes(shape=polarity, color = predicate)) +
     geom_point(aes(color = predicate)) +
     # geom_smooth(method = "lm", fullrange=TRUE) + 
     theme_bw() +
@@ -81,8 +81,42 @@ graphPredictives <- function(predictives, df) {
     # annotate("text", x = 0.75, y = 0, label = sprintf("r = %f", cor(predictives$prediction,
     #                                                                 predictives$observation))) +
     facet_grid(.~polarity) +
-    scale_color_manual(values=cbPalette[2:4]) +
-    scale_fill_manual(values=cbPalette[2:4]) + 
-    scale_x_continuous(breaks=seq(0,1,by=.25)) + 
-    scale_y_continuous(breaks=seq(0,1,by=.25))
+    scale_color_manual(values=cbPalette[2:4], guide="none") +
+    scale_fill_manual(values=cbPalette[2:4], guide="none") + 
+    scale_x_continuous(limits=c(0,1), breaks=seq(0,1,by=.25)) + 
+    scale_y_continuous(limits=c(0,1), breaks=seq(0,1,by=.25))
+}
+
+graphPredictives_ah <- function(predictives, df) {
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") 
+  
+  predictives$type = "prediction"
+  df$type = "observation"
+  
+  predictives <- rbind(predictives, 
+                       df) %>%
+    spread(type, prob)
+  
+  correlation <- predictives %>% 
+    # group_by(polarity) %>%
+    summarize(r = cor(observation, prediction),
+              r_squared = round(r ^ 2, digits=3)) %>% 
+    ungroup()
+  
+  ggplot(predictives, aes(x = prediction, y = observation)) +
+    geom_point(aes(color = predicate,
+                   shape=polarity)) +
+    # geom_smooth(method = "lm", fullrange=TRUE) + 
+    theme_bw() +
+    geom_text(data = correlation,
+              mapping = aes(x=-Inf, y=-Inf,label = sprintf("r^2 = %f", r_squared)),
+              hjust = -.1,
+              vjust = -1) +
+    # annotate("text", x = 0.75, y = 0, label = sprintf("r = %f", cor(predictives$prediction,
+    #                                                                 predictives$observation))) +
+    facet_grid(.~polarity) +
+    scale_color_manual(values=cbPalette[3:4]) +
+    scale_fill_manual(values=cbPalette[3:4]) + 
+    scale_x_continuous(limits=c(0,1), breaks=seq(0,1,by=.25)) + 
+    scale_y_continuous(limits=c(0,1), breaks=seq(0,1,by=.25))
 }

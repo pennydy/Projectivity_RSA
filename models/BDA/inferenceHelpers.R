@@ -3,7 +3,10 @@
 # create the basic RSA model (speaker and listener functions)
 makeModel <- function(header, modelName) {
   if (modelName == "threshold_cg") {
-    return(paste(read_file(header), read_file("./literalListener_cg.txt"), sep = "\n"))
+    # return(paste(read_file(header), read_file("./literalListener_cg.txt"), sep = "\n"))
+    return(read_file(header))
+  } else if (modelName == "chemo_production") {
+    return(read_file(header))
   } else {
     return(paste(read_file(header), read_file("./literalListener.txt"), sep = "\n"))
   }
@@ -21,6 +24,8 @@ wrapInference <- function(model, modelName, samples, lag, burn) {
     inferenceCommand <- read_file("./inferenceCommands/threshold_mix_params.txt")
   } else if (modelName == "threshold_cg") {
     inferenceCommand <- read_file("./inferenceCommands/threshold_cg_params.txt")
+  } else if (modelName == "chemo_production") {
+    inferenceCommand <- read_file("./inferenceCommands/chemo_production_params.txt")
   }
 
   inferenceCommand <- gsub("NUM_SAMPLES", samples, inferenceCommand, fixed = TRUE)
@@ -41,16 +46,32 @@ getEstimates <- function(posteriors) {
   estimates <- posteriors %>%
     group_by(Parameter) %>%
     summarize(estimate = estimate_mode(value)) %>% 
-    # mutate(estimate = ifelse(estimate < 0, 0, estimate)) %>%
+    # for chemo_production, production prob is always in [0,1]
+    mutate(estimate = ifelse(estimate < 0, 0, estimate)) %>%
     pivot_wider(names_from = Parameter, values_from = estimate)
   
   return(estimates)
   
 }
 
-wrapPrediction = function(model, estimates) {
-  predictionCommand <- read_file("./getPredictions.txt")
+wrapPrediction = function(model, modelName, estimates) {
+  if (modelName == "threshold_mix") {
+    literalListener <- read_file("./literalListener.txt")
+    predictionCommand <- read_file("./getPredictions.txt")
+    
+  } else if (modelName == "threshold_cg") {
+    literalListener <- read_file("./literalListener_cg.txt")
+    predictionCommand <- read_file("./getPredictions_cg.txt")
+    
+  } else if (modelName == "chemo_production") {
+    literalListener <- ""
+    predictionCommand <- read_file("./getPredictions_chemo.txt")
+  } else if (modelName == "chemo_speaker") {
+    literalListener <- ""
+    predictionCommand <- read_file("./getPredictions_speaker.txt")
+  }
+  
   predictionCommand <- paste((sprintf("var estimates = %s[0]", toJSON(estimates, digits = NA))), predictionCommand, sep = "\n")
-  return(paste(read_file(model), read_file("./literalListener.txt"), predictionCommand, sep = "\n"))
-  # return(paste(read_file(model), predictionCommand, sep = "\n"))
+  
+  return(paste(read_file(model), literalListener , predictionCommand, sep = "\n"))
 }

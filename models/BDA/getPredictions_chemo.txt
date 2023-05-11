@@ -1,0 +1,16 @@
+var predictives = map(function(d) {
+    // console.log(d.utterance)
+    // console.log(d.item)
+
+var m = extend(model(estimates))
+var belief_tuple = pragmaticListener(d.utterance, d.item, m, estimates)
+var belief_tuple_dist = Object.values(belief_tuple.params.dist)
+// console.log(belief_tuple_dist)
+
+// console.log(prob)
+// return {utterance: d.utterance, item: d.item, dist: belief_tuple_dist}
+return {utterance: d.utterance, item: d.item, predictives: belief_tuple_dist}
+  
+}, df)
+
+predictives

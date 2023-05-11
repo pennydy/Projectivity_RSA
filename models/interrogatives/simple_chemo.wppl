@@ -1,0 +1,291 @@
+var stringify = function (x) { return JSON.stringify(x) }
+
+//<SPEAKER BELIEF, ATTITUDE HOLDER BELIEF>
+var belief_states = [["dances", "dances"], ["dances", "doesnt_dance"], ["doesnt_dance", "dances"], ["doesnt_dance", "doesnt_dance"]] 
+
+
+// speaker and attitude holder belief priors
+var beliefs = ["dances", "doesnt_dance"]
+var ah_beliefs = ["dances", "doesnt_dance", "null"]
+
+var speaker_beliefPrior = function (item) {
+    //   console.log(priors[item])
+    return categorical({
+        vs: beliefs,
+        ps: speaker_priors[item]
+    })
+}
+
+var ah_beliefPrior = function (item) {
+    return categorical({
+        vs: ah_beliefs,
+        ps: ah_priors[item]
+    })
+}
+
+var speaker_priors = {
+    'Charley_H': [0.804632353, 0.195367647],
+    'Charley_L': [0.277066667, 0.722933333],
+    'Danny_H': [0.697062937, 0.302937063],
+    'Danny_L': [0.27993007, 0.72006993],
+    'Emily_H': [0.561555556, 0.438444444],
+    'Emily_L': [0.151655629, 0.848344371],
+    'Emma_H': [0.680763889, 0.319236111],
+    'Emma_L': [0.323098592, 0.676901408],
+    'Frank_H': [0.67972028, 0.32027972],
+    'Frank_L': [0.16965035, 0.83034965],
+    'Grace_H': [0.790144928, 0.209855072],
+    'Grace_L': [0.24777027, 0.75222973],
+    'Isabella_H': [0.517707006, 0.482292994],
+    'Isabella_L': [0.125813953, 0.874186047],
+    'Jackson_H': [0.774965035, 0.225034965],
+    'Jackson_L': [0.186013986, 0.813986014],
+    'Jayden_H': [0.687794118, 0.312205882],
+    'Jayden_L': [0.1756, 0.8244],
+    'Jon_H': [0.7559375, 0.2440625],
+    'Jon_L': [0.235696203, 0.764303797],
+    'Josh_H': [0.544575163, 0.455424837],
+    'Josh_L': [0.236917293, 0.763082707],
+    'Josie_H': [0.73343949, 0.26656051],
+    'Josie_L': [0.117286822, 0.882713178],
+    'Julian_H': [0.599493671, 0.400506329],
+    'Julian_L': [0.401796875, 0.598203125],
+    'Mary_H': [0.815167785, 0.184832215],
+    'Mary_L': [0.22540146, 0.77459854],
+    'Mia_H': [0.579022556, 0.420977444],
+    'Mia_L': [0.224901961, 0.775098039],
+    'Olivia_H': [0.664776119, 0.335223881],
+    'Olivia_L': [0.210592105, 0.789407895],
+    'Owen_H': [0.746482759, 0.253517241],
+    'Owen_L': [0.279503546, 0.720496454],
+    'Sophia_H': [0.634248366, 0.365751634],
+    'Sophia_L': [0.415413534, 0.584586466],
+    'Tony_H': [0.747279412, 0.252720588],
+    'Tony_L': [0.2196, 0.7804],
+    'Zoe_H': [0.745971223, 0.254028777],
+    'Zoe_L': [0.192108844, 0.807891156]
+}
+
+var null_prob = .1
+
+var ah_priors = {
+    'Charley_H': [0.804632353, 0.195367647, null_prob],
+    'Charley_L': [0.277066667, 0.722933333, null_prob],
+    'Danny_H': [0.697062937, 0.302937063, null_prob],
+    'Danny_L': [0.27993007, 0.72006993, null_prob],
+    'Emily_H': [0.561555556, 0.438444444, null_prob],
+    'Emily_L': [0.151655629, 0.848344371, null_prob],
+    'Emma_H': [0.680763889, 0.319236111, null_prob],
+    'Emma_L': [0.323098592, 0.676901408, null_prob],
+    'Frank_H': [0.67972028, 0.32027972, null_prob],
+    'Frank_L': [0.16965035, 0.83034965, null_prob],
+    'Grace_H': [0.790144928, 0.209855072, null_prob],
+    'Grace_L': [0.24777027, 0.75222973, null_prob],
+    'Isabella_H': [0.517707006, 0.482292994, null_prob],
+    'Isabella_L': [0.125813953, 0.874186047, null_prob],
+    'Jackson_H': [0.774965035, 0.225034965, null_prob],
+    'Jackson_L': [0.186013986, 0.813986014, null_prob],
+    'Jayden_H': [0.687794118, 0.312205882, null_prob],
+    'Jayden_L': [0.1756, 0.8244, null_prob],
+    'Jon_H': [0.7559375, 0.2440625, null_prob],
+    'Jon_L': [0.235696203, 0.764303797, null_prob],
+    'Josh_H': [0.544575163, 0.455424837, null_prob],
+    'Josh_L': [0.236917293, 0.763082707, null_prob],
+    'Josie_H': [0.73343949, 0.26656051, null_prob],
+    'Josie_L': [0.117286822, 0.882713178, null_prob],
+    'Julian_H': [0.599493671, 0.400506329, null_prob],
+    'Julian_L': [0.401796875, 0.598203125, null_prob],
+    'Mary_H': [0.815167785, 0.184832215, null_prob],
+    'Mary_L': [0.22540146, 0.77459854, null_prob],
+    'Mia_H': [0.579022556, 0.420977444, null_prob],
+    'Mia_L': [0.224901961, 0.775098039, null_prob],
+    'Olivia_H': [0.664776119, 0.335223881, null_prob],
+    'Olivia_L': [0.210592105, 0.789407895, null_prob],
+    'Owen_H': [0.746482759, 0.253517241, null_prob],
+    'Owen_L': [0.279503546, 0.720496454, null_prob],
+    'Sophia_H': [0.634248366, 0.365751634, null_prob],
+    'Sophia_L': [0.415413534, 0.584586466, null_prob],
+    'Tony_H': [0.747279412, 0.252720588, null_prob],
+    'Tony_L': [0.2196, 0.7804, null_prob],
+    'Zoe_H': [0.745971223, 0.254028777, null_prob],
+    'Zoe_L': [0.192108844, 0.807891156, null_prob]
+}
+
+// extract set of belief tuples compatible with utterance. dependent on predicate and sentence type (interrogative, declarative)
+var extractBeliefs = function (utterance) {
+    var splitutt = utterance.split('-')
+    var predicate = splitutt[0]
+    var content = splitutt[1]
+    var sentence_type = splitutt[2]
+
+    if (predicate == "know") {
+        if (sentence_type == "?") {
+            return [{ speaker_belief: content, ah_belief: "dances" },
+            { speaker_belief: content, ah_belief: "doesnt_dance" }]
+        } else {
+            console.log("error: unknown sentence type in extractBeliefs()")
+        }
+    }
+    if (predicate == "think") {
+        if (sentence_type == "?") {
+            return [{ speaker_belief: "dances", ah_belief: "dances" },
+            { speaker_belief: "doesnt_dance", ah_belief: "dances" },
+            { speaker_belief: "dances", ah_belief: "doesnt_dance" },
+            { speaker_belief: "doesnt_dance", ah_belief: "doesnt_dance" }]
+        } else {
+            console.log("error: unknown sentence type in extractBeliefs()")
+        }
+    }
+    if (predicate == "BARE") {
+        if (sentence_type == "?") {
+            return [{ speaker_belief: "dances", ah_belief: "null" },
+            { speaker_belief: "doesnt_dance", ah_belief: "null" }]
+        } else {
+            console.log("error: unknown sentence type in extractBeliefs()")
+        }
+    }
+}
+
+// meaning function checks whether belief tuple is in set of belief tuples compatible with utterance
+var meaning = function (utterance, belief_tuple) {
+    var extractedBeliefs = extractBeliefs(utterance) // the set of belief tuples compatible with the utterance
+    var speaker_belief = belief_tuple.speaker_belief
+    var ah_belief = belief_tuple.ah_belief
+    var matchesInArray = reduce(function (item, acc) {
+        let val = item.speaker_belief == speaker_belief && item.ah_belief == ah_belief ? 1 : 0
+        return (val + acc)
+    }, 0, extractedBeliefs)
+    return (matchesInArray > 0)
+}
+
+// specify different quds
+var qudFns = {
+    CC: function (belief_tuple) { return { speaker_belief: belief_tuple.speaker_belief } },
+    MC: function (belief_tuple) { return { ah_belief: belief_tuple.ah_belief } },
+}
+
+// Prior over QUDs
+var qudPrior = function (predicate) {
+    if (predicate == "know") {
+        return categorical({ ps: [0.85, 0.15], vs: ["MC", "CC"] })
+    } else if (predicate == "think") {
+        return categorical({ ps: [0.7, 0.3], vs: ["MC", "CC"] })
+    } else { // BARE
+        return categorical({ ps: [0, 1], vs: ["MC", "CC"] })
+    }
+}
+
+// specify utterance alternatives
+var utterances = ["know-dances-?",
+    "know-doesnt_dance-?",
+    "think-dances-?",
+    "think-doesnt_dance-?",
+    "BARE-dances-?"]
+
+// prior over utterance alternatives
+var utterancePrior = function () {
+    return uniformDraw(utterances)
+}
+
+
+// literal listener
+var literalListener = cache(function (utterance, qud, item) {
+    return Infer({
+        model: function () {
+            var speaker_belief = speaker_beliefPrior(item)
+            var ah_belief = ah_beliefPrior(item)
+            var belief_tuple = { speaker_belief: speaker_belief, ah_belief: ah_belief }
+            var qudFn = qudFns[qud]
+            var qudAnswer = qudFn(belief_tuple)
+            //  console.log(qudAnswer)
+            condition(meaning(utterance, belief_tuple))
+            // observe( meaning(utterance, belief_tuple), true)    
+            return qudAnswer
+        }
+    })
+})
+
+
+// set speaker optimality
+var alpha = 3
+
+// set cost (we start with zero)
+var embedCost = 0
+var negCost = 0
+
+var cost = function (utterance) {
+    var embedded_cost = _.includes(utterance, "BARE") ? 0 : embedCost
+    var negation_cost = _.includes(utterance, "doesnt") ? negCost : 0
+    return embedded_cost + negation_cost
+}
+
+
+// Speaker, chooses an utterance to convey a particular answer of the qud
+var speaker = cache(function (belief_tuple, qud, item) {
+    return Infer({
+        model: function () {
+            var utterance = utterancePrior()
+            var qudFn = qudFns[qud]
+            var qudAnswer = qudFn(belief_tuple)
+            var literalL = literalListener(utterance, qud, item)
+            factor(alpha * (literalListener(utterance, qud, item).score(qudAnswer)
+                - cost(utterance)))
+            return utterance
+        }
+    })
+})
+
+
+var pragmaticListener = cache(function (utterance, item) {
+    return Infer({
+        model: function () {
+            var splitutt = utterance.split('-')
+            var predicate = splitutt[0]
+            //////// priors ////////
+            var speaker_belief = speaker_beliefPrior(item)
+            var ah_belief = ah_beliefPrior(item)
+            var qud = qudPrior(predicate)
+            ////////////////////////
+            var belief_tuple = { speaker_belief: speaker_belief, ah_belief: ah_belief }
+            observe(speaker(belief_tuple, qud, item), utterance)
+            // return belief_tuple
+            // in order to turn this into a joint inference listener:
+            //     return {belief_tuple: belief_tuple, qud: qud}
+            return belief_tuple
+        }
+    })
+})
+
+
+///
+
+
+
+// check if belief priors work
+// Infer({model: ah_beliefPrior})
+
+// check if belief extraction from utterances works
+// extractBeliefs("think-dances-?")
+// extractBeliefs("know-dances-.")
+
+// check if meaning function works
+// meaning("know-dances-.", {speaker_belief:"dances", ah_belief:"not dances"})
+
+// literalListener("know-dances-?","speaker_belief")
+
+
+
+// speaker knows that speaker and ah believe "dances" and wants to communicate speaker belief, ah belief, and both, respectively
+// speaker({speaker_belief:"dances", ah_belief:"dances"},"speaker_belief")
+// speaker({speaker_belief:"dances", ah_belief:"dances"},"ah_belief")
+
+// pragmatic listner observes various utterances
+// var know = pragmaticListener("know-dances-?")
+// viz(marginalize(know, "speaker_belief"))
+// viz(marginalize(know, "ah_belief"))
+// var think = pragmaticListener("think-dances-?")
+// viz(marginalize(think, "speaker_belief"))
+// viz(marginalize(think, "ah_belief"))
+// var think = pragmaticListener("think-dances-?", "Charley_H")
+// viz(marginalize(think, "speaker_belief"))
+// viz(marginalize(think, "ah_belief"))
