@@ -4,6 +4,13 @@ This is the repository that accompanies the following paper:
 
 - Pan, D. and Degen, J. (2023). Towards a computational account of projection inferences in clause-embedding predicates. In *Proceedings of the 45th Annual Conference of the Cognitive Science Society* [to appear].
 
+## General information
+We've conducted 3 behavioral experiments and explored multiple Bayesian models. Below is the general information about summary of each experiment and the overview of the repository, and more details can be found in the desginated folder.
+- Experiment 1 (`1_listenerProjection`): about inferred speaker belief and speaker certainty in interrogatives
+- Experiment 2 (`2_listenerSpeakerAH`): about inferred speaker and attitude holder belief in interrogatives
+- Experiment 3 (`3_listenerSpeakerAH_Declaratives`): about inferred speaker and attitude holder belief in declarative sentences 
+
+
 ## Structure of this repository
 ```bash
 ├── analysis
@@ -35,10 +42,10 @@ This is the repository that accompanies the following paper:
 │   └── chemo
 │   ├── declaratives
 │   └── interrogatives
-└── writing
+└── writings
 ```
-- `analysis`: R files for the and main analyses
-- `experiments`: experimental files used to for the experiments
-- `data`: raw data files (anomyized)
-- `models`: models that we've explored, scripts for Bayesian data analysis and model simulations
-- `writing`: published paper related to this project
+- `analysis`: R files for the visualization and main analyses for the bebavioral experiments
+- `experiments`: experimental files used to for the bebavioral experiments
+- `data`: raw data files from the behavioral experiments (anomyized)
+- `models`: models that we've explored as well as rscripts for Bayesian data analysis and model simulations
+- `writings`: published paper related to this project

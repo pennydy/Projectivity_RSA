@@ -1,0 +1,85 @@
+var predicate_thresholds = function(predicate, qud) {
+    if (predicate == "know") {
+      if (qud == "MC") { // if the matrix clause/predicate is at-issue
+        return beta(10,1) // cannot do beta(10, 0.1): beta sample overflow
+      } else { // if the qud is CC
+        return beta(3,8)
+      }
+    }
+    if (predicate == "think") {
+      if (qud == "MC") {
+        return beta(1,10)
+      } else {
+        return beta(1,20) // beta(0.1,10)
+      }
+    }
+    else { // BARE, regardless of qud
+      // return beta(20,20)
+      return 0.5
+    }
+  }
+
+var meaning = function(utterance, speaker_belief, qud) {
+  var splitutt = utterance.split('-')
+  var predicate = splitutt[0]
+  var content = splitutt[1]
+  
+  var threshold = predicate_thresholds(predicate, qud)
+  
+  if (predicate != "BARE") {
+    if (!_.includes(content, "doesnt")) {
+      return speaker_belief > threshold
+    } else {
+      return speaker_belief < 1 - threshold
+    }
+  } else {
+//     var prob = Math.exp(Math.abs(threshold - speaker_belief))
+//     var prob = Math.pow(Math.abs(threshold - speaker_belief),0.5)
+//     return flip(1 - prob)
+        var diff = Math.abs(threshold - speaker_belief) 
+        var prob = diff > 0.1 ? Math.pow(diff, 0.1) : Math.pow(diff, 2)
+//         var prob = Math.pow(.5, diff)
+    return flip(1-prob)
+  }
+  
+}
+  
+  var literalListener = cache(function(utterance, qud) {
+      return Infer({method: 'MCMC', samples: 4000, lag: 0, burn: 0, model: function() { 
+          // console.log("in LL")
+          var speaker_belief = uniform(0,1)
+          // var speaker_belief = categorical({ps:[1,1,1,1,1,1,1,1,1,1], 
+          //   vs:[0,.1,.2,.3,.4,.5,.6,.7,.8,.9]})
+  
+          condition(meaning(utterance,speaker_belief, qud))
+          // for testing: beliefs into 3 bins
+          // var speaker_belief = speaker_belief < 0.4 ? 0 : (speaker_belief > 0.6 ? 2 : 1)
+          var speaker_belief = speaker_belief==1?10:Math.trunc(Math.trunc(speaker_belief * 100)/10) + 1
+          return speaker_belief
+  
+          // not sure why this is needed
+  
+          // if there is no ifelse statement, then speaker_belief is undefined
+          // also, curretnly 0 is not in here, only after conditioning? 
+          // var speaker_belief = speaker_belief==0.1?1:speaker_belief * 10
+          // return speaker_belief * 10
+      }
+  })})
+  
+  
+  var literalDistLists = {
+    "MC": {
+        "know-dances-?" : literalListener("know-dances-?", "MC"),
+        "know-doesnt_dance-?" : literalListener("know-doesnt_dance-?", "MC"),
+        "think-dances-?" : literalListener("think-dances-?","MC"),
+        "think-doesnt_dance-?" : literalListener("think-doesnt_dance-?","MC"),
+        "BARE-dances-?" : literalListener("BARE-dances-?","MC")
+    },
+    "CC": {
+        "know-dances-?" : literalListener("know-dances-?","CC"),
+        "know-doesnt_dance-?" : literalListener("know-doesnt_dance-?","CC"),
+        "think-dances-?" : literalListener("think-dances-?","CC"),
+        "think-doesnt_dance-?" : literalListener("think-doesnt_dance-?","CC"),
+        "BARE-dances-?" : literalListener("BARE-dances-?","CC")
+    }
+  }

@@ -4,7 +4,7 @@ var stringify = function(x){return JSON.stringify(x)}
 var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BURN_IN, model: function(){
 
       var p = {
-        alpha: uniformDrift({a: 0.1, b: 5, w: 0.1}),
+        alpha: uniformDrift({a: 0, b: 10, w: 0.1}),
         embedCost: uniformDrift({a: 0, b: 4, w:0.02}),
         negCost: uniformDrift({a: 0, b: 4, w: 0.02})
       }
@@ -15,18 +15,13 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
       mapData({data: df}, function(d){
         // loop through the df dataframe. d: a row of the long-form empirical data
 
-
-        // var listenerDist = listenerDistLists[d.item][d.utterance]
-        // console.log(d.utterance)
-        // console.log(d.item)
-        // console.log(d.speaker_response_bin)
-        // console.log(listenerDist.params.dist)
+        var beliefs_response = {"speaker_belief": d.speaker_response, "ah_belief": d.ah_response}
         
         var listenerDist = pragmaticListener(d.utterance,d.item,m,p)
         // console.log("listenerDist: " + listenerDist)
 
         // console.log("before sampling from the listenerDist ")
-        observe(listenerDist, d.speaker_response_bin)
+        observe(listenerDist, beliefs_response)
         // console.log("done sampling from the listenerDist ")
     
       })

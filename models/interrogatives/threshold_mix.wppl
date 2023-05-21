@@ -153,11 +153,11 @@ var literalListener = cache(function(utterance) {
 // // viz(marginalize(know, "speaker_belief"))
 // // viz(marginalize(know, "ah_belief"))
 
-var alpha = 3
+var alpha = 0.46
 
 var cost = function(utterance){
-  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0.8
-  var negation_cost = _.includes(utterance, "doesnt") ? -0.2 : 0
+  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 3.98
+  var negation_cost = _.includes(utterance, "doesnt") ? 0.54 : 0
   return embedded_cost + negation_cost
 
   // if (utterance == "know-dances-?") {

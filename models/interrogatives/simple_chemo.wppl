@@ -207,11 +207,11 @@ var literalListener = cache(function (utterance, qud, item) {
 
 
 // set speaker optimality
-var alpha = 3
+var alpha = 0.92
 
 // set cost (we start with zero)
-var embedCost = 0
-var negCost = 0
+var embedCost = 0.08
+var negCost = 0.01
 
 var cost = function (utterance) {
     var embedded_cost = _.includes(utterance, "BARE") ? 0 : embedCost
@@ -228,7 +228,7 @@ var speaker = cache(function (belief_tuple, qud, item) {
             var qudFn = qudFns[qud]
             var qudAnswer = qudFn(belief_tuple)
             var literalL = literalListener(utterance, qud, item)
-            factor(alpha * (literalListener(utterance, qud, item).score(qudAnswer)
+            factor(alpha * (literalL.score(qudAnswer)
                 - cost(utterance)))
             return utterance
         }
@@ -251,7 +251,9 @@ var pragmaticListener = cache(function (utterance, item) {
             // return belief_tuple
             // in order to turn this into a joint inference listener:
             //     return {belief_tuple: belief_tuple, qud: qud}
+            // return  { speaker_belief: speaker_belief, ah_belief: ah_belief, qud: qud}
             return belief_tuple
+            
         }
     })
 })

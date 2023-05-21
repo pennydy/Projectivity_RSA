@@ -1,0 +1,16 @@
+var predictives = map(function(d) {
+    // console.log(d.utterance)
+    // console.log(d.item)
+
+var m = extend(model(estimates))
+// console.log(beliefs_response)
+var speaker = viz_speaker(d.speaker_response_bin, m, estimates)
+// console.log(Object.values(speaker.params.dist))
+
+// console.log(prob)
+// return {utterance: d.utterance, item: d.item, dist: belief_tuple_dist}
+return {speaker_belief: d.speaker_response_bin, predictives: Object.values(speaker.params.dist)}
+  
+}, df)
+
+predictives

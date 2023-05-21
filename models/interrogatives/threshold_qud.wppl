@@ -1,6 +1,6 @@
 // var beliefs = ["dances","doesnt dance"]
 
-var beliefs = [0,1,2,3,4,5,6,7,8,9]
+var beliefs = [1,2,3,4,5,6,7,8,9,10]
 
 var quds = ["MC", "CC"]
 
@@ -69,29 +69,37 @@ var predicate_thresholds = function(predicate, qud) {
     if (qud == "MC") { // if the matrix clause/predicate is at-issue
       return beta(10,1) // cannot do beta(10, 0.1): beta sample overflow
     } else { // if the qud is CC
-      return beta(8,2)
+      return beta(3,8)
     }
   }
   if (predicate == "think") {
     if (qud == "MC") {
       return beta(1,10)
     } else {
-      return beta(3,8) // beta(0.1,10)
+      return beta(1,20) // beta(0.1,10)
     }
   }
   else { // BARE, regardless of qud
-    return beta(20,20)
+    // return beta(20,20)
+    return 0.5
   }
+}
+
+
+var viz_predicate_thresholds = function(predicate, qud) {
+  return Infer({method:"forward", samples:4000, model:function(){
+    predicate_thresholds(predicate, qud)
+  }})
 }
 
 var predicate_qud = function(predicate) {
   if (predicate=="know") {
-    return categorical({ps: [0.8, 0.2], vs: ["MC", "CC"]})
+    return categorical({ps: [0.85, 0.15], vs: ["MC", "CC"]})
   }
   if (predicate=="think"){
     return categorical({ps: [0.7, 0.3], vs: ["MC", "CC"]})
   } else { // BARE
-    return categorical({ps: [1, 0], vs: ["MC", "CC"]})
+    return categorical({ps: [0, 1], vs: ["MC", "CC"]})
   }
 }
 
@@ -127,37 +135,44 @@ var meaning = function(utterance, speaker_belief, qud) {
   
   if (predicate != "BARE") {
     if (!_.includes(content, "doesnt")) {
-      return speaker_belief >= threshold?1:0
+      return speaker_belief > threshold
     } else {
-      return speaker_belief <= 1 - threshold?1:0
+      return speaker_belief < 1 - threshold
     }
   } else {
 //     var prob = Math.exp(Math.abs(threshold - speaker_belief))
-    var prob = Math.pow(Math.abs(threshold - speaker_belief),0.5)
-    return flip(1 - prob) ? 1:0
+//     var prob = Math.pow(Math.abs(threshold - speaker_belief),0.5)
+//     return flip(1 - prob)
+        var diff = Math.abs(threshold - speaker_belief) 
+        var prob = diff > 0.1 ? Math.pow(diff, 0.1) : Math.pow(diff, 2)
+//         var prob = Math.pow(.5, diff)
+    return flip(1-prob)
   }
   
 }
 
+
 // viz(Infer({method:"forward", samples:1000}, function(){
-//     return meaning("think-dances-?", 0.2)
+//     return meaning("BARE-dances-?",0.2, "MC")
 //  }))
+
 
 var literalListener = cache(function(utterance, qud) {
   return Infer({method: 'MCMC', samples: 4000, lag: 100, burn: 50, model: function(){
 //     var speaker_belief = beta(4,2)
     var speaker_belief = uniform(0,1)
-    factor(meaning(utterance, speaker_belief, qud))
+//         factor(meaning(utterance, speaker_belief, qud)?1:0)
+    condition(meaning(utterance, speaker_belief, qud))
 //    return Math.trunc(Math.trunc((speaker_belief-0.01) * 100)/10) // put 1 to bin9
-    var speaker_belief = speaker_belief==1?9:Math.trunc(Math.trunc(speaker_belief * 100)/10)
+    var speaker_belief = speaker_belief==1?10:Math.trunc(Math.trunc(speaker_belief * 100)/10)+1
     return speaker_belief
   }})
 })
 
 // display("u:BARE-dances-?, qud:MC")
 // viz(literalListener("BARE-dances-?", "MC"))
-// // display("u:BARE-dances-?, qud:CC")
-// // viz(literalListener("BARE-dances-?", "CC"))
+// display("u:BARE-dances-?, qud:CC")
+// viz(literalListener("BARE-dances-?", "CC"))
 // display("u:know-dances-?, qud:MC")
 // viz(literalListener("know-dances-?", "MC"))
 // display("u:know-dances-?, qud:CC")
@@ -169,12 +184,12 @@ var literalListener = cache(function(utterance, qud) {
 
 
 
-var alpha = 3
+var alpha = 8.83
 
 // set all costs to 0, revise later.
 var cost = function(utterance){
-  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0 
-  var negation_cost = _.includes(utterance, "doesnt") ? 0 : 0
+  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 2.09 
+  var negation_cost = _.includes(utterance, "doesnt") ? 3.32 : 0
   return embedded_cost + negation_cost
 }
 
@@ -207,7 +222,8 @@ var pragmaticListener = function(utterance, cat_prior) {
    var predicate = splitutt[0]
    var qud = predicate_qud(predicate)
    observe(speaker(speaker_belief, qud), utterance)
-   return {belief: speaker_belief, qud:qud}
+  //  return {belief: speaker_belief, qud:qud}
+  return speaker_belief
  }})
 }
 

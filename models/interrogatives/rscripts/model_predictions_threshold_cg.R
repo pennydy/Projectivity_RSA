@@ -155,7 +155,7 @@ for (sp_belief in speaker_beliefs) {
 PS$speaker_belief = (PS$speaker_belief)/10
 # write.csv(PS, "../results/threshold_cg/PS.csv", row.names=FALSE)
 
-PS_summary = LL %>% 
+PS_summary = PS %>% 
   group_by(utterance, speaker_belief) %>% 
   summarize(mean_prob = mean(prob))
 
@@ -298,7 +298,7 @@ ggplot(agr,aes(x=prior_mean,y=posterior_belief_emb, color=predicate)) +
                      name = "Posterior speaker belief\nin the embedded content") +
   scale_x_continuous(breaks=seq(0,1,by=0.2),
                      name = "Rating of prior belief in the embedded content")
-ggsave("../graphs/threshold_mix/threshold_mix-PL-prior.pdf",width=7,height=3)
+ggsave("../graphs/threshold_cg/threshold_cg-PL-prior.pdf",width=7,height=3)
 
 
 

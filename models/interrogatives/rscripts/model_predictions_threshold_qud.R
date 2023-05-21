@@ -23,12 +23,25 @@ eval_webppl <- function(command) {
 
 # read in by-item priors
 item_priors <- read_csv("../data/binned-priors.csv")
-ggplot(item_priors, aes(x=state, y=prop)) +
+ggplot(item_priors %>% 
+         filter(!item %in% c("Sophia_H", "Sophia_L", "Mia_H", "Mia_L")), 
+       aes(x=state, y=prop)) +
   geom_bar(stat="identity") +
-  facet_wrap(.~item) +
-  scale_x_continuous(breaks=seq(from = 0, to = 10, by = 1))
+  facet_wrap(.~item,ncol = 6) +
+  scale_y_continuous("Proportion of prior belief\nin the embedded content")+
+  scale_x_continuous(breaks=seq(from = 0, to = 10, by = 1), "Belief state")
+ggsave("../graphs/all_priors.pdf",width=6,height=3)
+
 
 priors <- unique(item_priors$item)
+
+priors_by_condition <- read.csv("../../interrogatives/data/condition-priors.csv") %>% 
+  rename(prior_mean = prior_rating,
+         prior = item_condition) %>% 
+  mutate(prior_neg_mean = 1 - prior_mean)
+
+combined_prior <- mean(priors_by_condition$prior_mean)
+
 
 # prepare the plots ----
 
@@ -50,35 +63,73 @@ utterances
 # define the QUD 
 quds = c("MC", "CC")
 
-# define the beliefs
-#beliefs = c("dances","not dances")
+
+# define predicates
+predicates = c("think", "know", "BARE")
 
 # define beliefs
-speaker_beliefs = seq(0,9,by=1)
+speaker_beliefs = seq(1,10,by=1)
 
-states <- speaker_beliefs + 1
+# get_mean_prior <- function(item) {
+#   item_mean <- item/sum(item)
+#   item_mean <- mean(item_mean*states)
+#   return(item_mean)
+# }
+# 
+# prior_means <- item_priors %>% 
+#   select(c("item", "state", "prop")) %>% 
+#   pivot_wider(names_from = item, values_from = prop) %>%
+#   arrange(speaker_beliefs)
+# 
+# item_prior_means <- prior_means %>% 
+#   select(-speaker_beliefs) %>%
+#   sapply(., get_mean_prior)
+# 
+# item_prior <- data.frame(row.names = NULL,
+#                          prior=priors, prior_mean=item_prior_means) %>% 
+#   mutate(prior_neg_mean = 1 - prior_mean)
 
-get_mean_prior <- function(item) {
-  item_mean <- item/sum(item)
-  item_mean <- mean(item_mean*states)
-  return(item_mean)
+# thresholds ----
+thresholds = data.frame(predicate = character(), qud = character(), value = numeric(), score = numeric())
+
+for (q in quds) {
+  for (p in predicates) {
+    threshold_tmp = eval_webppl(paste("viz_predicate_thresholds('",p,"','",q,"')",sep=""))
+    for (i in 1:nrow(threshold_tmp)) {
+      thresholds = thresholds %>%
+        add_row(predicate = p, qud = q, value = threshold_tmp$value[i], score = threshold_tmp$score[i])
+    }
+  }
 }
 
-prior_means <- item_priors %>% 
-  select(c("item", "state", "prop")) %>% 
-  pivot_wider(names_from = item, values_from = prop) %>%
-  arrange(state)
 
-item_prior_means <- prior_means %>% 
-  select(-state) %>%
-  sapply(., get_mean_prior)
+ggplot(thresholds %>% 
+         filter(predicate != "BARE"), aes(x=value)) +
+  theme_bw() +
+  facet_grid(qud~predicate, scales="free") +
+  scale_x_continuous(limits=c(0,1), breaks=seq(0,1,by=0.2), "Threshold value")+
+  geom_density(alpha=0.05)
+ggsave("../graphs/threshold_qud_threshold.pdf",width=6,height=3)
 
-item_prior <- data.frame(row.names = NULL,
-                         prior=priors, prior_mean=item_prior_means) %>% 
-  mutate(prior_neg_mean = 1 - prior_mean)
+#### bare ----
+eq = function(x){
+  # if(x>0.1) {
+  #   y<-x^0.1
+  # } else {
+  #   y<-x^2
+  # }
+  # return(y)
+  ifelse(x>0.1, x^0.1, x^2)
+}
+eq = function(x){ifelse(x>0.1, 1-x^0.1, 1-x^2)}
+ggplot(data.frame(x=c(0, .5)), aes(x=x)) + 
+  stat_function(fun=eq) +
+  # scale_x_continuous("Distance from threshold θ") +
+  # scale_y_continuous("Probability of meaning function\nreturning true") 
+  labs(x=expression(paste("Difference betwen speaker belief ", b["SP"]," and threshold ", theta["BARE p"])),
+       y=expression(paste("Probability of ",delta["[[u]]"][q]," returning true")))
+ggsave("../graphs/bare_power.pdf",width=5,height=3)
 
-# read in by-predicate qud priors
-qud_priors <- read_csv("../data/predicate-nai.csv")
 
 # literal listener ----
 
@@ -134,7 +185,7 @@ for (sp_belief in speaker_beliefs) {
 # .2 means "belief in p is >= .1 and < .1"
 # ...
 # 1 means "belief in p is >= .9 and <= 1"
-PS$speaker_belief = (PS$speaker_belief + 1)/10
+PS$speaker_belief = (PS$speaker_belief)/10
 
 ggplot(PS, aes(x=speaker_belief, y=prob)) +
   geom_bar(stat="identity") +
@@ -155,61 +206,118 @@ ggsave("../graphs/threshold_qud/threshold_qud-PS-bybelief.pdf",width=12,height=3
 
 # pragmatic listener ----
 
+u = "know-dances-?"
+pr = "Charley_H"
+PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",pr,"')",sep=""))
+
+PL_test <- PL_tmp %>% 
+  mutate(total_count = n()) %>% 
+  group_by(value) %>% 
+  summarize(count = n(),
+            prob = count/total_count) %>% 
+  distinct(value,prob)
+# q = "MC"
+# PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",q,"','",pr,"')",sep=""))
+
+# PL_test <- PL_tmp %>% 
+#   group_by(Iteration) %>% 
+#   pivot_wider(names_from = Parameter, values_from = value) %>%
+#   ungroup() %>% 
+#   mutate(total_count=n()) %>% 
+#   group_by(belief) %>% 
+#   mutate(speaker_count = n(),
+#          speaker_prob = speaker_count/total_count) %>% 
+#   ungroup() %>% 
+#   group_by(qud) %>% 
+#   mutate(qud_count = n(),
+#          qud_prob = qud_count/total_count) %>% 
+#   select(belief, qud, speaker_prob, qud_prob)
+
+# only speaker belief, not joint inferene for now
+
+PL = data.frame(utterance = character(),  prior = character(), speaker_belief = integer(), prob = numeric())
+
 # currently implemented as just returning beliefs as a function of utterance and qud, but ideally would be a joint inference model
 # also inferring qud. not implemented for purely technical boring reasons: 
 # rwebppl can't parse joint inference webppl output) -> cannot do joint inference of two different types of variables
 
-PL = data.frame(utterance = character(), qud = character(), prior = character(), speaker_belief = character(), speaker_prob = numeric(), qud_prob=numeric())
-
-u = "know-dances-?"
-pr = "Charley_H"
-PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",pr,"')",sep=""))
-# q = "MC"
-# PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",q,"','",pr,"')",sep=""))
-
-PL_test <- PL_tmp %>% 
-  group_by(Iteration) %>% 
-  pivot_wider(names_from = Parameter, values_from = value) %>%
-  ungroup() %>% 
-  mutate(total_count=n()) %>% 
-  group_by(belief) %>% 
-  mutate(speaker_count = n(),
-         speaker_prob = speaker_count/total_count) %>% 
-  ungroup() %>% 
-  group_by(qud) %>% 
-  mutate(qud_count = n(),
-         qud_prob = qud_count/total_count) %>% 
-  select(belief, qud, speaker_prob, qud_prob)
+# PL = data.frame(utterance = character(), qud = character(), prior = character(), speaker_belief = character(), speaker_prob = numeric(), qud_prob=numeric())
 
 
 for (u in utterances) {
   # for (q in quds) {
     for (pr in priors) {
       # PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",q,"','",pr,"')",sep=""))
-      PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",pr,"')",sep="")) %>% 
-        group_by(Iteration) %>% 
-        pivot_wider(names_from = Parameter, values_from = value) %>%
-        ungroup() %>% 
-        mutate(total_count=n()) %>% 
-        group_by(belief) %>% 
-        mutate(speaker_count = n(),
-               speaker_prob = speaker_count/total_count) %>% 
-        ungroup() %>% 
-        group_by(qud) %>% 
-        mutate(qud_count = n(),
-               qud_prob = qud_count/total_count) %>% 
-        select(belief, qud, speaker_prob, qud_prob)
+      # PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",pr,"')",sep="")) %>% 
+      #   group_by(Iteration) %>% 
+      #   pivot_wider(names_from = Parameter, values_from = value) %>%
+      #   ungroup() %>% 
+      #   mutate(total_count=n()) %>% 
+      #   group_by(belief) %>% 
+      #   mutate(speaker_count = n(),
+      #          speaker_prob = speaker_count/total_count) %>% 
+      #   ungroup() %>% 
+      #   group_by(qud) %>% 
+      #   mutate(qud_count = n(),
+      #          qud_prob = qud_count/total_count) %>% 
+      #   select(belief, qud, speaker_prob, qud_prob)
       
+      # for (i in 1:nrow(PL_tmp)) {
+      #   PL = PL %>% 
+      #     add_row(utterance = u, qud = PL_tmp$qud[i], prior = pr, speaker_belief = PL_tmp$belief[i], speaker_prob = PL_tmp$speaker_prob[i], qud_prob = PL_tmp$qud_prob[i])
+        
+      PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",pr,"')",sep="")) %>% 
+        mutate(total_count = n()) %>% 
+        group_by(value) %>% 
+        summarize(count = n(),
+                  prob = count/total_count) %>% 
+        ungroup() %>% 
+        distinct(value,prob)
+
       for (i in 1:nrow(PL_tmp)) {
         PL = PL %>% 
-          add_row(utterance = u, qud = PL_tmp$qud[i], prior = pr, speaker_belief = PL_tmp$belief[i], speaker_prob = PL_tmp$speaker_prob[i], qud_prob = PL_tmp$qud_prob[i])
+          add_row(utterance = u,  prior = pr, speaker_belief = PL_tmp$value[i], prob = PL_tmp$prob[i])
       }
     }
   # }
 }
 
+PL_summary <- PL %>% 
+  group_by(utterance, prior) %>% 
+  summarize(posterior_belief_p = sum(prob*speaker_belief/10)) %>% 
+  mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "Embedded: not p",
+                              str_detect(utterance, "BARE") ~ "Polar",
+                              TRUE ~ "Embedded: p"),
+         predicate = case_when(str_detect(utterance, "think") ~ "think",
+                               str_detect(utterance, "know") ~ "know",
+                               str_detect(utterance, "BARE") ~ "Polar",
+                               TRUE ~ "ERROR"),
+         posterior_belief_emb = case_when(polarity == "Embedded: not p" ~ 1 - posterior_belief_p,
+                                          TRUE ~ posterior_belief_p)) %>% 
+  rename(prob = posterior_belief_emb) %>% 
+  ungroup() %>% 
+  select(prior, polarity, predicate, prob)
+
+PL_prior <- PL_summary %>% 
+  left_join(priors_by_condition, by=c("prior")) %>% 
+  mutate(prior_mean = ifelse(polarity=="Embedded: not p", prior_neg_mean, prior_mean),
+         predicate = fct_relevel(predicate, "Polar", "think", "know"),
+         polarity = fct_relevel(polarity, "Polar", "Embedded: p", "Embedded: not p")) %>% 
+  select(-prior_neg_mean)
+
+ggplot(PL_prior, aes(x=prior_mean,
+                     y=prob,color=predicate)) +
+  geom_point(alpha=0.6) +
+  geom_smooth(method="lm") +
+  facet_grid(.~polarity) +
+  scale_color_manual(values=cbPalette[2:4]) +
+  scale_y_continuous(name = "Posterior speaker belief\nin the embedded content") +
+  scale_x_continuous(name = "Rating of prior belief in the embedded content")
+
+
+
 PL_prior = PL %>% 
-  left_join(item_prior, by=c("prior")) %>% 
+  left_join(item_priors, by=c("prior")) %>% 
   mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "neg",
                               TRUE ~ "pos"),
          predicate = case_when(str_detect(utterance, "think") ~ "think",

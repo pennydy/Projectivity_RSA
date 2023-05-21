@@ -14,7 +14,7 @@ experiments/1_listenerProjection/finalized_interface/
 experiments/1_listenerProjection/*.config
 .Rproj.user
 
-writings/*
+writings/towardsa_0201.pdf
 
 analysis/2_listenerSpeakerAH/main/graphs/belief_p/
 analysis/2_listenerSpeakerAH/main/cache/
@@ -26,3 +26,6 @@ models/certainty/
 models/chemo/graphs/chemo_production/cogsci
 models/chemo/graphs/chemo_production/*.pdf
 models/BDA/results/chemo_production_pilot/
+models/BDA/results/chemo_production_incorrect_inputs/
+models/BDA/graphs/chemo_mix/incorrect_inputs
+models/interrogatives/graphs/simple_chemo/combine_graphs.key

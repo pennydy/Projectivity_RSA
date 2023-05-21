@@ -54,93 +54,6 @@ speaker_beliefs = c("dances","doesnt_dance","uncertain")
 ah_beliefs = c("dances","doesnt_dance","uncertain","null")
 
 #  pragmatic speaker -----
-sp_belief <- "dances"
-ah_belief <- "dances"
-command <- paste("viz_speaker({speaker_belief:'",sp_belief,"', ah_belief:'",ah_belief,"'})",sep="")
-PS_tmp = eval_webppl(command)
-
-
-PS = data.frame(speaker_belief = character(), ah_belief = character(), utterance = character(), prob = numeric())
-
-for (sp_belief in speaker_beliefs) {
-  for (ah_belief in ah_beliefs) {
-        PS_tmp = eval_webppl(paste("speaker({speaker_belief:'",sp_belief,"', ah_belief:'",ah_belief,"'})",sep=""))
-        for (i in 1:nrow(PS_tmp)) {
-          PS = PS %>% 
-            add_row(speaker_belief = sp_belief, ah_belief = ah_belief, utterance = PS_tmp$support[i], prob = PS_tmp$prob[i])
-        }
-  }
-}
-
-PS_summary = PS %>% 
-  mutate(utterance_type = ifelse(str_detect(utterance, "doesnt"), "not p","p"),
-         predicate = case_when(str_detect(utterance, "know") ~ "know",
-                               str_detect(utterance, "think") ~ "think",
-                               TRUE ~ "Polar"),
-         # speaker_belief = ifelse(str_detect(speaker_belief, "doesnt"), "not p", "p"),
-         # speaker_belief = case_when(str_detect(speaker_belief, "doesnt") ~ "not p",
-         #                            str_detect(speaker_belief, "null") ~ "null",
-         #                            TRUE ~ "p"),
-         speaker_belief = case_when(str_detect(speaker_belief, "doesnt") ~ "not p",
-                                    str_detect(speaker_belief, "null") ~ "null",
-                                    str_detect(speaker_belief, "uncertain") ~ "uncertain",
-                                    TRUE ~ "p"),
-         # ah_belief = case_when(str_detect(ah_belief, "doesnt") ~ "not p",
-         #                       str_detect(ah_belief, "null") ~ "null",
-         #                       TRUE ~ "p"),
-         ah_belief = case_when(str_detect(ah_belief, "doesnt") ~ "not p",
-                               str_detect(ah_belief, "null") ~ "null",
-                               str_detect(ah_belief, "uncertain") ~ "uncertain",
-                               TRUE ~ "p"),
-         utterance = case_when(utterance == "BARE-dances-?" ~ "Polar",
-                               utterance == "know-dances-?" ~ '"know-p"',
-                               utterance == "think-dances-?" ~ '"think-p"',
-                               utterance == "know-doesnt_dance-?" ~ '"know-not_p"',
-                               TRUE ~ '"think-not_p"'),
-           belief_states = paste("<",speaker_belief,", ",ah_belief,">", sep="")) %>%
-  group_by(utterance,belief_states,predicate,utterance_type) %>% 
-  summarize(mean_prob = mean(prob)) %>% 
-  ungroup() %>% 
-  mutate(belief_states = fct_relevel(belief_states, '<p, p>','<p, not p>', '<p, uncertain>', '<p, null>', '<not p, p>', '<not p, not p>', '<not p, uncertain>', '<not p, null>', '<uncertain, p>','<uncertain, not p>', '<uncertain, uncertain>', '<uncertain, null>'),
-         utterance = fct_relevel(utterance, 'Polar', '"know-p"', '"know-not_p"', '"think-p"', '"think-not_p"'),
-         predicate = fct_relevel(predicate, 'Polar', 'think', 'know'),
-         utterance_type = fct_relevel(utterance_type, 'p', 'not p'))
-
-# ggplot(PS_summary, 
-#        aes(x=utterance, y=mean_prob, fill = predicate, pattern = utterance_type)) +
-#   # geom_bar(stat="identity") +
-#   geom_bar_pattern(stat="identity",
-#                    position = position_dodge2(preserve = "single"),
-#                    width = 0.8,
-#                    color = "black", 
-#                    pattern_fill = "black",
-#                    pattern_angle = 45,
-#                    pattern_density = 0.1,
-#                    pattern_spacing = 0.05,
-#                    pattern_key_scale_factor = 0.6) +
-#   facet_grid(belief_states~.) +
-#   scale_fill_manual(values=cbPalette[2:4],
-#                     # labels=c('Polar', 'think', 'know'),
-#                     name="Predicate") +
-#   scale_pattern_manual(values = c("p" = "stripe", "not p" = "none")) +
-#   scale_x_discrete(name="Utterance",
-#                    guide=guide_axis(angle = 65)) +
-#   theme(legend.position="top") +
-#   ylab("Production probability")
-
-ggplot(PS_summary,
-       aes(x=utterance, y=mean_prob, fill = predicate)) +
-  geom_bar(stat="identity") +
-  facet_wrap(belief_states~.) +
-  scale_fill_manual(values=cbPalette[2:4],
-                    # labels=c('Polar', 'think', 'know'),
-                    name="Predicate") +
-  scale_x_discrete(name="Utterance",
-                   guide=guide_axis(angle = 65)) +
-  theme(legend.position="top") +
-  ylab("Production probability")
-ggsave("../graphs/chemo_production/chemo_production-PS1234-bin3.pdf",width=6,height=4)
-
 ### BDA ----
 # load the BDA posterior
 all_predictives <- data.frame(seed = character(), utterance = character(), speaker_belief = character(), ah_belief = character(), prob = numeric())
@@ -201,15 +114,100 @@ facet_wrap(belief_states~.) +
                     name="Predicate") +
   scale_x_discrete(name="Utterance",
                    guide=guide_axis(angle = 65)) +
-  theme(legend.position="top") +
+  theme(legend.position="top",
+        axis.text.x = element_text(size = 12),
+        axis.title.y = element_text(size = 14),
+        axis.title.x = element_text(size = 14)) +
   ylab("Production probability")
 production
 ggsave(production, file="../graphs/chemo_production/model_eval/production.pdf", width=6, height=5)
 
-#   mutate(belief_states = fct_relevel(belief_states, '<p, p>','<p, not p>', '<p, ?>','<p, null>', '<not p, p>', '<not p, not p>', '<not p, ?>', '<not p, null>', '<?, p>','<?, not p>', '<?, ?>', '<?, null>'),
-#          utterance = fct_relevel(utterance, 'Polar', '"know-p"', '"know-not_p"', '"think-p"', '"think-not_p"'),
-#          predicate = fct_relevel(predicate, 'Polar', 'think', 'know'),
-#          utterance_type = fct_relevel(utterance_type, 'p', 'not p'))
+### simulation ----
+sp_belief <- "dances"
+ah_belief <- "dances"
+command <- paste("viz_speaker({speaker_belief:'",sp_belief,"', ah_belief:'",ah_belief,"'})",sep="")
+PS_tmp = eval_webppl(command)
+
+PS = data.frame(speaker_belief = character(), ah_belief = character(), utterance = character(), prob = numeric())
+
+for (sp_belief in speaker_beliefs) {
+  for (ah_belief in ah_beliefs) {
+    PS_tmp = eval_webppl(paste("speaker({speaker_belief:'",sp_belief,"', ah_belief:'",ah_belief,"'})",sep=""))
+    for (i in 1:nrow(PS_tmp)) {
+      PS = PS %>% 
+        add_row(speaker_belief = sp_belief, ah_belief = ah_belief, utterance = PS_tmp$support[i], prob = PS_tmp$prob[i])
+    }
+  }
+}
+
+PS_summary = PS %>% 
+  mutate(utterance_type = ifelse(str_detect(utterance, "doesnt"), "not p","p"),
+         predicate = case_when(str_detect(utterance, "know") ~ "know",
+                               str_detect(utterance, "think") ~ "think",
+                               TRUE ~ "Polar"),
+         # speaker_belief = ifelse(str_detect(speaker_belief, "doesnt"), "not p", "p"),
+         # speaker_belief = case_when(str_detect(speaker_belief, "doesnt") ~ "not p",
+         #                            str_detect(speaker_belief, "null") ~ "null",
+         #                            TRUE ~ "p"),
+         speaker_belief = case_when(str_detect(speaker_belief, "doesnt") ~ "not p",
+                                    str_detect(speaker_belief, "null") ~ "null",
+                                    str_detect(speaker_belief, "uncertain") ~ "uncertain",
+                                    TRUE ~ "p"),
+         # ah_belief = case_when(str_detect(ah_belief, "doesnt") ~ "not p",
+         #                       str_detect(ah_belief, "null") ~ "null",
+         #                       TRUE ~ "p"),
+         ah_belief = case_when(str_detect(ah_belief, "doesnt") ~ "not p",
+                               str_detect(ah_belief, "null") ~ "null",
+                               str_detect(ah_belief, "uncertain") ~ "uncertain",
+                               TRUE ~ "p"),
+         utterance = case_when(utterance == "BARE-dances-?" ~ "Polar",
+                               utterance == "know-dances-?" ~ '"know-p"',
+                               utterance == "think-dances-?" ~ '"think-p"',
+                               utterance == "know-doesnt_dance-?" ~ '"know-not_p"',
+                               TRUE ~ '"think-not_p"'),
+         belief_states = paste("<",speaker_belief,", ",ah_belief,">", sep="")) %>%
+  group_by(utterance,belief_states,predicate,utterance_type) %>% 
+  summarize(mean_prob = mean(prob)) %>% 
+  ungroup() %>% 
+  mutate(belief_states = fct_relevel(belief_states, '<p, p>','<p, not p>', '<p, uncertain>', '<p, null>', '<not p, p>', '<not p, not p>', '<not p, uncertain>', '<not p, null>', '<uncertain, p>','<uncertain, not p>', '<uncertain, uncertain>', '<uncertain, null>'),
+         utterance = fct_relevel(utterance, 'Polar', '"know-p"', '"know-not_p"', '"think-p"', '"think-not_p"'),
+         predicate = fct_relevel(predicate, 'Polar', 'think', 'know'),
+         utterance_type = fct_relevel(utterance_type, 'p', 'not p'))
+
+# ggplot(PS_summary, 
+#        aes(x=utterance, y=mean_prob, fill = predicate, pattern = utterance_type)) +
+#   # geom_bar(stat="identity") +
+#   geom_bar_pattern(stat="identity",
+#                    position = position_dodge2(preserve = "single"),
+#                    width = 0.8,
+#                    color = "black", 
+#                    pattern_fill = "black",
+#                    pattern_angle = 45,
+#                    pattern_density = 0.1,
+#                    pattern_spacing = 0.05,
+#                    pattern_key_scale_factor = 0.6) +
+#   facet_grid(belief_states~.) +
+#   scale_fill_manual(values=cbPalette[2:4],
+#                     # labels=c('Polar', 'think', 'know'),
+#                     name="Predicate") +
+#   scale_pattern_manual(values = c("p" = "stripe", "not p" = "none")) +
+#   scale_x_discrete(name="Utterance",
+#                    guide=guide_axis(angle = 65)) +
+#   theme(legend.position="top") +
+#   ylab("Production probability")
+
+ggplot(PS_summary,
+       aes(x=utterance, y=mean_prob, fill = predicate)) +
+  geom_bar(stat="identity") +
+  facet_wrap(belief_states~.) +
+  scale_fill_manual(values=cbPalette[2:4],
+                    # labels=c('Polar', 'think', 'know'),
+                    name="Predicate") +
+  scale_x_discrete(name="Utterance",
+                   guide=guide_axis(angle = 65)) +
+  theme(legend.position="top") +
+  ylab("Production probability")
+ggsave("../graphs/chemo_production/chemo_production-PS1234-bin3.pdf",width=6,height=4)
 
 # pragmatic listener ----
 ## BDA ----
@@ -238,10 +236,6 @@ sp <- listener_sp_predictives %>%
   filter((polarity == "pos" & speaker_belief == "dances") |
            polarity == "neg" & speaker_belief == "doesnt_dance" |
            polarity == "Polar" & speaker_belief == "dances") %>%
-  # group_by(utterance, polarity, predicate, prior_condition, speaker_belief) %>%
-  # summarize(mean_prob=mean(prob)) %>%
-  # ungroup() %>% 
-  # mutate(prob = ifelse(polarity=="neg", 1-mean_prob, mean_prob)) %>% 
   mutate(polarity = fct_relevel(polarity, "Polar", "pos", "neg" ),
          predicate = fct_relevel(predicate, "Polar", "think", "know")) %>%
   # select(-c(utterance, speaker_belief))
@@ -276,7 +270,7 @@ empirical_speaker$condition = "empirical"
 
 sp_summary_combined <- rbind(sp_summary_binary, empirical_speaker) %>% 
   mutate(polarity = ifelse(polarity %in% c("Polar","pos"), "pos", "neg"),
-         polarity = ifelse(polarity == "pos", "Embedded content:p", "Embedded content:not p"))
+         polarity = ifelse(polarity == "pos", "p", "not p"))
 
 speaker_belief_comparison <- ggplot(data = sp_summary_combined,
                                     mapping = aes(x = condition,
@@ -425,7 +419,7 @@ empirical_ah <- empirical %>%
 empirical_ah$condition = "empirical"
 
 ah_summary_combined <- rbind(ah_summary_binary, empirical_ah) %>% 
-  mutate(polarity = ifelse(polarity == "pos", "Embedded content:p", "Embedded content:not p"))
+  mutate(polarity = ifelse(polarity == "pos", "p", "not p"))
 
 ah_belief_comparison <- ggplot(data = ah_summary_combined,
                                     mapping = aes(x = condition,
@@ -463,6 +457,7 @@ ah_belief_comparison <- ggplot(data = ah_summary_combined,
 ah_belief_comparison
 ggsave(ah_belief_comparison, file="../graphs/chemo_production/model_eval/ah_belief_comparison.pdf", width=7, height=4)
 
+### simulation ----
 # only infer speaker belief.
 # # testing pragmatic listener
 # u = "think-doesnt_dance-?"
@@ -480,11 +475,9 @@ ggsave(ah_belief_comparison, file="../graphs/chemo_production/model_eval/ah_beli
 #   mutate(prob=mean_prob/sum_means) %>%
 #   select(value, prob)
 
-
 # u <- "know-dances-?"
 # it <- "Charley_L"
 # PL_tmp = eval_webppl(paste("pragmaticListener('",u,"','",it,"')",sep="")) 
-
 
 PL = data.frame(utterance = character(), prior = character(), speaker_belief = character(), ah_belief = character(), prob = numeric())
 

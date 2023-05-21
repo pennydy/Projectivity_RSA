@@ -1,0 +1,339 @@
+// speaker and attitude holder belief priors
+var speaker_beliefs = ["dances","doesnt_dance"]
+var ah_beliefs = ["dances", "doesnt_dance", "null"]
+
+
+var speaker_beliefPrior = function (item) {
+    return categorical({
+        vs: speaker_beliefs,
+        ps: speaker_priors[item]
+    })
+}
+
+var ah_beliefPrior = function (item) {
+    return categorical({
+        vs: ah_beliefs,
+        ps: ah_priors[item]
+    })
+}
+var speaker_priors = {
+    'Charley_H': [0.804632353, 0.195367647],
+    'Charley_L': [0.277066667, 0.722933333],
+    'Danny_H': [0.697062937, 0.302937063],
+    'Danny_L': [0.27993007, 0.72006993],
+    'Emily_H': [0.561555556, 0.438444444],
+    'Emily_L': [0.151655629, 0.848344371],
+    'Emma_H': [0.680763889, 0.319236111],
+    'Emma_L': [0.323098592, 0.676901408],
+    'Frank_H': [0.67972028, 0.32027972],
+    'Frank_L': [0.16965035, 0.83034965],
+    'Grace_H': [0.790144928, 0.209855072],
+    'Grace_L': [0.24777027, 0.75222973],
+    'Isabella_H': [0.517707006, 0.482292994],
+    'Isabella_L': [0.125813953, 0.874186047],
+    'Jackson_H': [0.774965035, 0.225034965],
+    'Jackson_L': [0.186013986, 0.813986014],
+    'Jayden_H': [0.687794118, 0.312205882],
+    'Jayden_L': [0.1756, 0.8244],
+    'Jon_H': [0.7559375, 0.2440625],
+    'Jon_L': [0.235696203, 0.764303797],
+    'Josh_H': [0.544575163, 0.455424837],
+    'Josh_L': [0.236917293, 0.763082707],
+    'Josie_H': [0.73343949, 0.26656051],
+    'Josie_L': [0.117286822, 0.882713178],
+    'Julian_H': [0.599493671, 0.400506329],
+    'Julian_L': [0.401796875, 0.598203125],
+    'Mary_H': [0.815167785, 0.184832215],
+    'Mary_L': [0.22540146, 0.77459854],
+    'Mia_H': [0.579022556, 0.420977444],
+    'Mia_L': [0.224901961, 0.775098039],
+    'Olivia_H': [0.664776119, 0.335223881],
+    'Olivia_L': [0.210592105, 0.789407895],
+    'Owen_H': [0.746482759, 0.253517241],
+    'Owen_L': [0.279503546, 0.720496454],
+    'Sophia_H': [0.634248366, 0.365751634],
+    'Sophia_L': [0.415413534, 0.584586466],
+    'Tony_H': [0.747279412, 0.252720588],
+    'Tony_L': [0.2196, 0.7804],
+    'Zoe_H': [0.745971223, 0.254028777],
+    'Zoe_L': [0.192108844, 0.807891156]
+}
+
+var null_prob = .05
+
+var ah_priors = {
+    'Charley_H': [0.804632353, 0.195367647, null_prob],
+    'Charley_L': [0.277066667, 0.722933333, null_prob],
+    'Danny_H': [0.697062937, 0.302937063, null_prob],
+    'Danny_L': [0.27993007, 0.72006993, null_prob],
+    'Emily_H': [0.561555556, 0.438444444, null_prob],
+    'Emily_L': [0.151655629, 0.848344371, null_prob],
+    'Emma_H': [0.680763889, 0.319236111, null_prob],
+    'Emma_L': [0.323098592, 0.676901408, null_prob],
+    'Frank_H': [0.67972028, 0.32027972, null_prob],
+    'Frank_L': [0.16965035, 0.83034965, null_prob],
+    'Grace_H': [0.790144928, 0.209855072, null_prob],
+    'Grace_L': [0.24777027, 0.75222973, null_prob],
+    'Isabella_H': [0.517707006, 0.482292994, null_prob],
+    'Isabella_L': [0.125813953, 0.874186047, null_prob],
+    'Jackson_H': [0.774965035, 0.225034965, null_prob],
+    'Jackson_L': [0.186013986, 0.813986014, null_prob],
+    'Jayden_H': [0.687794118, 0.312205882, null_prob],
+    'Jayden_L': [0.1756, 0.8244, null_prob],
+    'Jon_H': [0.7559375, 0.2440625, null_prob],
+    'Jon_L': [0.235696203, 0.764303797, null_prob],
+    'Josh_H': [0.544575163, 0.455424837, null_prob],
+    'Josh_L': [0.236917293, 0.763082707, null_prob],
+    'Josie_H': [0.73343949, 0.26656051, null_prob],
+    'Josie_L': [0.117286822, 0.882713178, null_prob],
+    'Julian_H': [0.599493671, 0.400506329, null_prob],
+    'Julian_L': [0.401796875, 0.598203125, null_prob],
+    'Mary_H': [0.815167785, 0.184832215, null_prob],
+    'Mary_L': [0.22540146, 0.77459854, null_prob],
+    'Mia_H': [0.579022556, 0.420977444, null_prob],
+    'Mia_L': [0.224901961, 0.775098039, null_prob],
+    'Olivia_H': [0.664776119, 0.335223881, null_prob],
+    'Olivia_L': [0.210592105, 0.789407895, null_prob],
+    'Owen_H': [0.746482759, 0.253517241, null_prob],
+    'Owen_L': [0.279503546, 0.720496454, null_prob],
+    'Sophia_H': [0.634248366, 0.365751634, null_prob],
+    'Sophia_L': [0.415413534, 0.584586466, null_prob],
+    'Tony_H': [0.747279412, 0.252720588, null_prob],
+    'Tony_L': [0.2196, 0.7804, null_prob],
+    'Zoe_H': [0.745971223, 0.254028777, null_prob],
+    'Zoe_L': [0.192108844, 0.807891156, null_prob]
+}
+
+
+// specify utterance alternatives
+var utterances = ["know-dances-?", 
+                  "know-doesnt_dance-?",                 
+                  "think-dances-?", 
+                  "think-doesnt_dance-?",                         
+                  "BARE-dances-?"]
+
+
+
+// Prior over QUDs
+var qudPrior = function (predicate) {
+    if (predicate == "know") {
+        return categorical({ ps: [0.85, 0.15], vs: ["MC", "CC"] })
+    } else if (predicate == "think") {
+        return categorical({ ps: [0.7, 0.3], vs: ["MC", "CC"] })
+    } else { // BARE
+        return categorical({ ps: [0.1, 0.9], vs: ["MC", "CC"] })
+    }
+}
+
+var model = function(params) {
+    return {
+        production_prob : {         // utterances: know p, know not p, think p, think not p, BARE
+            dances_dances_prob: [params.p_p_knowDances, params.p_p_knowNot, params.p_p_thinkDances, params.p_p_thinkNot, params.p_p_BARE],
+            dances_doesnt_prob:[params.p_np_knowDances, params.p_np_knowNot, params.p_np_thinkDances, params.p_np_thinkNot, params.p_np_BARE],
+            doesnt_dances_prob: [params.np_p_knowDances, params.np_p_knowNot, params.np_p_thinkDances, params.np_p_thinkNot, params.np_p_BARE],
+            doesnt_doesnt_prob: [params.np_np_knowDances, params.np_np_knowNot, params.np_np_thinkDances, params.np_np_thinkNot, params.np_np_BARE],
+            dances_na_prob: [params.p_na_knowDances, params.p_na_knowNot, params.p_na_thinkDances, params.p_na_thinkNot, params.p_na_BARE],
+            doesnt_na_prob:[params.np_na_knowDances, params.np_na_knowNot, params.np_na_thinkDances, params.np_na_thinkNot, params.np_na_BARE],
+            // uncertain_dances_prob:[params.un_p_knowDances, params.un_p_knowNot, params.un_p_thinkDances, params.un_p_thinkNot, params.un_p_BARE],
+            // uncertain_doesnt_prob : [params.un_np_knowDances, params.un_np_knowNot, params.un_np_thinkDances, params.un_np_thinkNot, params.un_np_BARE],
+            // uncertain_na_prob : [params.un_na_knowDances, params.un_na_knowNot, params.un_na_thinkDances, params.un_na_thinkNot, params.un_na_BARE],
+            // dances_uncertain_prob: [params.p_un_knowDances, params.p_un_knowNot, params.p_un_thinkDances, params.p_un_thinkNot, params.p_un_BARE],
+            // doesnt_uncertain_prob: [params.np_un_knowDances, params.np_un_knowNot, params.np_un_thinkDances, params.np_un_thinkNot, params.np_un_BARE],
+            // uncertain_uncertain_prob: [params.un_un_knowDances, params.un_un_knowNot, params.un_un_thinkDances, params.un_un_thinkNot, params.un_un_BARE],
+
+            dances_dances_CC_prob: [params.p_p_CC_knowDances, params.p_p_CC_knowNot, params.p_p_CC_thinkDances, params.p_p_CC_thinkNot, params.p_p_CC_BARE],
+            dances_doesnt_CC_prob:[params.p_np_CC_knowDances, params.p_np_CC_knowNot, params.p_np_CC_thinkDances, params.p_np_CC_thinkNot, params.p_np_CC_BARE],
+            doesnt_dances_CC_prob: [params.np_p_CC_knowDances, params.np_p_CC_knowNot, params.np_p_CC_thinkDances, params.np_p_CC_thinkNot, params.np_p_CC_BARE],
+            doesnt_doesnt_CC_prob: [params.np_np_CC_knowDances, params.np_np_CC_knowNot, params.np_np_CC_thinkDances, params.np_np_CC_thinkNot, params.np_np_CC_BARE],
+            dances_na_CC_prob: [params.p_na_CC_knowDances, params.p_na_CC_knowNot, params.p_na_CC_thinkDances, params.p_na_CC_thinkNot, params.p_na_CC_BARE],
+            doesnt_na_CC_prob:[params.np_na_CC_knowDances, params.np_na_CC_knowNot, params.np_na_CC_thinkDances, params.np_na_CC_thinkNot, params.np_na_CC_BARE],
+            // uncertain_dances_CC_prob:[params.un_p_CC_knowDances, params.un_p_CC_knowNot, params.un_p_CC_thinkDances, params.un_p_CC_thinkNot, params.un_p_CC_BARE],
+            // uncertain_doesnt_CC_prob : [params.un_np_CC_knowDances, params.un_np_CC_knowNot, params.un_np_CC_thinkDances, params.un_np_CC_thinkNot, params.un_np_CC_BARE],
+            // uncertain_na_CC_prob : [params.un_na_CC_knowDances, params.un_na_CC_knowNot, params.un_na_CC_thinkDances, params.un_na_CC_thinkNot, params.un_na_CC_BARE],
+            // dances_uncertain_CC_prob: [params.p_un_CC_knowDances, params.p_un_CC_knowNot, params.p_un_CC_thinkDances, params.p_un_CC_thinkNot, params.p_un_CC_BARE],
+            // doesnt_uncertain_CC_prob: [params.np_un_CC_knowDances, params.np_un_CC_knowNot, params.np_un_CC_thinkDances, params.np_un_CC_thinkNot, params.np_un_CC_BARE],
+            // uncertain_uncertain_CC_prob: [params.un_un_CC_knowDances, params.un_un_CC_knowNot, params.un_un_CC_thinkDances, params.un_un_CC_thinkNot, params.un_un_CC_BARE]
+        }
+    }
+}
+
+var speaker = cache(function(belief_tuple, qud, model){
+  var speaker_belief = belief_tuple.speaker_belief
+  var ah_belief = belief_tuple.ah_belief
+
+  if (qud == "MC") {
+    if (speaker_belief == "dances" & ah_belief =="dances") {
+        return Categorical({ps:model.production_prob["dances_dances_prob"],
+                            vs:utterances})
+      }
+      else if (speaker_belief=="dances" & ah_belief =="doesnt_dance") {
+        return Categorical({ps:model.production_prob["dances_doesnt_prob"],
+                            vs:utterances})
+      }
+      else if (speaker_belief =="doesnt_dance" & ah_belief=="dances") {
+        return Categorical({ps:model.production_prob["doesnt_dances_prob"],
+                            vs:utterances})
+      }
+      else if (speaker_belief == "doesnt_dance" & ah_belief == "doesnt_dance") {
+        return Categorical({ps:model.production_prob["doesnt_doesnt_prob"],
+                            vs:utterances})
+      }
+      else if (speaker_belief == "dances" & ah_belief == "null") {
+        return Categorical({ps:model.production_prob["dances_na_prob"],
+                            vs:utterances})
+      }
+      else if (speaker_belief == "doesnt_dance" & ah_belief == "null") {
+        return Categorical({ps:model.production_prob["doesnt_na_prob"],
+                            vs:utterances})
+      }
+    
+    //   else if (speaker_belief == "uncertain" & ah_belief == "dances") {
+    //     return Categorical({ps:model.production_prob["uncertain_dances_prob"],
+    //                         vs:utterances})
+    //   }
+    //   else if (speaker_belief == "uncertain" & ah_belief == "doesnt_dance") {
+    //     return Categorical({ps:model.production_prob["uncertain_doesnt_prob"],
+    //                         vs:utterances})
+    //   }
+    //   else if (speaker_belief == "uncertain" & ah_belief == "null") {
+    //     return Categorical({ps:model.production_prob["uncertain_na_prob"],
+    //                         vs:utterances})
+    //   }
+    //   else if (speaker_belief == "dances" & ah_belief == "uncertain") {
+    //     return Categorical({ps:model.production_prob["dances_uncertain_prob"],
+    //                         vs:utterances})
+    //   }
+    //   else if (speaker_belief == "doesnt_dance" & ah_belief == "uncertain") {
+    //     return Categorical({ps:model.production_prob["doesnt_uncertain_prob"],
+    //                         vs:utterances})
+    //   }
+    //   else if (speaker_belief == "uncertain" & ah_belief == "uncertain") {
+    //     return Categorical({ps:model.production_prob["uncertain_uncertain_prob"],
+    //                         vs:utterances})
+    //   }
+  } else if (qud == "CC") {
+    if (speaker_belief == "dances" & ah_belief =="dances") {
+        return Categorical({ps:model.production_prob["dances_dances_CC_prob"],
+                            vs:utterances})
+      }
+      else if (speaker_belief=="dances" & ah_belief =="doesnt_dance") {
+        return Categorical({ps:model.production_prob["dances_doesnt_CC_prob"],
+                            vs:utterances})
+      }
+      else if (speaker_belief =="doesnt_dance" & ah_belief=="dances") {
+        return Categorical({ps:model.production_prob["doesnt_dances_CC_prob"],
+                            vs:utterances})
+      }
+      else if (speaker_belief == "doesnt_dance" & ah_belief == "doesnt_dance") {
+        return Categorical({ps:model.production_prob["doesnt_doesnt_CC_prob"],
+                            vs:utterances})
+      }
+      else if (speaker_belief == "dances" & ah_belief == "null") {
+        return Categorical({ps:model.production_prob["dances_na_CC_prob"],
+                            vs:utterances})
+      }
+      else if (speaker_belief == "doesnt_dance" & ah_belief == "null") {
+        return Categorical({ps:model.production_prob["doesnt_na_CC_prob"],
+                            vs:utterances})
+      }
+    
+    //   else if (speaker_belief == "uncertain" & ah_belief == "dances") {
+    //     return Categorical({ps:model.production_prob["uncertain_dances_CC_prob"],
+    //                         vs:utterances})
+    //   }
+    //   else if (speaker_belief == "uncertain" & ah_belief == "doesnt_dance") {
+    //     return Categorical({ps:model.production_prob["uncertain_doesnt_CC_prob"],
+    //                         vs:utterances})
+    //   }
+    //   else if (speaker_belief == "uncertain" & ah_belief == "null") {
+    //     return Categorical({ps:model.production_prob["uncertain_na_CC_prob"],
+    //                         vs:utterances})
+    //   }
+    //   else if (speaker_belief == "dances" & ah_belief == "uncertain") {
+    //     return Categorical({ps:model.production_prob["dances_uncertain_CC_prob"],
+    //                         vs:utterances})
+    //   }
+    //   else if (speaker_belief == "doesnt_dance" & ah_belief == "uncertain") {
+    //     return Categorical({ps:model.production_prob["doesnt_uncertain_CC_prob"],
+    //                         vs:utterances})
+    //   }
+    //   else if (speaker_belief == "uncertain" & ah_belief == "uncertain") {
+    //     return Categorical({ps:model.production_prob["uncertain_uncertain_CC_prob"],
+    //                         vs:utterances})
+    //   }
+  }
+
+    
+})
+
+var viz_speaker = function(belief_tuple, qud, model) {
+    return Infer({model:function(){
+      sample(speaker(belief_tuple,qud, model))
+    }})
+  }
+
+// display("p , p")
+// viz.table(speaker({speaker_belief:"dances", ah_belief:"dances"}))
+// display("p, not p")
+// viz.table(speaker({speaker_belief:"dances", ah_belief:"doesnt_dance"}))
+// display("not p, p")
+// viz.table(speaker({speaker_belief:"doesnt_dance", ah_belief:"dances"}))
+// display("not p, not p")
+// viz.table(speaker({speaker_belief:"doesnt_dance", ah_belief:"doesnt_dance"}))
+// viz.table(speaker({speaker_belief:"dances"}))
+// viz.table(speaker({speaker_belief:"doesnt_dance"}))
+
+
+var pragmaticListener = cache(function(utterance, item, model, params) {
+  return Infer({model: function(){
+    var splitutt = utterance.split('-')
+    var predicate = splitutt[0]
+    //////// priors ////////
+    var speaker_belief = speaker_beliefPrior(item)
+    var ah_belief = ah_beliefPrior(item)
+    var qud = qudPrior(predicate)
+    ////////////////////////
+    var belief_tuple = {speaker_belief:speaker_belief, ah_belief:ah_belief}
+    // console.log(speaker(belief_tuple, model))
+    observe(speaker(belief_tuple, qud, model), utterance)
+    return belief_tuple
+  }})
+})
+
+
+///
+// display("know")
+// var know = pragmaticListener("know-dances-?")
+// display("speaker_belief")
+// viz.table(marginalize(know, "speaker_belief"))
+// display("ah_belief")
+// viz.table(marginalize(know, "ah_belief"))
+
+// display("know not")
+// var know_not = pragmaticListener("know-doesnt_dance-?")
+// display("speaker_belief")
+// viz.table(marginalize(know_not, "speaker_belief"))
+// display("ah_belief")
+// viz.table(marginalize(know_not, "ah_belief"))
+
+// display("think")
+// var think = pragmaticListener("think-dances-?")
+// display("speaker_belief")
+// viz.table(marginalize(think, "speaker_belief"))
+// display("ah_belief")
+// viz.table(marginalize(think, "ah_belief"))
+
+// display("think not")
+// var think_not = pragmaticListener("think-doesnt_dance-?")
+// display("speaker_belief")
+// viz.table(marginalize(think_not, "speaker_belief"))
+// display("ah_belief")
+// viz.table(marginalize(think_not, "ah_belief"))
+
+// display("BARE")
+// var bare = pragmaticListener("BARE-dances-?")
+// display("speaker_belief")
+// viz.table(marginalize(bare, "speaker_belief"))
+// display("ah_belief")
+// viz.table(marginalize(bare, "ah_belief"))
+

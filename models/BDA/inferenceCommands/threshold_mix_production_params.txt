@@ -1,0 +1,92 @@
+var stringify = function(x){return JSON.stringify(x)}
+
+// sample parameters to be estimated
+var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BURN_IN, model: function(){
+
+      var p = {
+        one_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        one_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        one_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        one_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        one_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        two_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        two_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        two_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        two_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        two_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        three_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        three_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        three_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        three_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        three_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        four_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        four_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        four_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        four_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        four_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        five_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        five_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        five_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        five_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        five_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        six_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        six_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        six_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        six_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        six_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+        seven_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        seven_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        seven_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        seven_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        seven_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+        eight_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        eight_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        eight_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        eight_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        eight_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+
+        nine_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        nine_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        nine_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        nine_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        nine_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+        ten_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        ten_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        ten_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        ten_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        ten_BARE:uniformDrift({a: 0, b: 1, w: 0.01})
+
+      }
+ 
+    var m = extend(model(p)) //{literalDistLists: literalDistLists}, {thresholds:speaker_thresholds}
+
+      
+      mapData({data: df}, function(d){
+        // loop through the df dataframe. d: a row of the long-form empirical data
+
+        // console.log(d.speaker_response_bin)
+        // console.log(d.item)
+        var listenerDist = pragmaticListener(d.utterance,d.item,m,p)
+        // console.log("listenerDist: " + listenerDist)
+
+        // console.log("before sampling from the listenerDist ")
+        observe(listenerDist, d.speaker_response_bin)
+        // console.log("done sampling from the listenerDist ")
+    
+      })
+    
+      return p
+    
+    }, verbose: true})
+    
+    
+    posteriors

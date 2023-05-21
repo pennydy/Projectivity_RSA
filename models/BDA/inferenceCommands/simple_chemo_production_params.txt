@@ -1,0 +1,181 @@
+var stringify = function(x){return JSON.stringify(x)}
+
+// sample parameters to be estimated
+var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BURN_IN, model: function(){
+
+      var p = {
+        p_p_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_p_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_p_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        p_p_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_p_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        p_np_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_np_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_np_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        p_np_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_np_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        np_p_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_p_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_p_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        np_p_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_p_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        np_np_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_np_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_np_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        np_np_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_np_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        p_na_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_na_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_na_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        p_na_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_na_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        np_na_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_na_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_na_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        np_na_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_na_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+        // un_p_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_p_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_p_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // un_p_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_p_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+        // un_np_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_np_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_np_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // un_np_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_np_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+        // un_na_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_na_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_na_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // un_na_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_na_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+        // p_un_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // p_un_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // p_un_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // p_un_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // p_un_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        
+        // np_un_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // np_un_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // np_un_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // np_un_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // np_un_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        // un_un_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_un_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_un_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // un_un_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_un_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+
+        p_p_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_p_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_p_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        p_p_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_p_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        p_np_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_np_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_np_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        p_np_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_np_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        np_p_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_p_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_p_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        np_p_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_p_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        np_np_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_np_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_np_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        np_np_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_np_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        p_na_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_na_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_na_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        p_na_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        p_na_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        np_na_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_na_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_na_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        np_na_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        np_na_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+        // un_p_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_p_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_p_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // un_p_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_p_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+        // un_np_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_np_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_np_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // un_np_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_np_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+        // un_na_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_na_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_na_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // un_na_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_na_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01}),
+
+        // p_un_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // p_un_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // p_un_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // p_un_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // p_un_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        
+        // np_un_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // np_un_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // np_un_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // np_un_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // np_un_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01}), 
+
+        // un_un_CC_knowDances: uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_un_CC_knowNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_un_CC_thinkDances:uniformDrift({a: 0, b: 1, w: 0.01}),
+        // un_un_CC_thinkNot:uniformDrift({a: 0, b: 1, w: 0.01}), 
+        // un_un_CC_BARE:uniformDrift({a: 0, b: 1, w: 0.01})
+
+      }
+ 
+    var m = extend(model(p)) //{literalDistLists: literalDistLists}, {thresholds:speaker_thresholds}
+
+      
+      mapData({data: df}, function(d){
+        // loop through the df dataframe. d: a row of the long-form empirical data
+
+        // console.log(d.utterance)
+        // console.log(d.item)
+
+        var beliefs_response = {"speaker_belief": d.speaker_response, "ah_belief": d.ah_response}
+        
+        // console.log(beliefs_response)
+        // console.log(d.utterance)
+        var listenerDist = pragmaticListener(d.utterance,d.item,m,p)
+        // console.log("listenerDist: " + listenerDist)
+
+        // console.log("before sampling from the listenerDist ")
+        observe(listenerDist, beliefs_response)
+        // console.log("done sampling from the listenerDist ")
+    
+      })
+    
+      return p
+    
+    }, verbose: true})
+    
+    
+    posteriors

@@ -2,7 +2,7 @@
 var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BURN_IN, model: function(){
 // not using joint inference here: the parameters are independent
   var p = {
-    alpha: uniformDrift({a: 0, b: 10, w: 1}),
+    alpha: uniformDrift({a: 0, b: 10, w: 0.01}),
     // think_sp_alpha: 0.1, // uniformDrift({a: 0.00001, b:10, w:0.01}),
     // think_sp_beta: 10, // uniformDrift({a: 0.00001, b:10, w:0.01}),
     // think_ah_alpha: 0.1, // uniformDrift({a: 0.00001, b:10, w:0.01}),
@@ -19,8 +19,8 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
     // know_ah_threshold: uniformDrift({a: 0.00001, b:1, w:0.01}),
     // BARE_sp_threshold: 0.5, // uniformDrift({a: 0.00001, b:1, w:0.01}),
 
-    embedCost: uniformDrift({a: 0, b: 5, w:0.5}),
-    negCost: uniformDrift({a: 0, b: 5, w: 0.5})
+    embedCost: uniformDrift({a: 0, b: 4, w:0.05}),
+    negCost: uniformDrift({a: 0, b: 4, w: 0.05})
   }
 
 //  more efficient if we have the pragListener distrubtion ready and then observe the empirical results

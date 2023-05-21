@@ -299,7 +299,8 @@ combined_speaker_prior_embedded <- ggplot(data = df.data.summary |>
                                      mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
                                             utterance_type = fct_relevel(utterance_type, "MC","Polar","pos", "neg"),
                                             prior_condition = fct_relevel(prior_condition_embedded, "neutral", "high_prob", "low_prob")) |>
-                                     filter(trigger != "MC"),
+                                     filter(trigger != "MC") |>
+                                     filter(predicate %in% c("Polar", "think", "know")),
                                   aes(color=predicate)) +
   geom_point(data = d_byitem_sp, 
              aes(x = prior_rating_embedded,
@@ -337,6 +338,53 @@ combined_speaker_prior_embedded <- ggplot(data = df.data.summary |>
         axis.text.y = element_text(size = 10))
 combined_speaker_prior_embedded
 ggsave(combined_speaker_prior_embedded, file="../graphs/combined_speaker_prior_embedded.pdf", width=7, height=3)
+
+
+# critical conditions
+combined_speaker_prior_embedded_critical <- ggplot(data = df.data.summary |>
+                                            # to reorder the predicate and utterance_type for graph
+                                            mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
+                                                   utterance_type = fct_relevel(utterance_type, "MC","Polar","pos", "neg"),
+                                                   prior_condition = fct_relevel(prior_condition_embedded, "neutral", "high_prob", "low_prob")) |>
+                                            filter(trigger != "MC") |>
+                                            filter(predicate %in% c("Polar", "think", "know")),
+                                          aes(color=predicate)) +
+  geom_point(data = d_byitem_sp |>
+               filter(predicate%in% c("Polar", "think", "know")), 
+             aes(x = prior_rating_embedded,
+                 y = speaker_response),
+             alpha=0.4) +
+  geom_smooth(aes(x = prior_rating_embedded,
+                  y = speaker_response),
+              method = "lm", fullrange=T) +
+  geom_point(data=combine_summary |> 
+               filter(predicate %in% c("know","think","Polar")), 
+             aes(x=combined_prior,
+                 y=mean_speaker_rating,
+                 fill=predicate),
+             shape=21,size=2,color="black",stroke=1) +
+  geom_errorbar(data=combine_summary |> 
+                  filter(predicate %in% c("know","think","Polar")),
+                aes(x=combined_prior,ymin=speaker_YMin, ymax=speaker_YMax),
+                width=0.05,
+                color="black") + 
+  facet_grid(. ~ utterance_type,
+             labeller = utterance_labeller) +
+  scale_x_continuous(name="Rating of prior belief in the embedded content", 
+                     limits=c(0,1),
+                     breaks=c(0,0.2,0.4,0.6,0.8,1)) + 
+  scale_y_continuous(name="Mean speaker belief\nin the embedded content", limits=c(0,1)) + 
+  scale_color_manual(values=cbPalette[2:5],
+                     labels=c("Polar", "think", "know"),
+                     name="Predicate") +
+  scale_fill_manual(values=cbPalette[2:5],
+                    labels=c("Polar", "think", "know"),
+                    name="Predicate") +
+  theme(axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10))
+combined_speaker_prior_embedded_critical
+ggsave(combined_speaker_prior_embedded_critical, file="../graphs/combined_speaker_prior_embedded_critical_lengend.pdf", width=7, height=3)
+
 
 ## AH BELEIF RATING
 # bar graph by embedded clause (facet by predicate)
