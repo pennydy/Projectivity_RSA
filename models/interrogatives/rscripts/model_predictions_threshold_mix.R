@@ -36,14 +36,9 @@ utterances = c("know-dances-?",
                "know-doesnt_dance-?",
                "think-dances-?", 
                "think-doesnt_dance-?",
-               # "inform-dances-?",
-               # "inform-doesnt_dance",
-               # "say-dances-?",
-               # "say-doesnt_dance-?",
                "BARE-dances-?"
 )
 
-utterances
 
 # define the QUD 
 quds = c("MC", "CC")
@@ -88,7 +83,7 @@ ggplot(thresholds %>%
   facet_wrap(~predicate, scales="free") +
   geom_density(alpha=0.05) +
   scale_x_continuous(limits=c(0,1), breaks=seq(0,1,by=0.2), "Threshold value")
-ggsave("../graphs/threshold_mix_threshold.pdf",width=6,height=2)
+# ggsave("../graphs/threshold_mix_threshold.pdf",width=6,height=2)
 
 # literal listener ----
 # # testing literal listener
@@ -163,7 +158,7 @@ all_predictives = all_predictives %>%
          predicate = case_when(str_detect(utterance, "know") ~ "know",
                                str_detect(utterance, "think") ~ "think",
                                TRUE ~ "Polar"),
-         utterance = case_when(utterance == "BARE-dances-?" ~ "Polar",
+         utterance = case_when(utterance == "BARE-dances-?" ~ "BARE p",
                                utterance == "know-dances-?" ~ '"know p"',
                                utterance == "think-dances-?" ~ '"think p"',
                                utterance == "know-doesnt_dance-?" ~ '"know not p"',
@@ -179,8 +174,8 @@ predictives_summary <- all_predictives %>%
          prob_YMax = mean_prob + prob_ci_high)
 
 predictives_summary <- predictives_summary %>% 
-  mutate(utterance_type = ifelse(utterance_type == "p", "Embedded content:p", "Embedded content:not p")) %>% 
-  mutate(utterance = fct_relevel(utterance, 'Polar', '"know p"', '"know not p"', '"think p"', '"think not p"'),
+  mutate(utterance_type = ifelse(utterance_type == "p", "Embedded content:p", "Embedded content:not p")) %>%
+  mutate(utterance = fct_relevel(utterance, 'BARE p', '"know p"', '"know not p"', '"think p"', '"think not p"'),
          predicate = fct_relevel(predicate, 'Polar', 'think', 'know'),
          utterance_type = fct_relevel(utterance_type, "Embedded content:p", "Embedded content:not p"))
 
@@ -221,6 +216,7 @@ for (sp_belief in speaker_beliefs) {
       }
 }
 
+# not needed, just 1-10 is fine
 # make bins go from .1 - 1
 # .1 means "belief in p is < .1"
 # .2 means "belief in p is >= .1 and < .1"
@@ -233,7 +229,7 @@ PS$speaker_belief = (PS$speaker_belief)/10
 ggplot(PS, aes(x=speaker_belief, y=prob)) +
   geom_bar(stat="identity") +
   facet_grid(.~utterance) +
-  scale_x_continuous(breaks=seq(0,1,by=.1)) + 
+  scale_x_continuous(breaks=seq(1,10,by=1)) + 
   ylab("Production probability") +
   xlab("Speaker belief") +
   coord_flip()
@@ -243,9 +239,15 @@ ggplot(PS %>%
          mutate(predicate = case_when(str_detect(utterance, "know") ~ "know",
                                       str_detect(utterance, "think") ~ "think",
                                       TRUE ~ "Polar"),
-                predicate=fct_relevel(predicate,"Polar", "think","know")), 
+                predicate=fct_relevel(predicate,"Polar", "think","know"),
+                utterance = case_when(utterance == "BARE-dances-?" ~ "BARE p",
+                                      utterance == "know-dances-?" ~ '"know p"',
+                                      utterance == "think-dances-?" ~ '"think p"',
+                                      utterance == "know-doesnt_dance-?" ~ '"know not p"',
+                                      TRUE ~ '"think not p"'),
+                utterance = fct_relevel(utterance, 'BARE p', '"know p"', '"know not p"', '"think p"', '"think not p"')), 
        aes(x=utterance, y=prob, color=predicate, fill=predicate)) +
-  geom_bar(stat="identity")+
+  geom_bar(stat="identity",width = 0.8, position = position_dodge(width = 0.9))+
   scale_fill_manual(values=c("#56B4E9", "#009E73", "#F0E442"),
                     # labels=c('Polar', 'think', 'know'),
                     name="Predicate") +
@@ -253,8 +255,14 @@ ggplot(PS %>%
                     # labels=c('Polar', 'think', 'know'),
                     name="Predicate") +
   facet_grid(.~speaker_belief)+
-  theme(axis.text.x = element_text(angle = 45, vjust=1, hjust=1))
-ggsave("../graphs/threshold_mix/threshold_mix-PS-byUtterance.pdf",width=12,height=5)
+  # theme(axis.text.x = element_text(angle = 45, vjust=1, hjust=1)) + 
+  theme(legend.position="top",
+        axis.text.x = element_text(angle = 60, size = 10, vjust=1, hjust=1),
+        axis.title.y = element_text(size = 14),
+        axis.title.x = element_text(size = 14)) +
+  ylab("Production probability") +
+  scale_x_discrete("Utterance")
+ggsave("../graphs/threshold_mix/threshold_mix-PS-byUtterance.pdf",width=8,height=4)
 
 
 # ggplot(PS, aes(x=utterance, y=prob)) +
@@ -263,7 +271,7 @@ ggsave("../graphs/threshold_mix/threshold_mix-PS-byUtterance.pdf",width=12,heigh
 #   xlab("Utterance") +
 #   ylab("Production probability") +
 #   coord_flip()
-ggsave("../graphs/threshold_mix/threshold_chemo-PS-byBelief.pdf",width=12,height=5)
+ggsave("../graphs/threshold_mix/threshold_chemo-PS-byBelief.pdf",width=8,height=4)
 
 
 # pragmatic listener ----

@@ -226,7 +226,7 @@ speaker_all_alt <- ggplot(data = speaker_ah_summary,
   scale_x_discrete(label=c("p", "not p"),
                    name="Type of embedded clause")
 speaker_all_alt
-ggsave(speaker_all_alt, file="../graphs/speaker_embedded_collapse_prior.pdf", width=6, height=3)
+# ggsave(speaker_all_alt, file="../graphs/speaker_embedded_collapse_prior.pdf", width=6, height=3)
 
 # line graph by prior (facet by embedded clause)
 d_byitem_sp = df.data.summary %>% 
@@ -262,7 +262,7 @@ speaker_prior_embedded <- ggplot(data = df.data.summary |>
                     name="Predicate",
                     guide="none")
 speaker_prior_embedded
-ggsave(speaker_prior_embedded, file="../graphs/speaker_prior_embedded.pdf", width=7, height=3)
+# ggsave(speaker_prior_embedded, file="../graphs/speaker_prior_embedded.pdf", width=7, height=3)
 
 
 # combine the bar graph (embedded clause type) with the line graph (prior)
@@ -299,27 +299,28 @@ combined_speaker_prior_embedded <- ggplot(data = df.data.summary |>
                                      mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
                                             utterance_type = fct_relevel(utterance_type, "MC","Polar","pos", "neg"),
                                             prior_condition = fct_relevel(prior_condition_embedded, "neutral", "high_prob", "low_prob")) |>
-                                     filter(trigger != "MC") |>
-                                     filter(predicate %in% c("Polar", "think", "know")),
+                                     filter(trigger != "MC"), # %>% 
+                                     # filter(predicate %in% c("Polar", "think", "know")),
                                   aes(color=predicate)) +
-  geom_point(data = d_byitem_sp, 
+  geom_point(data = d_byitem_sp,
              aes(x = prior_rating_embedded,
                  y = speaker_response),
              alpha=0.4) +
   geom_smooth(aes(x = prior_rating_embedded,
-                  y = speaker_response),
+                  y = speaker_response,
+                  fill=predicate),
               method = "lm", fullrange=T) +
-  geom_point(data=combine_summary |> 
-               filter(predicate %in% c("know","think","say","Polar","inform")), 
+  geom_point(data=combine_summary |>
+               filter(predicate %in% c("know","think","Polar","say", "inform")),
              aes(x=combined_prior,
                  y=mean_speaker_rating,
                  fill=predicate),
              shape=21,size=2,color="black",stroke=1) +
-  geom_errorbar(data=combine_summary |> 
-                  filter(predicate %in% c("know","think","say","Polar","inform")),
+  geom_errorbar(data=combine_summary |>
+                  filter(predicate %in% c("know","think","Polar", "say", "inform")),
                 aes(x=combined_prior,ymin=speaker_YMin, ymax=speaker_YMax),
                 width=0.05,
-                color="black") + 
+                color="black") +
   facet_grid(. ~ utterance_type,
              labeller = utterance_labeller) +
   scale_x_continuous(name="Rating of prior belief in the embedded content", 
@@ -328,15 +329,14 @@ combined_speaker_prior_embedded <- ggplot(data = df.data.summary |>
   scale_y_continuous(name="Mean speaker belief\nin the embedded content", limits=c(0,1)) + 
   scale_color_manual(values=cbPalette[2:7],
                      labels=c("Polar", "think", "know", "say", "inform"),
-                     name="Predicate",
-                     guide="none") +
+                     name="Predicate") +
   scale_fill_manual(values=cbPalette[2:7],
                      labels=c("Polar", "think", "know", "say", "inform"),
-                     name="Predicate",
-                    guide="none") +
+                     name="Predicate") +
   theme(axis.text.x = element_text(size = 10),
         axis.text.y = element_text(size = 10))
 combined_speaker_prior_embedded
+# ggsave(combined_speaker_prior_embedded, file="../../../../models/chemo/graphs/chemo_production/cogsci_talk/combined_speaker_prior_blank.pdf", width=7, height=3)
 ggsave(combined_speaker_prior_embedded, file="../graphs/combined_speaker_prior_embedded.pdf", width=7, height=3)
 
 
@@ -354,8 +354,12 @@ combined_speaker_prior_embedded_critical <- ggplot(data = df.data.summary |>
              aes(x = prior_rating_embedded,
                  y = speaker_response),
              alpha=0.4) +
+  geom_hline(yintercept = 0.5,
+             color = "grey",
+             linetype = "dashed") +
   geom_smooth(aes(x = prior_rating_embedded,
-                  y = speaker_response),
+                  y = speaker_response,
+                  fill = predicate),
               method = "lm", fullrange=T) +
   geom_point(data=combine_summary |> 
                filter(predicate %in% c("know","think","Polar")), 
@@ -373,17 +377,18 @@ combined_speaker_prior_embedded_critical <- ggplot(data = df.data.summary |>
   scale_x_continuous(name="Rating of prior belief in the embedded content", 
                      limits=c(0,1),
                      breaks=c(0,0.2,0.4,0.6,0.8,1)) + 
-  scale_y_continuous(name="Mean speaker belief\nin the embedded content", limits=c(0,1)) + 
+  scale_y_continuous(name="Mean speaker belief in the embedded content", limits=c(0,1)) + 
   scale_color_manual(values=cbPalette[2:5],
-                     labels=c("Polar", "think", "know"),
+                     labels=c("BARE", "think", "know"),
                      name="Predicate") +
   scale_fill_manual(values=cbPalette[2:5],
-                    labels=c("Polar", "think", "know"),
+                    labels=c("BARE", "think", "know"),
                     name="Predicate") +
   theme(axis.text.x = element_text(size = 10),
-        axis.text.y = element_text(size = 10))
+        axis.text.y = element_text(size = 10),
+        legend.position="top")
 combined_speaker_prior_embedded_critical
-ggsave(combined_speaker_prior_embedded_critical, file="../graphs/combined_speaker_prior_embedded_critical_lengend.pdf", width=7, height=3)
+ggsave(combined_speaker_prior_embedded_critical, file="../graphs/combined_speaker_prior_embedded_critical_lengend.pdf", width=6, height=4)
 
 
 ## AH BELEIF RATING
@@ -431,7 +436,7 @@ d_byitem_ah = df.data.summary %>%
          prior_condition = fct_relevel(prior_condition_embedded, "neutral", "high_prob", "low_prob")) |>
   filter(predicate != "MC" & predicate != "Polar")
 
-
+color_mapping <- c("Polar"=toString(cbPalette[1]), "think"=toString(cbPalette[2]), "know"=toString(cbPalette[3]), "say"=toString(cbPalette[4]), "inform"=toString(cbPalette[5]))
 ah_prior <- ggplot(data = df.data.summary |>
                      mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
                             utterance_type = fct_relevel(utterance_type, "MC","Polar","pos", "neg"),
@@ -488,19 +493,18 @@ combined_ah_prior_embedded <- ggplot(data = df.data.summary |>
                      limits=c(0,1),
                      breaks=c(0,0.2,0.4,0.6,0.8,1)) + 
   scale_y_continuous(name="Mean attitude holder belief\nin the embedded content", limits=c(0,1)) + 
-  scale_color_manual(values=cbPalette[2:7],
-                     limits=color_mapping,
-                     labels=c("Polar", "think", "know", "say", "inform"),
+  scale_color_manual(values=cbPalette[3:7],
+                     # limits=color_mapping,
+                     # labels=c("Polar", "think", "know", "say", "inform"),
                      name="Predicate") +
-  scale_fill_manual(values=cbPalette[2:7],
-                    limits=color_mapping,
-                     labels=c("Polar", "think", "know", "say", "inform"),
+  scale_fill_manual(values=cbPalette[3:7],
+                    # limits=color_mapping,
+                    #  labels=c("Polar", "think", "know", "say", "inform"),
                      name="Predicate") +
   theme(axis.text.x = element_text(size = 10),
         axis.text.y = element_text(size = 10))
 combined_ah_prior_embedded
 ggsave(combined_ah_prior_embedded, file="../graphs/combined_ah_prior_embedded_bw.pdf", width=6, height=3)
-color_mapping <- c("Polar"=toString(cbPalette[1]), "think"=toString(cbPalette[2]), "know"=toString(cbPalette[3]), "say"=toString(cbPalette[4]), "inform"=toString(cbPalette[5]))
 
 ###### Analysis ######
 emm_options(pbkrtest.limit = 3450)

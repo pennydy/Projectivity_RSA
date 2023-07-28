@@ -251,7 +251,7 @@ predictives_speaker <- PL_speaker %>%
   filter(!item %in% c("Sophia_H", "Sophia_L", "Mia_H", "Mia_L"))
 
 graphPredictives_test(predictives_speaker, df_speaker)
-# ggsave("../graphs/simple_chemo/simpleChemo_predictives-empircal-sp.pdf",width=14,height=4)
+ggsave("../graphs/simple_chemo/simpleChemo_predictives-empirical-sp.pdf",width=7,height=3)
 
 
 # plot ah belief
@@ -280,7 +280,7 @@ predictives_ah <- PL_ah %>%
   filter(!item %in% c("Sophia_H", "Sophia_L", "Mia_H", "Mia_L"))
 
 graphPredictives_ah_test(predictives_ah, df_ah)
-# ggsave("../graphs/simple_chemo/simpleChemo_predictives-empircal-ah.pdf",width=14,height=4)
+ggsave("../graphs/simple_chemo/simpleChemo_predictives-empirical-ah.pdf",width=7,height=3)
 
 ## plot the predictions against prior ----
 ## (line plot)
@@ -343,17 +343,17 @@ ggplot(combine_sp_summary,aes(x=prior_prob,y=prob, color=predicate)) +
                 width=0.05,
                 color="black") +
   facet_grid(.~polarity) +
-  scale_color_manual(values=cbPalette[2:4],guide="none") +
-  scale_fill_manual(values=cbPalette[2:4],guide="none") +
-  scale_linetype(guide="none")+
-  scale_shape(guide="none")+
+  scale_color_manual(values=cbPalette[2:4]) +
+  scale_fill_manual(values=cbPalette[2:4]) +
+  # scale_linetype(guide="none")+
+  # scale_shape(guide="none")+
   scale_y_continuous(limits = c(0,1),
                      breaks=seq(0,1,by=.25),
                      name = "Posterior speaker belief\nin the embedded content") +
   scale_x_continuous(breaks=seq(0,1,by=0.2),
                      name = "Rating of prior belief in the embedded content") 
   # theme(legend.position = "top")
-ggsave("../graphs/simple_chemo/PL_empirical-predicted.pdf", width=7,height=3)
+ggsave("../graphs/simple_chemo/PL_empirical-predicted-sp.pdf", width=8,height=3)
 
 
 ## line plot: predictions only

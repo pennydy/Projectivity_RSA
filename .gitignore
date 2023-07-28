@@ -12,6 +12,8 @@ data/3_listenerSpeakerAH_Declaratives/all_original/
 
 experiments/1_listenerProjection/finalized_interface/
 experiments/1_listenerProjection/*.config
+experiments/2_listenerSpeakerAH/finalized_interface/
+experiments/3_listenerSpeakerAH_Declaratives/finalized_interface/
 .Rproj.user
 
 writings/towardsa_0201.pdf
@@ -23,7 +25,8 @@ analysis/3_listenerSpeakerAH_Declaratives/main/cache/
 
 models/threshold.wppl 
 models/certainty/
-models/chemo/graphs/chemo_production/cogsci
+models/chemo/graphs/chemo_production/cogsci_initial/
+models/chemo/graphs/chemo_production/cogsci_talk/
 models/chemo/graphs/chemo_production/*.pdf
 models/BDA/results/chemo_production_pilot/
 models/BDA/results/chemo_production_incorrect_inputs/

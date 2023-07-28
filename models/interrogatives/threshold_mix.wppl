@@ -161,13 +161,13 @@ var cost = function(utterance){
   return embedded_cost + negation_cost
 
   // if (utterance == "know-dances-?") {
-  //   return -0.94
+  //   return 3.98
   // } else if (utterance == "know-doesnt_dance-?") {
   //   return 3.99
   // } else if (utterance == "think-dances-?") {
-  //   return -0.94
+  //   return 3.98
   // } else if (utterance == "think-doesnt_dance-?") {
-  //   return 3.99
+  //   return 3.98
   // } else if (utterance == "BARE-dances-?") {
   //   return 0
   // } else {

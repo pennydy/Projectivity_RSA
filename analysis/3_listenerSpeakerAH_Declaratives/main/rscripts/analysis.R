@@ -10,7 +10,7 @@ theme_set(theme_bw())
 cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") 
 
 
-###### Data ######
+# Data ----
 # get the data
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("../../../helpers.R")
@@ -82,13 +82,14 @@ combined_prior <- df.data.summary |>
 combined_prior <- combined_prior$mean_prior
 
 
-###### Graph ######
+# Graph ----
 # additional helper functions/lists for graphs
 dodge = position_dodge(.9)
 
 utterance_label <- list("MC"="Filler",
                         "pos"="Embedded: p",
                         "neg"="Embedded: not p")
+
 utterance_labeller <- function(variable,value){
   return(utterance_label[value])
 }
@@ -118,8 +119,8 @@ content_predicate_labeller <- function(variable,value){
   }
 }
 
-## SPEAKER BELIEF RATINGS
-
+## SPEAKER BELIEF RATINGS ----
+#### bar plot -----
 speaker_ah_summary <- df.data.summary |>
   group_by(predicate, utterance_type) |> # collapse prior condition
   summarize(mean_speaker_rating = mean(speaker_response),
@@ -133,12 +134,14 @@ speaker_ah_summary <- df.data.summary |>
          speaker_YMax = mean_speaker_rating + speaker_ci_high,
          ah_YMin = mean_ah_rating - ah_ci_low,
          ah_YMax = mean_ah_rating + ah_ci_high) |>
+  # to reorder the predicate and utterance_type for graph
   mutate(utterance_type = ifelse(predicate == "MC",
                                  "pos",
                                  as.character(utterance_type)),
-         utterance_type = fct_relevel(utterance_type, "pos", "neg")) |>
-  mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
-         utterance_type = fct_relevel(utterance_type, "pos", "neg"))
+         predicate = fct_relevel(predicate, "Polar","think","know","say","inform"),
+         utterance_type = case_when(utterance_type=="pos" ~ "Embedded: p",
+                                    TRUE ~ "Embedded: not p"),
+         utterance_type = fct_relevel(utterance_type, "Embedded: p","Embedded: not p")) 
 speaker_ah_summary
 # write.csv(speaker_ah_summary, "../results/speaker_ah_summary.csv" , row.names = FALSE)
 
@@ -161,7 +164,9 @@ speaker_ah_prior <- df.data.summary |>
                                  as.character(utterance_type)),
          utterance_type = fct_relevel(utterance_type, "pos", "neg")) |>
   mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
-         utterance_type = fct_relevel(utterance_type, "pos", "neg"))
+         utterance_type = case_when(utterance_type=="pos" ~ "Embedded: p",
+                                    TRUE ~ "Embedded: not p"),
+         utterance_type = fct_relevel(utterance_type, "Embedded: p", "Embedded: not p"))
 # write.csv(speaker_ah_prior, "../results/speaker_ah_prior.csv" , row.names = FALSE)
 
 # speaker belief
@@ -229,13 +234,17 @@ speaker_all_prior <- ggplot(data = speaker_ah_prior |>
 speaker_all_prior
 ggsave(speaker_all_prior, file="../graphs/speaker_embedded_by_prior.pdf", width=6, height=3)
 
+#### line plot ----
 # line graph by prior (facet by embedded clause)
 d_byitem_sp = df.data.summary %>% 
   group_by(item,predicate,utterance_type,prior_condition_embedded, prior_rating_embedded) %>% 
   summarize(speaker_response = mean(speaker_response)) %>% 
   ungroup() %>% 
   mutate(predicate = fct_relevel(as.factor(predicate), "MC","Polar","think","know","say","inform"),
-         utterance_type = fct_relevel(as.factor(utterance_type), "MC","pos", "neg"),
+         utterance_type = case_when(utterance_type=="MC" ~ "MC",
+                                    utterance_type=="pos" ~ "Embedded: p",
+                                    TRUE ~ "Embedded: not p"),
+         utterance_type = fct_relevel(as.factor(utterance_type), "MC","Embedded: p", "Embedded: not p"),
          prior_condition_embedded = fct_relevel(as.factor(prior_condition_embedded), "neutral", "high_prob", "low_prob")) %>% 
   filter(predicate != "MC")
 
@@ -246,7 +255,10 @@ which(is.na(df.data.summary$speaker_response))
 speaker_prior_embedded <- ggplot(data = df.data.summary |>
                                    # to reorder the predicate and utterance_type for graph
                                    mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
-                                          utterance_type = fct_relevel(utterance_type, "MC","pos","neg"),
+                                          utterance_type = case_when(utterance_type=="MC" ~ "MC",
+                                                                     utterance_type=="pos" ~ "Embedded: p",
+                                                                     TRUE ~ "Embedded: not p"),
+                                          utterance_type = fct_relevel(utterance_type, "MC","Embedded: p","Embedded: not p"),
                                           prior_condition = fct_relevel(prior_condition_embedded, "neutral", "high_prob", "low_prob")) |>
                                    filter(trigger != "MC"),
                                  mapping = aes(x = prior_rating_embedded,
@@ -259,7 +271,7 @@ speaker_prior_embedded <- ggplot(data = df.data.summary |>
              labeller = utterance_labeller) +
   scale_x_continuous(name="Rating of prior belief in the embedded content",
                      limits=c(0,1),
-                     breaks=c(0,0.2,0.4,0.6,0.8,1)) +
+                     breaks=seq(0,1,by=0.2)) +
   scale_y_continuous(name="Mean speaker belief\nin the embedded content", limits=c(0,1)) + 
   coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
   scale_color_manual(values=cbPalette[2:7],
@@ -268,8 +280,50 @@ speaker_prior_embedded <- ggplot(data = df.data.summary |>
 speaker_prior_embedded
 ggsave(speaker_prior_embedded, file="../graphs/speaker_prior_embedded.pdf", width=7, height=3)
 
+# combine with the mean
+speaker_prior_embedded_combined <- ggplot(df.data.summary |>
+                                   filter(trigger != "MC") %>% 
+                                     mutate(predicate = fct_relevel(predicate,"Polar","think","know","say","inform"),
+                                            utterance_type = ifelse(utterance_type == "pos", "Embedded: p", "Embedded: not p"),
+                                            utterance_type = fct_relevel(utterance_type, "Embedded: p", "Embedded: not p")),
+                                 aes(color = predicate)) +
+  # geom_point(alpha = 0.1) +
+  geom_point(data=d_byitem_sp, 
+             aes(x = prior_rating_embedded,
+                 y = speaker_response),
+             alpha=.4) +
+  geom_smooth(aes(x = prior_rating_embedded,
+                  y = speaker_response),
+              method = "lm", fullrange=T) +  # extend to full range 0-1 
+  geom_point(data=speaker_ah_summary %>% 
+               filter(predicate != "MC"), 
+             aes(x=combined_prior,
+                 y=mean_speaker_rating,
+                 fill=predicate),
+             shape=21,size=2,color="black",stroke=1) +
+  geom_errorbar(data=speaker_ah_summary |> 
+                  filter(predicate !="MC"),
+                aes(x=combined_prior,
+                    ymin=speaker_YMin, ymax=speaker_YMax),
+                width=0.05,
+                color="black") + 
+  facet_grid(. ~ utterance_type) +
+  scale_x_continuous(name="Rating of prior belief in the embedded content",
+                     limits=c(0,1),
+                     breaks=seq(0,1,by=0.2)) +
+  scale_y_continuous(name="Mean speaker belief\nin the embedded content", limits=c(0,1)) + 
+  coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+  scale_color_manual(values=cbPalette[2:7],
+                     labels=c("BARE", "think", "know", "say","inform"),
+                     name="Predicate") +
+  scale_fill_manual(values=cbPalette[2:7],
+                     labels=c("BARE", "think", "know", "say","inform"),
+                     name="Predicate")
+speaker_prior_embedded_combined
+ggsave(speaker_prior_embedded_combined, file="../graphs/combined_speaker_prior_embedded.pdf", width=7, height=3)
 
-# ah belief
+## AH BELIEF RATINGS ----
+### bar plot ----
 # bar graph by predicate and embedded clause
 ah_all <- ggplot(data = speaker_ah_summary |>
                         filter(!predicate %in% c("Polar", "MC")),
@@ -338,21 +392,27 @@ df.data.summary |>
   filter(!trigger %in% c("Filler", "MC")) |>
   summarise(across(everything(), ~ sum(is.na(.))))
 
-
+### line plot ----
 # line graph by prior (facet by embedded clause)
 d_byitem_ah = df.data.summary %>% 
   group_by(item,predicate,utterance_type,prior_condition_embedded, prior_rating_embedded) %>% 
   summarize(ah_response = mean(ah_response)) %>% 
   ungroup() %>% 
   mutate(predicate = fct_relevel(as.factor(predicate), "MC","Polar","think","know","say","inform"),
-         utterance_type = fct_relevel(as.factor(utterance_type), "MC","pos", "neg"),
+         utterance_type = case_when(utterance_type=="MC" ~ "MC",
+                                    utterance_type=="pos" ~ "Embedded: p",
+                                    TRUE ~ "Embedded: not p"),
+         utterance_type = fct_relevel(as.factor(utterance_type), "MC","Embedded: p", "Embedded: not p"),
          prior_condition = fct_relevel(as.factor(prior_condition_embedded), "neutral", "high_prob", "low_prob")) %>% 
   filter(!predicate %in% c("MC","Polar"))
 
 ah_prior_embedded <- ggplot(data = df.data.summary |>
                                    # to reorder the predicate and utterance_type for graph
                                    mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
-                                          utterance_type = fct_relevel(utterance_type, "MC","pos","neg"),
+                                          utterance_type = case_when(utterance_type == "pos" ~ "Embedded: p",
+                                                                                                                                                  utterance_type == "neg" ~ "Embedded: not p",
+                                                                                                                                                  TRUE ~ "MC"),
+                                          utterance_type = fct_relevel(utterance_type, "MC","Embedded: p","Embedded: not p"),
                                           prior_condition = fct_relevel(prior_condition_embedded, "neutral", "high_prob", "low_prob")) |>
                               filter(!predicate %in% c("MC","Polar")),
                                  mapping = aes(x = prior_rating_embedded,
@@ -361,12 +421,11 @@ ah_prior_embedded <- ggplot(data = df.data.summary |>
   # geom_point(alpha = 0.1) +
   geom_point(data=d_byitem_ah, alpha=.1) +
   geom_smooth(method = "lm", fullrange=T) +  # extend to full range 0-1 
-  facet_grid(. ~ utterance_type,
-             labeller = utterance_labeller) +
+  facet_grid(. ~ utterance_type) +
   scale_x_continuous(name="Rating of prior belief in the embedded content", 
                      limits=c(0,1),
                      breaks=c(0,0.2,0.4,0.6,0.8,1)) +
-  scale_y_continuous(name="Mean ah belief\nin the embedded content", 
+  scale_y_continuous(name="Mean attitude holder belief\nin the embedded content", 
                      limits=c(0,1)) + 
   coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
   scale_color_manual(values=cbPalette[3:7],
@@ -375,7 +434,55 @@ ah_prior_embedded <- ggplot(data = df.data.summary |>
 ah_prior_embedded
 ggsave(ah_prior_embedded, file="../graphs/ah_prior_embedded.pdf", width=7, height=3)
 
-###### Analysis ######
+
+# line plot combine with mean
+ah_prior_embedded_combined <- ggplot(data = df.data.summary |>
+                              # to reorder the predicate and utterance_type for graph
+                              mutate(predicate = fct_relevel(predicate, "MC","Polar","think","know","say","inform"),
+                                     utterance_type = case_when(utterance_type=="MC" ~ "MC",
+                                                                utterance_type=="pos" ~ "Embedded: p",
+                                                                TRUE ~ "Embedded: not p"),
+                                     utterance_type = fct_relevel(utterance_type, "MC","Embedded: p","Embedded: not p")) |>
+                              filter(!predicate %in% c("MC","Polar")),
+                            mapping = aes(color = predicate)) +
+  # geom_point(alpha = 0.1) +
+  geom_point(data=d_byitem_ah, 
+             aes(x = prior_rating_embedded,
+                 y = ah_response),
+             alpha=.1) +
+  geom_smooth(aes(x = prior_rating_embedded,
+                  y = ah_response),
+              method = "lm", fullrange=T) +  # extend to full range 0-1 
+  geom_point(data=speaker_ah_summary %>%
+               filter(!predicate %in% c("MC","Polar")),
+             aes(x=combined_prior,
+                 y=mean_ah_rating,
+                 fill=predicate),
+             shape=21,size=2,color="black",stroke=1) +
+  geom_errorbar(data=speaker_ah_summary |>
+                  filter(!predicate %in% c("MC","Polar")),
+                aes(x=combined_prior,
+                    ymin=ah_YMin, ymax=ah_YMax),
+                width=0.05,
+                color="black")+
+  facet_grid(. ~ utterance_type,
+             labeller = utterance_labeller) +
+  scale_x_continuous(name="Rating of prior belief in the embedded content", 
+                     limits=c(0,1),
+                     breaks=seq(0,1,by=0.2)) +
+  scale_y_continuous(name="Mean attitude holder belief\nin the embedded content", 
+                     limits=c(0,1)) + 
+  # coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+  scale_fill_manual(values=cbPalette[3:7],
+                     labels=c("think", "know", "say","inform"),
+                     name="Predicate")+
+  scale_color_manual(values=cbPalette[3:7],
+                       labels=c("think", "know", "say","inform"),
+                       name="Predicate")
+ah_prior_embedded_combined
+ggsave(ah_prior_embedded_combined, file="../graphs/combined_ah_prior_embedded.pdf", width=7, height=3)
+
+# Analysis ----
 emm_options(pbkrtest.limit = 3450)
 emm_options(lmerTest.limit = 3450)
 analysis_data <- df.data.summary |>
@@ -411,8 +518,8 @@ full_analysis_data |>
 
 table(full_analysis_data$predicate, full_analysis_data$item,full_analysis_data$centered_embedded_content)
 
-## lmer
-# speaker
+### lmer ----
+##### speaker -----
 speaker_model <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
                       analysis_data)
 summary(speaker_model)
@@ -420,6 +527,11 @@ summary(speaker_model)
 speaker_model_decorrelated <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content || workerid) + (predicate + centered_prior_rating + centered_embedded_content || item), 
                       analysis_data)
 summary(speaker_model_decorrelated)
+
+
+# speaker_model_interaction <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate * centered_prior_rating + centered_embedded_content | workerid) + (predicate * centered_prior_rating + centered_embedded_content | item), 
+#                       analysis_data)
+# summary(speaker_model_interaction)
 
 # no significant main effect of question order
 speaker_model_order <- lmer(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content * question_order + (predicate + centered_prior_rating + centered_embedded_content + question_order || workerid) + (predicate + centered_prior_rating + centered_embedded_content + question_order|| item), 
@@ -439,7 +551,7 @@ full_speaker_model_decorrelated <- lmer(speaker_response ~ predicate * centered_
                            full_analysis_data)
 summary(full_speaker_model_decorrelated)
 
-# ah
+#### ah ----
 ah_model <- lmer(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
                  analysis_data |>
                    filter(predicate != "Polar"))
@@ -467,8 +579,8 @@ full_ah_model_decorrelated <- lmer(ah_response ~ predicate * centered_prior_rati
                         filter(predicate != "Polar"))
 summary(full_ah_model_decorrelated)
 
-## Bayesian, brm
-# speaker
+### brms -----
+##### speaker -----
 # speaker_bayesian_simple <- brm(speaker_response ~ predicate * centered_prior_rating * centered_embedded_content + (1 | workerid) + (1 | item),  
 #                         analysis_data,
 #                         control=list(max_treedepth = 15, adapt_delta = 0.99),
@@ -510,7 +622,7 @@ full_speaker_bayesian_decorrelated <- brm(speaker_response ~ predicate * centere
 summary(full_speaker_bayesian_decorrelated)
 plot(full_speaker_bayesian_decorrelated)
 
-# ah
+#### ah ----
 # ah_bayesian_simple <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (1 | workerid) + (1 | item), # only include random intercept since not enough observations 
 #                         analysis_data |>
 #                      filter(predicate != "Polar"),
@@ -534,6 +646,7 @@ ah_bayesian_decorrelated <- brm(ah_response ~ predicate * centered_prior_rating 
 summary(ah_bayesian_decorrelated)
 plot(ah_bayesian_decorrelated)
 
+# full: including inform and say
 full_ah_bayesian <- brm(ah_response ~ predicate * centered_prior_rating * centered_embedded_content + (predicate + centered_prior_rating + centered_embedded_content | workerid) + (predicate + centered_prior_rating + centered_embedded_content | item), 
                                      full_analysis_data |>
                                        filter(predicate != "Polar"),

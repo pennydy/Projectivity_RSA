@@ -28,9 +28,9 @@ ggplot(item_priors %>%
        aes(x=state, y=prop)) +
   geom_bar(stat="identity") +
   facet_wrap(.~item,ncol = 6) +
-  scale_y_continuous("Proportion of prior belief\nin the embedded content")+
+  scale_y_continuous("Proportion of prior belief in the embedded content")+
   scale_x_continuous(breaks=seq(from = 0, to = 10, by = 1), "Belief state")
-ggsave("../graphs/all_priors.pdf",width=6,height=3)
+ggsave("../graphs/all_priors.pdf",width=6,height=6)
 
 
 priors <- unique(item_priors$item)

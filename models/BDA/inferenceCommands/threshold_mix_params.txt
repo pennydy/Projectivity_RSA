@@ -292,6 +292,7 @@ var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BU
       })
     
       // console.log("final: "+stringify(p))
+
       return p
     
     }, verbose: true})

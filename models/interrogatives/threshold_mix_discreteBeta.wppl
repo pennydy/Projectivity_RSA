@@ -1,0 +1,227 @@
+///fold:
+// discretized range between 0 - 1
+var bins = map(function(x){
+  _.round(x, 2);
+},  _.range(0, 1.01, 0.01));
+
+var binPriors = _.range(0, 1.01, 0.01).fill(1)
+
+// function returns a discretized Beta distribution
+var DiscreteBeta = cache(function(g, d){
+  var a =  g * d, b = (1-g) * d;
+  var betaPDF = function(x){
+    return Math.pow(x, a-1)*Math.pow((1-x), b-1)
+  }
+  var probs = map(betaPDF, bins);
+  return Categorical({vs: bins, ps: probs})
+})
+///
+
+
+var stringify = function(x){return JSON.stringify(x)}
+
+
+var priors = {
+  Charley_H : [0.002380952, 0.00000001, 0.007142857, 0.00952381, 0.023809524, 0.028571429, 0.061904762, 0.154761905, 0.245238095, 0.466666667],
+  Charley_L : [0.192825112, 0.226457399, 0.183856502, 0.174887892, 0.103139013, 0.069506726, 0.011210762, 0.022421525, 0.011210762, 0.004484305],
+  Danny_H : [0.002347418, 0.009389671, 0.002347418, 0.014084507, 0.075117371, 0.211267606, 0.192488263, 0.227699531, 0.154929577, 0.110328638],
+  Danny_L : [0.245454545, 0.247727273, 0.184090909, 0.127272727, 0.068181818, 0.063636364, 0.025, 0.013636364, 0.015909091, 0.009090909],
+  Emily_H : [0.048837209, 0.030232558, 0.076744186, 0.079069767, 0.190697674, 0.253488372, 0.13255814, 0.086046512, 0.044186047, 0.058139535],
+  Emily_L : [0.607798165, 0.178899083, 0.100917431, 0.038990826, 0.018348624, 0.027522936, 0.006880734, 0.009174312, 0.006880734, 0.004587156],
+  Emma_H : [0.00000001, 0.009237875, 0.006928406, 0.030023095, 0.043879908, 0.161662818, 0.200923788, 0.212471132, 0.193995381, 0.140877598],
+  Emma_L : [0.25404157, 0.221709007, 0.143187067, 0.103926097, 0.071593533, 0.092378753, 0.057736721, 0.027713626, 0.009237875, 0.018475751],
+  Frank_H : [0.002267574, 0.006802721, 0.015873016, 0.022675737, 0.106575964, 0.249433107, 0.185941043, 0.170068027, 0.140589569, 0.099773243],
+  Frank_L : [0.616470588, 0.202352941, 0.08, 0.025882353, 0.021176471, 0.007058824, 0.007058824, 0.014117647, 0.016470588, 0.009411765],
+  Grace_H : [0.00000001, 0.004395604, 0.008791209, 0.008791209, 0.017582418, 0.07032967, 0.10989011, 0.204395604, 0.241758242, 0.334065934],
+  Grace_L : [0.284671533, 0.243309002, 0.206812652, 0.094890511, 0.058394161, 0.02676399, 0.04136253, 0.02676399, 0.00973236, 0.00729927],
+  Isabella_H : [0.011415525, 0.047945205, 0.052511416, 0.068493151, 0.239726027, 0.385844749, 0.086757991, 0.052511416, 0.03652968, 0.01826484],
+  Isabella_L : [0.761682243, 0.102803738, 0.049065421, 0.01635514, 0.018691589, 0.014018692, 0.011682243, 0.007009346, 0.007009346, 0.011682243],
+  Jackson_H : [0.004889976, 0.002444988, 0.007334963, 0.02200489, 0.012224939, 0.070904645, 0.124694377, 0.188264059, 0.239608802, 0.327628362],
+  Jackson_L : [0.485776805, 0.240700219, 0.13785558, 0.052516411, 0.024070022, 0.019693654, 0.01750547, 0.015317287, 0.006564551,  0.00000001],
+  Jayden_H : [0.01627907, 0.020930233, 0.01627907, 0.027906977, 0.088372093, 0.169767442, 0.195348837, 0.2, 0.155813953, 0.109302326],
+  Jayden_L : [0.736238532, 0.082568807, 0.029816514, 0.027522936, 0.027522936, 0.025229358, 0.029816514, 0.016055046, 0.01146789, 0.013761468],
+  Jon_H : [0.007194245, 0.002398082, 0.009592326, 0.019184652, 0.028776978, 0.06235012, 0.127098321, 0.223021583, 0.256594724, 0.263788969],
+  Jon_L : [0.427616927, 0.247216036, 0.158129176, 0.040089087, 0.033407572, 0.024498886, 0.022271715, 0.024498886, 0.013363029, 0.008908686],
+  Josh_H : [0.053932584, 0.040449438, 0.042696629, 0.080898876, 0.119101124, 0.287640449, 0.159550562, 0.121348315, 0.062921348, 0.031460674],
+  Josh_L : [0.35391924, 0.228028504, 0.159144893, 0.095011876, 0.059382423, 0.047505938, 0.023752969, 0.019002375, 0.004750594, 0.009501188],
+  Josie_H : [0.006622517, 0.008830022, 0.004415011, 0.013245033, 0.077262693, 0.10816777, 0.178807947, 0.218543046, 0.194260486, 0.189845475],
+  Josie_L : [0.760290557, 0.099273608, 0.031476998, 0.021791768, 0.02905569, 0.021791768, 0.00968523, 0.014527845, 0.004842615, 0.007263923],
+  Julian_H : [0.00000001, 0.021028037, 0.030373832, 0.049065421, 0.156542056, 0.275700935, 0.168224299, 0.156542056, 0.074766355, 0.067757009],
+  Julian_L : [0.089041096, 0.141552511, 0.191780822, 0.203196347, 0.173515982, 0.134703196, 0.01369863, 0.02739726, 0.01369863, 0.011415525],
+  Mary_H : [0.025522042, 0.004640371, 0.009280742, 0.016241299, 0.018561485, 0.025522042, 0.032482599, 0.09512761, 0.197215777, 0.575406032],
+  Mary_L : [0.475862069, 0.216091954, 0.12183908, 0.073563218, 0.036781609, 0.025287356, 0.016091954, 0.016091954, 0.011494253, 0.006896552],
+  Mia_H : [0.016431925, 0.025821596, 0.056338028, 0.072769953, 0.161971831, 0.300469484, 0.161971831, 0.115023474, 0.056338028, 0.03286385],
+  Mia_L : [0.538636364, 0.161363636, 0.090909091, 0.056818182, 0.043181818, 0.052272727, 0.018181818, 0.022727273, 0.011363636, 0.004545455],
+  Olivia_H : [0.032634033, 0.006993007, 0.03030303, 0.027972028, 0.03962704, 0.072261072, 0.172494172, 0.256410256, 0.198135198, 0.163170163],
+  Olivia_L : [0.510297483, 0.233409611, 0.091533181, 0.038901602, 0.032036613, 0.029748284, 0.009153318, 0.027459954, 0.020594966, 0.006864989],
+  Owen_H : [0.006772009, 0.004514673, 0.002257336, 0.022573363, 0.022573363, 0.103837472, 0.101580135, 0.189616253, 0.218961625, 0.32731377],
+  Owen_L : [0.399527187, 0.21749409, 0.125295508, 0.063829787, 0.042553191, 0.052009456, 0.030732861, 0.014184397, 0.035460993, 0.01891253],
+  Sophia_H : [0.011389522, 0.009111617, 0.025056948, 0.031890661, 0.118451025, 0.232346241, 0.209567198, 0.177676538, 0.104783599, 0.079726651],
+  Sophia_L : [0.128805621, 0.145199063, 0.147540984, 0.145199063, 0.161592506, 0.128805621, 0.056206089, 0.030444965, 0.028103044, 0.028103044],
+  Tony_H : [0.00000001, 0.002380952, 0.014285714, 0.007142857, 0.052380952, 0.107142857, 0.166666667, 0.24047619, 0.264285714, 0.145238095],
+  Tony_L : [0.533632287, 0.206278027, 0.096412556, 0.047085202, 0.02690583, 0.031390135, 0.020179372, 0.013452915, 0.00896861, 0.015695067],
+  Zoe_H : [0.004474273, 0.00000001, 0.006711409, 0.013422819, 0.029082774, 0.093959732, 0.136465324, 0.241610738, 0.22147651, 0.252796421],
+  Zoe_L : [0.575178998, 0.190930788, 0.097852029, 0.040572792, 0.026252983, 0.011933174, 0.019093079, 0.019093079, 0.011933174, 0.007159905]
+
+}
+
+// specify utterance alternatives, only include polar interrogatives for now
+var utterances = ["know-dances-?", 
+                  "know-doesnt_dance-?",                 
+                  "think-dances-?", 
+                  "think-doesnt_dance-?",
+                  "BARE-dances-?"]
+
+
+var predicate_thresholds = function(predicate) {
+  if (predicate == "know") {
+      return DiscreteBeta(0.9,20)
+  } else if (predicate == "think") {
+      return DiscreteBeta(0.1,10) 
+  } else {
+    return 0.5
+  }
+}
+
+
+var viz_predicate_thresholds = function(predicate) {
+  return Infer({method:"forward", samples:4000, model:function(){
+    predicate_thresholds(predicate)
+  }})
+}
+
+var predicate_qud = function(predicate) {
+  if (predicate=="know") {
+    return {MC: 0.85, CC: 0.15}
+  } else if (predicate=="think"){
+    return {MC: 0.7, CC:0.3}
+//   } else { // BARE
+//     return {MC:0.1, CC:0.9}
+  }
+}
+
+
+var meaning = function(utterance, speaker_belief) {
+  var splitutt = utterance.split('-')
+  var predicate = splitutt[0]
+  var content = splitutt[1]
+
+  
+  var speaker_threshold = predicate=="BARE" ? 0.5 : sample(predicate_thresholds(predicate))
+  
+  if (predicate != "BARE") {
+    if (!_.includes(content, "doesnt")) {
+      return speaker_belief > speaker_threshold 
+    } else {
+      return speaker_belief < 1 - speaker_threshold
+    }
+  } else { // BARE
+    // var prob = Math.pow(Math.abs(speaker_threshold - speaker_belief),0.1)
+    // return flip(1 - prob)
+    var diff = Math.abs(speaker_threshold - speaker_belief) 
+    var prob = diff > 0.1 ? Math.pow(diff, 0.1) : Math.pow(diff, 2)
+    return flip(1-prob)
+  }
+}
+
+
+var literalListener = cache(function(utterance) {
+  return Infer({model: function(){
+
+//     var speaker_belief = uniform(0,1)
+    var speaker_belief = uniformDraw(bins)
+    // var speaker_belief = categorical({ps:[1,1,1,1,1,1,1,1,1,1], vs:beliefs})
+
+    condition(meaning(utterance, speaker_belief))
+//     var speaker_belief = speaker_belief==1?10:Math.trunc(Math.trunc(speaker_belief * 100)/10)+1
+    
+    // return speaker_belief * 10
+    return speaker_belief
+  }})
+})
+
+display("u:BARE-dances-?")
+var bare = literalListener("BARE-dances-?")
+viz(bare)
+// viz(marginalize(bare, "speaker_belief"))
+
+display("u:know-dances-?")
+var know = literalListener("know-dances-?")
+viz(know)
+// viz(marginalize(know, "speaker_belief"))
+// viz(marginalize(know, "ah_belief"))
+
+display("u:think-dances-?")
+var think = literalListener("think-dances-?")
+viz(think)
+// viz(marginalize(know, "speaker_belief"))
+// viz(marginalize(know, "ah_belief"))
+
+var alpha = 1
+
+var cost = function(utterance){
+  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0
+  var negation_cost = _.includes(utterance, "doesnt") ? 0 : 0
+  return embedded_cost + negation_cost
+}
+
+// Speaker, chooses an utterance to convey a particular answer of the qud
+var speaker = cache(function(speaker_belief) {
+  return Infer({model: function(){
+    var utterance = uniformDraw(utterances)
+//     var qudFn = qudFns[qud]
+//     var qudAnswer = qudFn(beliefs)
+//     var literalL = literalListener(utterance, qud).score(qudAnswer)
+    var literalL = literalListener(utterance).score(speaker_belief) 
+    factor(alpha*(literalL - cost(utterance))) 
+    return utterance
+  }})
+})
+
+display("belief:0.01")
+viz(speaker(0.01))
+display("belief:0.9")
+viz(speaker(.9))
+
+
+var pragmaticListener = function(utterance, item) {
+  Infer({method:'enumerate', model: function() {
+//     var speaker_belief = uniformDraw(_.range(1, 11, 1))
+    var speaker_belief = uniformDraw(bins)
+    
+//     var splitutt = utterance.split('-')
+//     var predicate = splitutt[0]
+//     var MC_prob = predicate_qud(predicate)["MC"]
+// HOW TO REPRESENT THE PRIOR DISTRIBUTION? 
+//     var prior_belief = priors[item]
+//     var prior_distribution = Categorical({vs: normalized_beliefs, ps:prior_belief})
+    
+    var speaker_distribution = speaker(speaker_belief)
+
+//     flip(MC_prob) ? observe(speaker_distribution, utterance) : 
+//         observe(prior_distribution, speaker_belief)
+    
+    observe(speaker_distribution, utterance)
+    
+    return speaker_belief
+  }})
+}
+
+
+display("u:know-dances-?, item:Charley_H")
+var know = pragmaticListener("know-dances-?","Charley_H")
+viz(know)
+
+
+display("u:think-dances-?, item:Charley_H")
+var think = pragmaticListener("think-dances-?","Charley_H")
+viz(think)
+
+display("u:BARE-dances-?, item:Charley_H")
+var bare = pragmaticListener("BARE-dances-?","Charley_H")
+viz(bare)
+
+// display("prior distribution Charley_H")
+// var prior_belief = priors["Charley_H"]
+// var prior_distribution = Categorical({vs: beliefs, ps:prior_belief})
+// viz(prior_distribution)

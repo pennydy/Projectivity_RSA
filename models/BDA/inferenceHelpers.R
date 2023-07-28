@@ -1,4 +1,4 @@
-# adapted from Brandon https://github.com/bwaldon/crossling_reference/blob/master/_shared/inferenceHelpers.r
+# from Brandon https://github.com/bwaldon/crossling_reference/blob/master/_shared/inferenceHelpers.r
 
 # create the basic RSA model (speaker and listener functions)
 makeModel <- function(header, modelName) {
@@ -21,7 +21,7 @@ wrapInference <- function(model, modelName, samples, lag, burn) {
   if (modelName == "threshold_chemo") {
     inferenceCommand <- read_file("./inferenceCommands/threshold_chemo_params.txt")
   } else if (modelName == "threshold_qud") {
-    inferenceCommand <- read_file("./inferenceCommands/threshold_mix_params.txt")
+    inferenceCommand <- read_file("./inferenceCommands/threshold_qud_params.txt")
   }  else if (modelName == "threshold_mix") {
     inferenceCommand <- read_file("./inferenceCommands/threshold_mix_params.txt")
   } else if (modelName == "threshold_cg") {

@@ -1,0 +1,123 @@
+
+
+var predicates = ["know", "think"]
+var beliefs = ["dances", "doesnt_dance"]
+
+var utterances = ["know-dances-?", 
+                  "know-doesnt_dance-?",                 
+                  "think-dances-?", 
+                  "think-doesnt_dance-?",
+                  "BARE-dances-?"]
+
+// the prob of the content and not the content should be: [a, 1-a] 
+// where a can be obtained from behavioral result
+var beliefPrior = function() {
+  return categorical({
+    vs: beliefs,
+    ps: [.7, .3]
+  })
+}
+
+// same as beliefPrior, but instead of returning a sample from the categorical 
+// distribution, it returns the prob
+var beliefProb = {
+    dances: 0.7,
+    doesnt_dance: 0.3
+}
+
+// how likely the predicate will have the factive interpretation
+var factivityPrior = {
+  know: 0.8,
+  think: 0.4,
+  BARE: 0
+}
+
+// two ways to represent the meaning function, one discrete (1) and one continuous (2)
+// in both cases, it checks if the predicate takes the factive interpretation
+// in 1, if the predicate takes the factive interpretation, return whether the content
+// is the same as the belief; if non-fative, then return true by chance
+
+// var meaning = function(utterance, belief) {
+//   var splitutt = utterance.split('-')
+//   var predicate = splitutt[0]
+//   var content = splitutt[1]
+  
+//   var factivity = factivityPrior[predicate]
+//   return flip(factivity) ? content == belief : flip()
+// }
+
+// //  Literal listener
+// var literalListener = function(utterance) {
+//   Infer({model: function() {
+//     var belief = uniformDraw(beliefs)
+//     condition(meaning(utterance, belief))
+//     return belief
+//   }})
+// }
+
+// in 2, if the predicate takes the factive interpretation, return 1 if the content
+// is the same as the belief, else 0; if non-factive, then return the prob of the content
+var meaning = function(utterance, belief) {
+    var splitutt = utterance.split('-')
+    var predicate = splitutt[0]
+    var content = splitutt[1]
+    
+    var factivity = factivityPrior[predicate]
+    return flip(factivity) ? (content == belief ? 1 : 0) : beliefProb[content]
+    // ** this one runs into sampling problem **
+    // return a uniform distribution between 0 and 1 if non-factive, and then
+    // multiply it by the prior belief
+    // var fact = flip(factivity) ? (content == belief ? 1 : 0) : uniform(0,0.99)
+    // return fact * beliefProb[content]
+  }
+  
+  //  Literal listener
+  var literalListener = function(utterance) {
+    Infer({model: function() {
+      var belief = uniformDraw(beliefs)
+      factor(meaning(utterance, belief))
+      return belief
+    }})
+  }
+
+
+viz(literalListener("know-dances-?"))
+viz(literalListener("think-dances-?"))
+viz(literalListener("BARE-dances-?"))
+
+// Speaker optimality parameter
+var alpha = 1
+
+// the cost on negation breaks the symmetry of how BARE will be used for the two beliefs
+var cost = function(utterance){
+  var embedded_cost = _.includes(utterance, "BARE") ? 0 : 0.5
+  var negation_cost = _.includes(utterance, "doesnt") ? 0.5 : 0
+  return embedded_cost + negation_cost
+}
+
+// Pragmatic speaker
+var speaker = function(belief) {
+  Infer({model: function() {
+    var utterance = uniformDraw(utterances)
+    factor(alpha * literalListener(utterance).score(belief) - cost(utterance))
+    return utterance
+  }})
+}
+
+viz(speaker("dances"))
+viz(speaker("doesnt_dance"))
+
+// Define a pragmatic listener
+var pragmaticListener = function(utterance) {
+  Infer({model: function() {
+    var belief = beliefPrior()
+//     var splitutt = utterance.split('-')
+    
+    observe(speaker(belief), utterance)
+    return belief
+  }})
+}
+
+viz.table(pragmaticListener("know-dances-?"))
+viz.table(pragmaticListener("think-dances-?"))
+viz.table(pragmaticListener("BARE-dances-?"))

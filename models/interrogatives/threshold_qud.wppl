@@ -99,7 +99,7 @@ var predicate_qud = function(predicate) {
   if (predicate=="think"){
     return categorical({ps: [0.7, 0.3], vs: ["MC", "CC"]})
   } else { // BARE
-    return categorical({ps: [0, 1], vs: ["MC", "CC"]})
+    return categorical({ps: [0.1, .9], vs: ["MC", "CC"]})
   }
 }
 

@@ -20,3 +20,16 @@ bda_data <- behavioral_results %>%
   select(workerid, predicate, polarity, utterance, item, speaker_response, ah_response, prior_rating)
 write.csv(bda_data, "../../data/2_listenerSpeakerAH/main/bda_data.csv", row.names = FALSE)
 
+belief_data <- behavioral_results %>% 
+  mutate(itemType = case_when(str_detect(trigger, "neg") & prior_condition == "low_prob" ~ "H",
+                              str_detect(trigger, "neg") & prior_condition == "high_prob" ~ "L",
+                              str_detect(trigger, "pos") & prior_condition == "low_prob" ~ "L",
+                              str_detect(trigger, "pos") & prior_condition == "high_prob" ~ "H",
+                              trigger=="Polar" & prior_condition == "high_prob" ~ "H",
+                              trigger=="Polar" & prior_condition == "low_prob" ~ "L"),
+         # itemType = ifelse(prior_condition == "low_prob", "L", "H"),
+         polarity = case_when(str_detect(trigger, "neg") ~ "neg",
+                              str_detect(trigger, "pos") ~ "pos",
+                              TRUE ~ "Polar")) %>% 
+  select(workerid, predicate, polarity, item, itemType, speaker_response, ah_response)
+write.csv(belief_data, "../../data/2_listenerSpeakerAH/main/belief_data.csv", row.names = FALSE)

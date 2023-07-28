@@ -56,17 +56,17 @@ ah_beliefs = c("dances","doesnt_dance","uncertain","null")
 #  pragmatic speaker -----
 ### BDA ----
 # load the BDA posterior
-all_predictives <- data.frame(seed = character(), utterance = character(), speaker_belief = character(), ah_belief = character(), prob = numeric())
+all_predictives_simulated <- data.frame(seed = character(), utterance = character(), speaker_belief = character(), ah_belief = character(), prob = numeric())
 
 for (file in list.files("../results/chemo_production/bda/production")) {
   name <- gsub("^([[:alnum:]]+)-small.csv", "\\1", file)
   predictives <- read.csv(paste0("../results/chemo_production/bda/production/",file))
   predictives$seed <- name
-  all_predictives <- rbind(all_predictives, predictives)
+  all_predictives_simulated <- rbind(all_predictives_simulated, predictives)
 }
 
 
-all_predictives = all_predictives %>% 
+all_predictives <- all_predictives_simulated %>% 
   mutate(utterance_type = ifelse(str_detect(utterance, "doesnt"), "not p","p"),
          predicate = case_when(str_detect(utterance, "know") ~ "know",
                                str_detect(utterance, "think") ~ "think",
@@ -120,7 +120,121 @@ facet_wrap(belief_states~.) +
         axis.title.x = element_text(size = 14)) +
   ylab("Production probability")
 production
-ggsave(production, file="../graphs/chemo_production/model_eval/production.pdf", width=6, height=5)
+ggsave(production, file="../graphs/chemo_production/cogsci_talk/production.pdf", width=6, height=5)
+
+#### collapse by each sp belief ----
+##### bare ----
+bare <- all_predictives %>% 
+  filter(utterance=="Polar") %>% 
+  group_by(seed) %>%
+  mutate(marg_prob = sum(prob)) %>% # how likely is Polar 
+  ungroup() %>% 
+  group_by(seed, ah_belief) %>% 
+  mutate(ah_prob = sum(prob)/marg_prob) %>% 
+  ungroup() %>% 
+  group_by(ah_belief) %>% 
+  summarize(mean_prob = mean(ah_prob),
+            prob_ci_low = ci.low(ah_prob),
+            prob_ci_high = ci.high(ah_prob)) %>%  
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+
+bare_plot <- ggplot(bare %>% 
+                      mutate(ah_belief=fct_relevel(ah_belief, "p", "not p", "?", "null")),
+                    aes(x=ah_belief, y=mean_prob, fill=cbPalette[2])) +
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=prob_YMin,
+                    ymax=prob_YMax),
+                width=.2) +
+  scale_fill_manual(values=cbPalette[2],
+                    name="Predicate",
+                    guide="none") +
+  scale_y_continuous(limits = c(0,1)) + 
+  scale_x_discrete(name="Attitude holder belief") +
+  ylab("Production probability") +
+  theme(axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        axis.title.x = element_text(size=16))
+bare_plot
+ggsave(bare_plot,file="../graphs/chemo_production/cogsci_talk/production_bare.pdf",
+       width=6,height=4)
+
+bare_sp <- all_predictives %>% 
+  filter(utterance=="Polar" & ah_belief == "null") %>% 
+  group_by(seed) %>%
+  mutate(marg_prob = sum(prob)) %>% 
+  ungroup() %>% 
+  group_by(seed, speaker_belief) %>% 
+  mutate(ah_prob = prob/marg_prob) %>% 
+  ungroup() %>% 
+  group_by(speaker_belief) %>% 
+  summarize(mean_prob = mean(ah_prob),
+            prob_ci_low = ci.low(ah_prob),
+            prob_ci_high = ci.high(ah_prob)) %>%  
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+
+bare_sp_plot <- ggplot(bare_sp %>% 
+                      mutate(speaker_belief=fct_relevel(speaker_belief, "p", "not p", "?")),
+                    aes(x=speaker_belief, y=mean_prob, fill=cbPalette[2])) +
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=prob_YMin,
+                    ymax=prob_YMax),
+                width=.2) +
+  scale_fill_manual(values=cbPalette[2],
+                    name="Predicate",
+                    guide="none") +
+  scale_x_discrete(name="Speaker belief") +
+  ylab("Production probability") +
+  theme(axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        axis.title.x = element_text(size = 16))
+bare_sp_plot
+ggsave(bare_sp_plot,file="../graphs/chemo_production/cogsci_talk/production_bare_sp.pdf",
+       width=6,height=4)
+
+##### know ----
+know <- all_predictives %>% 
+  filter(predicate=="know") %>% 
+  group_by(seed) %>%
+  mutate(marg_prob = sum(prob)) %>% # how likely is Polar 
+  ungroup() %>% 
+  group_by(seed, utterance_type, speaker_belief) %>% 
+  mutate(sp_prob = sum(prob)/marg_prob) %>% 
+  ungroup() %>% 
+  group_by(utterance_type, speaker_belief) %>% 
+  summarize(mean_prob = mean(sp_prob),
+            prob_ci_low = ci.low(sp_prob),
+            prob_ci_high = ci.high(sp_prob)) %>%  
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+
+know_plot <- ggplot(know %>% 
+                      mutate(speaker_belief=fct_relevel(speaker_belief, "p", "not p", "?"),
+                             utterance_type=fct_relevel(utterance_type, "p", "not p")),
+                    aes(x=speaker_belief, y=mean_prob, fill=cbPalette[4])) +
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=prob_YMin,
+                    ymax=prob_YMax),
+                width=.2) +
+  scale_fill_manual(values=cbPalette[4],
+                    name="Predicate",
+                    guide="none") +
+  facet_grid(.~utterance_type) +
+  scale_x_discrete(name="Speaker belief") +
+  ylab("Production probability") +
+  theme(axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        axis.title.x = element_text(size=16))
+know_plot
+ggsave(know_plot,file="../graphs/chemo_production/cogsci_talk/production_know_sp.pdf",
+       width=6,height=4)
 
 ### simulation ----
 sp_belief <- "dances"
@@ -294,8 +408,7 @@ speaker_belief_comparison <- ggplot(data = sp_summary_combined,
                     guide="none") +
   scale_alpha_discrete(range=c(.9,.4),
                        labels=c("high prob", "low prob"),
-                       name="prior belief in\nembedded content",
-                       guide="none") +
+                       name="prior belief in\nembedded content") +
   facet_grid(polarity ~ predicate)+
              # labeller = content_predicate_labeller) +
   scale_y_continuous(limits = c(0,1)) + 
@@ -307,7 +420,162 @@ speaker_belief_comparison <- ggplot(data = sp_summary_combined,
         legend.title=element_text(size=12),
         legend.text=element_text(size=12))
 speaker_belief_comparison
-ggsave(speaker_belief_comparison, file="../graphs/chemo_production/model_eval/sp_belief_comparison.pdf", width=7, height=4)
+ggsave(speaker_belief_comparison, file="../graphs/chemo_production/cogsci_model_eval/sp_belief_comparison_legend.pdf", width=8, height=4)
+
+##### collapse prior (by predicates) ----
+
+sp_summary_by_predicate <- sp %>% 
+  group_by(polarity, predicate) %>% 
+  summarize(mean_prob = mean(prob),
+            prob_ci_low = ci.low(prob),
+            prob_ci_high = ci.high(prob)) %>%  
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+sp_summary_by_predicate$condition = "model"
+
+empirical_speaker_by_predicate <- empirical %>% 
+  filter(predicate %in% c("Polar", "know", "think")) %>% 
+  mutate(prior_condition = gsub("^([A-Za-z]+)_([A-Za-z]+)", "\\2", item)) %>% 
+  group_by(predicate,polarity) %>%
+  summarize(mean_prob = mean(speaker_response),
+            prob_ci_low = ci.low(speaker_response),
+            prob_ci_high = ci.high(speaker_response)) %>% 
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+empirical_speaker_by_predicate$condition = "empirical"
+
+sp_summary_by_predicate <- rbind(sp_summary_by_predicate, empirical_speaker_by_predicate) %>% 
+  mutate(polarity = ifelse(polarity %in% c("Polar","pos"), "pos", "neg"),
+         polarity = ifelse(polarity == "pos", "p", "not p"))
+
+comparison_by_predicate <- ggplot(data = sp_summary_by_predicate,
+                                    mapping = aes(x = condition,
+                                                  y = mean_prob,
+                                                  fill = predicate)) +
+  geom_bar(stat="identity",
+           width = 0.8,
+           color = "black") +
+  geom_errorbar(aes(ymin=prob_YMin,
+                    ymax=prob_YMax),
+                width=.2) +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.7,
+             color = "grey",
+             linetype = "dashed") +
+  scale_fill_manual(values=cbPalette[2:4],
+                    labels=c("simple", "think", "know"),
+                    guide="none") +
+  facet_grid(polarity ~ predicate)+
+  # labeller = content_predicate_labeller) +
+  scale_y_continuous(limits = c(0,1)) + 
+  labs(x = "",
+       y = "Speaker belief\nin the embedded content") +
+  theme(axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        legend.title=element_text(size=12),
+        legend.text=element_text(size=12))
+comparison_by_predicate
+ggsave(comparison_by_predicate, file="../graphs/chemo_production/cogsci_talk/sp_belief_comparison_by_predicate.pdf", width=6, height=4)
+
+
+comparison_by_condition <- ggplot(data = sp_summary_by_predicate,
+                                  mapping = aes(x = condition,
+                                                y = mean_prob,
+                                                fill = predicate)) +
+  geom_bar(stat="identity",
+           position = position_dodge2(preserve = "single"),
+           width = 0.8,
+           color = "black") +
+  geom_errorbar(aes(ymin=prob_YMin,
+                    ymax=prob_YMax),
+                position=position_dodge(width=0.8),
+                width=.2) +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.7,
+             color = "grey",
+             linetype = "dashed") +
+  scale_fill_manual(values=cbPalette[2:4],
+                    labels=c("simple", "think", "know")) +
+  facet_grid(polarity ~ .)+
+  # labeller = content_predicate_labeller) +
+  scale_y_continuous(limits = c(0,1)) + 
+  labs(x = "",
+       y = "Speaker belief\nin the embedded content") +
+  theme(axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        legend.title=element_text(size=12),
+        legend.text=element_text(size=12),
+        legend.position="top")
+comparison_by_condition
+ggsave(comparison_by_condition, file="../graphs/chemo_production/cogsci_talk/sp_belief_comparison_by_condition.pdf", width=6, height=4)
+
+
+##### collapse predicates (by prior) ----
+sp_summary_by_prior <- sp %>% 
+  mutate(polarity = ifelse(polarity %in% c("Polar","pos"), "pos", "neg")) %>% 
+  group_by(prior_condition, polarity) %>% 
+  summarize(mean_prob = mean(prob),
+            prob_ci_low = ci.low(prob),
+            prob_ci_high = ci.high(prob)) %>%  
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+sp_summary_by_prior$condition = "model"
+
+empirical_speaker_by_prior <- empirical %>% 
+  filter(predicate %in% c("Polar", "know", "think")) %>% 
+  mutate(polarity = ifelse(polarity %in% c("Polar","pos"), "pos", "neg")) %>% 
+  mutate(prior_condition = gsub("^([A-Za-z]+)_([A-Za-z]+)", "\\2", item)) %>% 
+  mutate(prior_condition = case_when(polarity=="neg" & prior_condition=="H" ~ "L",
+                                     polarity=="neg" & prior_condition=="L" ~ "H",
+                                     TRUE ~ prior_condition)) %>% 
+  group_by(prior_condition,polarity) %>%
+  summarize(mean_prob = mean(speaker_response),
+            prob_ci_low = ci.low(speaker_response),
+            prob_ci_high = ci.high(speaker_response)) %>% 
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+empirical_speaker_by_prior$condition = "empirical"
+
+sp_summary_by_prior <- rbind(sp_summary_by_prior, empirical_speaker_by_prior) %>% 
+  mutate(polarity = ifelse(polarity == "pos", "p", "not p"))
+
+comparison_by_prior <- ggplot(data = sp_summary_by_prior %>% 
+                                mutate(prior_condition = fct_relevel(prior_condition, "L", "H")),
+                                    mapping = aes(x = condition,
+                                                  y = mean_prob,
+                                                  alpha = prior_condition)) +
+  geom_bar(stat="identity",
+           position = position_dodge2(preserve = "single"),
+           width = 0.8,
+           color = "black") +
+  geom_errorbar(aes(ymin=prob_YMin,
+                    ymax=prob_YMax),
+                position=position_dodge(width=0.8),
+                width=.2) +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.7,
+             color = "grey",
+             linetype = "dashed") +
+  scale_alpha_discrete(range=c(.9,.4),
+                       labels=c("low prob", "high prob"),
+                       name="prior belief in\nembedded content") +
+  facet_grid(polarity ~ .)+
+  scale_y_continuous(limits = c(0,1)) + 
+  labs(x = "",
+       y = "Speaker belief\nin the embedded content") +
+  theme(axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        legend.title=element_text(size=12),
+        legend.text=element_text(size=12))
+comparison_by_prior
+ggsave(comparison_by_prior, file="../graphs/chemo_production/cogsci_talk/sp_belief_comparison_by_prior.pdf", width=8, height=4)
 
 #### line plot ----
 # not used
@@ -361,6 +629,154 @@ ggsave(speaker_belief_comparison, file="../graphs/chemo_production/model_eval/sp
 #                      name = "Posterior speaker belief\nin the embedded content") +
 #   scale_x_continuous(breaks=seq(0,1,by=0.2),
 #                      name = "Rating of prior belief in the embedded content")
+
+### plots for talk intro ----
+#### predicates ----
+binary_predicates <- data.frame(predicate = c("think", "know"), mean_prob = 0:1)
+binary_predicate_plot<- ggplot(data = binary_predicates %>% 
+                                 mutate(predicate = fct_relevel(predicate, "think", "know")),
+                        mapping = aes(x = predicate,
+                                      y = mean_prob,
+                                      fill = predicate)) +
+  geom_bar(stat="identity",
+           width = 0.8,
+           color = "black") +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.7,
+             color = "grey",
+             linetype = "dashed") +
+  scale_fill_manual(values=cbPalette[3:4],
+                    labels=c("think", "know"),
+                    guide="none")+
+  scale_y_continuous(limits = c(0,1)) + 
+  labs(x = "",
+       y = "Speaker belief in the\nembedded content") +
+  theme(axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        legend.title=element_text(size=12),
+        legend.text=element_text(size=12))
+binary_predicate_plot
+ggsave(binary_predicate_plot, file="../graphs/chemo_production/cogsci_talk/binary_predicate.pdf", width=6, height=4)
+
+know_think <- empirical %>% 
+  filter(predicate %in% c("know", "think")) %>% 
+  # mutate(polarity = ifelse(polarity %in% c("Polar","pos"), "pos", "neg")) %>% 
+  # mutate(prior_condition = gsub("^([A-Za-z]+)_([A-Za-z]+)", "\\2", item)) %>% 
+  # mutate(prior_condition = case_when(polarity=="neg" & prior_condition=="H" ~ "L",
+  #                                    polarity=="neg" & prior_condition=="L" ~ "H",
+  #                                    TRUE ~ prior_condition)) %>% 
+  group_by(predicate) %>%
+  summarize(mean_prob = mean(speaker_response),
+            prob_ci_low = ci.low(speaker_response),
+            prob_ci_high = ci.high(speaker_response)) %>% 
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+
+predicate_plot<- ggplot(data = know_think %>% 
+                          mutate(predicate=fct_relevel(predicate, "think", "know")),
+                                  mapping = aes(x = predicate,
+                                                y = mean_prob,
+                                                fill = predicate)) +
+  geom_bar(stat="identity",
+           width = 0.5,
+           color = "black") +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.7,
+             color = "grey",
+             linetype = "dashed") +
+  scale_fill_manual(values=cbPalette[3:4],
+                    labels=c("think", "know"),
+                    guide="none")+
+  scale_y_continuous(limits = c(0,1)) + 
+  labs(x = "",
+       y = "",
+       title= "") +
+  theme(axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        legend.title=element_text(size=12),
+        legend.text=element_text(size=14))
+predicate_plot
+ggsave(predicate_plot, file="../graphs/chemo_production/cogsci_talk/predicate_no_title.pdf", width=4, height=4)
+
+#### prior ----
+prior <- empirical %>% 
+  filter(predicate %in% c("know")) %>% 
+  mutate(prior_condition = gsub("^([A-Za-z]+)_([A-Za-z]+)", "\\2", item),
+         item = gsub("^([A-Za-z]+)_([A-Za-z]+)", "\\1", item)) %>%
+  mutate(prior_condition = case_when(polarity=="neg" & prior_condition=="H" ~ "L",
+                                     polarity=="neg" & prior_condition=="L" ~ "H",
+                                     TRUE ~ prior_condition)) %>%
+  filter(item=="Josie" & polarity == "pos") %>% 
+  group_by(prior_condition) %>%
+  summarize(mean_prob = mean(speaker_response),
+            prob_ci_low = ci.low(speaker_response),
+            prob_ci_high = ci.high(speaker_response)) %>% 
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+
+
+prior_plot<- ggplot(data = prior %>% 
+                      mutate(prior_condition = fct_relevel(prior_condition, "L", "H")),
+                        mapping = aes(x = prior_condition,
+                                      y = mean_prob,
+                                      alpha = prior_condition)) +
+  geom_bar(stat="identity",
+           width = 0.5,
+           color = "black") +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.7,
+             color = "grey",
+             linetype = "dashed") +
+  scale_alpha_discrete(range=c(.9,.4),
+                       labels=c("high prob", "low prob"),
+                       name="prior belief in\nembedded content",
+                       guide="none") +
+  scale_y_continuous(limits = c(0,1)) +
+  scale_x_discrete(labels=c("German", "Cuban")) +
+  labs(x = "",
+       y = "",
+       title = "Ascribed speaker belief in the\nembedded content(by prior)") +
+  theme(axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        legend.title=element_text(size=12),
+        legend.text=element_text(size=14))
+prior_plot
+ggsave(prior_plot, file="../graphs/chemo_production/cogsci_talk/prior.pdf", width=4, height=4)
+
+#### at-issueness ----
+at_issue <- data.frame(ai = c("At-issue", "Not at-issue"), mean_prob = c(0.3,0.7))
+at_issue_plot<- ggplot(data = at_issue,
+                               mapping = aes(x = ai,
+                                             y = mean_prob,
+                                             alpha = ai)) +
+  geom_bar(stat="identity",
+           width = 0.5,
+           color = "black") +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.7,
+             color = "grey",
+             linetype = "dashed") +
+  scale_alpha_discrete(range=c(.9,.4),
+                       labels=c("At-issue", "Not at-issue"),
+                       name="At-issueness of the embedded clause",
+                       guide="none") +
+  scale_y_continuous(limits = c(0,1)) +
+  scale_x_discrete(labels=c("JULIAN", "KNOW")) +
+  labs(x = "",
+       y = "",
+       title = "") +
+  theme(axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        legend.title=element_text(size=12),
+        legend.text=element_text(size=12))
+at_issue_plot
+ggsave(at_issue_plot, file="../graphs/chemo_production/cogsci_talk/at_issue_no_title.pdf", width=4, height=4)
 
 ### marginal ah_belief ----
 listener_ah_predictives <- data.frame(seed = character(), item = character(), utterance = character(), ah_belief = character(), prob = numeric())
@@ -421,7 +837,8 @@ empirical_ah$condition = "empirical"
 ah_summary_combined <- rbind(ah_summary_binary, empirical_ah) %>% 
   mutate(polarity = ifelse(polarity == "pos", "p", "not p"))
 
-ah_belief_comparison <- ggplot(data = ah_summary_combined,
+ah_belief_comparison <- ggplot(data = ah_summary_combined %>% 
+                                 mutate(prior_condition = fct_relevel(prior_condition, "L","H")),
                                     mapping = aes(x = condition,
                                                   y = mean_prob,
                                                   alpha = prior_condition,
@@ -442,7 +859,7 @@ ah_belief_comparison <- ggplot(data = ah_summary_combined,
                     labels=c("think", "know"),
                     guide="none") +
   scale_alpha_discrete(range=c(.9,.4),
-                       labels=c("high prob", "low prob"),
+                       labels=c("low prob", "high prob"),
                        name="prior belief in\nembedded content",) +
   facet_grid(polarity ~ predicate)+
   # labeller = content_predicate_labeller) +
@@ -455,7 +872,162 @@ ah_belief_comparison <- ggplot(data = ah_summary_combined,
         legend.title=element_text(size=12),
         legend.text=element_text(size=12))
 ah_belief_comparison
-ggsave(ah_belief_comparison, file="../graphs/chemo_production/model_eval/ah_belief_comparison.pdf", width=7, height=4)
+ggsave(ah_belief_comparison, file="../graphs/chemo_production/cogsci_talk/ah_belief_comparison.pdf", width=7, height=4)
+
+
+##### collapse prior (by predicates) ----
+
+ah_summary_by_predicate <- ah %>% 
+  group_by(polarity, predicate) %>% 
+  summarize(mean_prob = mean(prob),
+            prob_ci_low = ci.low(prob),
+            prob_ci_high = ci.high(prob)) %>%  
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+ah_summary_by_predicate$condition = "model"
+
+ah_empirical_speaker_by_predicate <- empirical %>% 
+  filter(predicate %in% c("know", "think")) %>% 
+  mutate(prior_condition = gsub("^([A-Za-z]+)_([A-Za-z]+)", "\\2", item)) %>% 
+  group_by(predicate,polarity) %>%
+  summarize(mean_prob = mean(ah_response),
+            prob_ci_low = ci.low(ah_response),
+            prob_ci_high = ci.high(ah_response)) %>% 
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+ah_empirical_speaker_by_predicate$condition = "empirical"
+
+ah_summary_by_predicate <- rbind(ah_summary_by_predicate, ah_empirical_speaker_by_predicate) %>% 
+  mutate(polarity = ifelse(polarity %in% c("Polar","pos"), "pos", "neg"),
+         polarity = ifelse(polarity == "pos", "p", "not p"))
+
+ah_comparison_by_predicate <- ggplot(data = ah_summary_by_predicate,
+                                  mapping = aes(x = condition,
+                                                y = mean_prob,
+                                                fill = predicate)) +
+  geom_bar(stat="identity",
+           width = 0.8,
+           color = "black") +
+  geom_errorbar(aes(ymin=prob_YMin,
+                    ymax=prob_YMax),
+                width=.2) +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.7,
+             color = "grey",
+             linetype = "dashed") +
+  scale_fill_manual(values=cbPalette[3:5],
+                    labels=c("think", "know"),
+                    guide="none") +
+  facet_grid(polarity ~ predicate)+
+  # labeller = content_predicate_labeller) +
+  scale_y_continuous(limits = c(0,1)) + 
+  labs(x = "",
+       y = "Speaker belief\nin the embedded content") +
+  theme(axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        legend.title=element_text(size=12),
+        legend.text=element_text(size=12))
+ah_comparison_by_predicate
+ggsave(ah_comparison_by_predicate, file="../graphs/chemo_production/cogsci_talk/ah_belief_comparison_by_predicate.pdf", width=6, height=4)
+
+
+ah_comparison_by_condition <- ggplot(data = ah_summary_by_predicate,
+                                  mapping = aes(x = condition,
+                                                y = mean_prob,
+                                                fill = predicate)) +
+  geom_bar(stat="identity",
+           position = position_dodge2(preserve = "single"),
+           width = 0.8,
+           color = "black") +
+  geom_errorbar(aes(ymin=prob_YMin,
+                    ymax=prob_YMax),
+                position=position_dodge(width=0.8),
+                width=.2) +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.7,
+             color = "grey",
+             linetype = "dashed") +
+  scale_fill_manual(values=cbPalette[3:4],
+                    labels=c("think", "know")) +
+  facet_grid(polarity ~ .)+
+  # labeller = content_predicate_labeller) +
+  scale_y_continuous(limits = c(0,1)) + 
+  labs(x = "",
+       y = "Speaker belief\nin the embedded content") +
+  theme(axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        legend.title=element_text(size=12),
+        legend.text=element_text(size=12),
+        legend.position="top")
+ah_comparison_by_condition
+ggsave(ah_comparison_by_condition, file="../graphs/chemo_production/cogsci_talk/ah_belief_comparison_by_condition.pdf", width=6, height=4)
+
+
+##### collapse predicates (by prior) ----
+ah_summary_by_prior <- ah %>% 
+  group_by(prior_condition, polarity) %>% 
+  summarize(mean_prob = mean(prob),
+            prob_ci_low = ci.low(prob),
+            prob_ci_high = ci.high(prob)) %>%  
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+ah_summary_by_prior$condition = "model"
+
+ah_empirical_speaker_by_prior <- empirical %>% 
+  filter(predicate %in% c("know", "think")) %>% 
+  mutate(prior_condition = gsub("^([A-Za-z]+)_([A-Za-z]+)", "\\2", item)) %>% 
+  mutate(prior_condition = case_when(polarity=="neg" & prior_condition=="H" ~ "L",
+                                     polarity=="neg" & prior_condition=="L" ~ "H",
+                                     TRUE ~ prior_condition)) %>% 
+  group_by(prior_condition,polarity) %>%
+  summarize(mean_prob = mean(ah_response),
+            prob_ci_low = ci.low(ah_response),
+            prob_ci_high = ci.high(ah_response)) %>% 
+  ungroup() %>% 
+  mutate(prob_YMin = mean_prob - prob_ci_low,
+         prob_YMax = mean_prob + prob_ci_high)
+ah_empirical_speaker_by_prior$condition = "empirical"
+
+ah_summary_by_prior <- rbind(ah_summary_by_prior, ah_empirical_speaker_by_prior) %>% 
+  mutate(polarity = ifelse(polarity == "pos", "p", "not p"))
+
+ah_comparison_by_prior <- ggplot(data = ah_summary_by_prior %>% 
+                                   mutate(prior_condition = fct_relevel(prior_condition, "L", "H")),
+                              mapping = aes(x = condition,
+                                            y = mean_prob,
+                                            alpha = prior_condition)) +
+  geom_bar(stat="identity",
+           position = position_dodge2(preserve = "single"),
+           width = 0.8,
+           color = "black") +
+  geom_errorbar(aes(ymin=prob_YMin,
+                    ymax=prob_YMax),
+                position=position_dodge(width=0.8),
+                width=.2) +
+  geom_hline(yintercept = 0.5,
+             alpha = 0.7,
+             color = "grey",
+             linetype = "dashed") +
+  scale_alpha_discrete(range=c(.9,.4),
+                       labels=c("low prob", "high prob"),
+                       name="prior belief in\nembedded content") +
+  facet_grid(polarity ~ .)+
+  scale_y_continuous(limits = c(0,1)) + 
+  labs(x = "",
+       y = "Speaker belief\nin the embedded content") +
+  theme(axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 16),
+        legend.title=element_text(size=12),
+        legend.text=element_text(size=12))
+ah_comparison_by_prior
+ggsave(ah_comparison_by_prior, file="../graphs/chemo_production/cogsci_talk/ah_belief_comparison_by_prior.pdf", width=8, height=4)
+
 
 ### simulation ----
 # only infer speaker belief.
