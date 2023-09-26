@@ -1,0 +1,20 @@
+var predictives = map(function(d) {
+
+var m = extend(model(estimates))
+var speaker_belief = literalListener(d.utterance, d.item, m, estimates)
+
+console.log(speaker_belief)
+
+// get the probability of each state
+var belief_dist = speaker_belief.params.samples
+console.log(Object.values(belief_dist))
+// var score = map(function(i){ return (i.val)/10*i.prob},  Object.values(belief_dist))
+// // console.log(score)
+// var prob = reduce(function(acc, i) {return acc + i},0, score)
+
+// console.log(prob)
+return {utterance: d.utterance, item: d.item, prob: belief_dist}
+  
+}, df)
+
+predictives

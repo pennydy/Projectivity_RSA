@@ -105,7 +105,7 @@ graphPredictives_test(thresholdMixPredictives, df_collapsed)
 
 ggsave("graphs/threshold_mix/thresholdMix-full_predictive-emprical_combined.pdf", width = 8, height = 4, units = "in")
 
-# 2. threshold_cg ----
+# 2. threshold_cg (wonky common ground) ----
 ## DATA ----
 df <- read.csv("../../data/2_listenerSpeakerAH/main/bda_data.csv") %>% 
   mutate(speaker_response = ifelse(polarity=="neg", 1-speaker_response, speaker_response),
@@ -114,7 +114,7 @@ df <- read.csv("../../data/2_listenerSpeakerAH/main/bda_data.csv") %>%
   filter(predicate %in% c("think", "know", "Polar")) %>% 
   # filter(item %in% c( "Charley_H", "Charley_L","Frank_H", "Frank_L","Danny_H", "Danny_L", "Emily_H", "Emily_L","Emma_H", "Emma_L", "Grace_H", "Grace_L", "Isabella_H","Isabella_L","Jackson_H","Jackson_L", "Jayden_H","Jayden_L","Jon_H","Jon_L","Josh_H","Josh_L","Josie_H","Josie_L","Julian_H", "Julian_L","Mary_H","Mary_L","Mia_H","Mia_L"))
   # filter(item %in% c( "Charley_H", "Charley_L","Frank_H", "Frank_L","Danny_H", "Danny_L", "Emily_H", "Emily_L","Emma_H", "Emma_L", "Grace_H", "Grace_L", "Isabella_H","Isabella_L","Jackson_H","Jackson_L", "Jayden_H","Jayden_L","Jon_H","Jon_L"))
-  filter(item %in% c("Frank_H", "Frank_L","Danny_H", "Danny_L", "Emily_H", "Emily_L","Isabella_H","Isabella_L","Jon_H","Jon_L", "Jayden_H", "Jayden_L"))
+  filter(item %in% c("Frank_H", "Frank_L","Danny_H", "Danny_L", "Emily_H", "Emily_L","Emma_H", "Emma_L", "Grace_H", "Grace_L", "Isabella_H","Isabella_L","Jon_H","Jon_L", "Jayden_H", "Jayden_L","Josh_H","Josh_L"))
   # filter(item %in% training_items)
 
 
@@ -124,7 +124,7 @@ model <- makeModel("threshold_cg.txt", "threshold_cg")
 
 thresholdCgScript <- wrapInference(model,"threshold_cg", 100, 5, 10) 
 
-thresholdCgPosteriors <- webppl(thresholdCgScript, data = df, data_var = "df", random_seed = 1024)
+thresholdCgPosteriors <- webppl(thresholdCgScript, data = df, data_var = "df", random_seed = 789)
 
 saveRDS(thresholdCgPosteriors, "results/thresholdCgPosteriors_smallTest.RDS")
 
@@ -969,3 +969,149 @@ sp <- thresholdMixProductionPredictives %>%
 graphPredictives(sp %>% select(-prior_condition), df_speaker)
 
 ggsave("graphs/simple_chemo_production/simplechemoProduction_predictive-emprical-1234sp.pdf", width = 6, height = 3, units = "in")
+
+
+# 8. threshold_LL ----
+## DATA ----
+df <- read.csv("../../data/2_listenerSpeakerAH/main/bda_data.csv") %>% 
+  mutate(speaker_response = ifelse(polarity=="neg", 1-speaker_response, speaker_response),
+         ah_response = ifelse(polarity=="neg", 1-ah_response, ah_response)) %>%
+  mutate(speaker_response_bin = ifelse(speaker_response == 1, 10, trunc(speaker_response * 10) + 1)) %>%
+  filter(predicate %in% c("think", "know", "Polar")) %>% 
+  filter(item %in% training_items)
+
+df_test <- head(df, 100)
+
+
+## INFERENCE ----
+model <- makeModel("threshold_LL.txt", "threshold_LL")
+
+thresholdLLScript <- wrapInference(model,"threshold_LL", 100, 5, 10) 
+
+thresholdLLPosteriors <- webppl(thresholdLLScript, data = df_test, data_var = "df", random_seed = 6789)
+
+saveRDS(thresholdLLPosteriors, "results/thresholdCgPosteriors_smallTest.RDS")
+
+# plot the posterior
+graphPosteriors(thresholdLLPosteriors) + ggtitle("Posteriors")
+
+ggsave("graphs/thresholdLL_posteriors.pdf", width = 6, height = 3, units = "in")
+
+
+## PREDICTIVES ----
+df <- read.csv("../../data/2_listenerSpeakerAH/main/bda_data.csv") %>% 
+  filter(predicate %in% c("think", "know", "Polar"))
+
+df_collapsed <- df %>% 
+  group_by(predicate, item, polarity) %>%
+  summarize(prob = mean(speaker_response)) %>% 
+  mutate(polarity = case_when(polarity=="neg" ~ "Embedded: not p",
+                              polarity=="Polar" ~ "Polar",
+                              TRUE ~ "Embedded: p"))
+
+# read the posteriors instead of rerunning
+# thresholdLLPosteriors <- readRDS("results/thresholdLLPosteriors.RDS")
+
+thresholdLLEstimates <- getEstimates(thresholdLLPosteriors) 
+
+thresholdLLPredictionScript <- wrapPrediction(model, "threshold_LL", thresholdLLEstimates)
+
+thresholdLLPredictives <- webppl(thresholdLLPredictionScript, data = unique(df %>% select(utterance, item)), data_var = "df")
+
+thresholdLLPredictives <- thresholdLLPredictives %>% 
+  mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "Embedded: not p",
+                              str_detect(utterance, "BARE") ~ "Polar",
+                              TRUE ~ "Embedded: p"),
+         predicate = case_when(str_detect(utterance, "know") ~ "know",
+                               str_detect(utterance, "think") ~ "think",
+                               TRUE ~ "Polar"),
+         prob = case_when(str_detect(utterance, "doesnt") ~ 1 - prob,
+                          TRUE ~ prob),
+         polarity = fct_relevel(polarity, "Polar", "Embedded: p", "Embedded: not p" ),
+         predicate = fct_relevel(predicate, "Polar", "think", "know")) %>%
+  select(-utterance)
+
+graphPredictives_test(thresholdLLPredictives, df_collapsed)
+
+
+ggsave("graphs/thresholdLL_predictive-empirical.pdf", width = 8, height = 4, units = "in")
+
+### simulation plot ----
+
+# get mean priors
+priors_by_condition <- read.csv("../interrogatives/data/condition-priors.csv") %>% 
+  rename(prior_mean = prior_rating,
+         prior = item_condition) %>% 
+  mutate(prior_neg_mean = 1 - prior_mean) %>% 
+  rename(item = prior)
+
+combined_prior <- mean(priors_by_condition$prior_mean)
+combined_neg_prior <- mean(priors_by_condition$prior_neg_mean)
+
+observed_sp <- df_collapsed %>% 
+  mutate(type = "observation")
+sp <- thresholdLLPredictives %>% 
+  mutate(type="prediction")
+
+combine_sp <- rbind(sp, observed_sp) %>% 
+  left_join(priors_by_condition, by=c("item")) %>% 
+  mutate(prior_mean = ifelse(polarity=="Embedded: not p", prior_neg_mean, prior_mean)) %>% 
+  select(-prior_neg_mean) %>% 
+  mutate(predicate=fct_relevel(predicate, "Polar", "think","know"),
+         polarity=fct_relevel(polarity, "Polar", "Embedded: p", "Embedded: not p"))
+
+source("../interrogatives/helpers.R")
+
+mean_predicted_sp <- sp %>%
+  group_by(predicate, polarity) %>%  # collapse prior condition
+  summarize(mean_posterior_belief = mean(prob),
+            speaker_ci_low = ci.low(prob),
+            speaker_ci_high = ci.high(prob)) %>%
+  ungroup() %>%
+  mutate(speaker_YMin = mean_posterior_belief - speaker_ci_low,
+         speaker_YMax = mean_posterior_belief + speaker_ci_high,
+         type="prediction")
+
+mean_empirical_sp <- df_collapsed %>%
+  group_by(predicate, polarity) %>%  # collapse prior condition
+  summarize(mean_posterior_belief = mean(prob),
+            speaker_ci_low = ci.low(prob),
+            speaker_ci_high = ci.high(prob)) %>%
+  ungroup() %>%
+  mutate(speaker_YMin = mean_posterior_belief - speaker_ci_low,
+         speaker_YMax = mean_posterior_belief + speaker_ci_high,
+         type="observation")
+
+mean_sp <- rbind(mean_empirical_sp, mean_predicted_sp) %>% 
+  mutate(predicate=fct_relevel(predicate, "Polar", "think","know"),
+         polarity=fct_relevel(polarity, "Polar", "Embedded: p", "Embedded: not p"))
+
+
+ggplot(combine_sp,aes(x=prior_mean,y=prob, color=predicate)) +
+  geom_point(aes(shape=type),alpha=0.6) +
+  geom_smooth(aes(linetype=type),method="lm", fullrange=TRUE) +
+  geom_point(data=mean_sp,
+             aes(shape=type,
+                 x=ifelse(polarity=="Embedded: not p", combined_neg_prior, combined_prior),
+                 y=mean_posterior_belief,
+                 fill=predicate),size=2,color="black",stroke=1) +
+  geom_errorbar(data=mean_sp,
+                aes(linetype=type,
+                    x=ifelse(polarity=="Embedded: not p", combined_neg_prior, combined_prior),
+                    y=mean_posterior_belief,
+                    ymin=speaker_YMin, ymax=speaker_YMax),
+                width=0.05,
+                color="black") +
+  facet_grid(.~polarity) +
+  scale_color_manual(values=c("#56B4E9", "#009E73", "#F0E442")) +
+  scale_fill_manual(values=c("#56B4E9", "#009E73", "#F0E442")) +
+  scale_linetype()+
+  scale_shape()+
+  theme_bw()+
+  scale_y_continuous(limits = c(0,1),
+                     breaks=seq(0,1,by=.25),
+                     name = "Posterior speaker belief\nin the embedded content") +
+  scale_x_continuous(breaks=seq(0,1,by=0.2),
+                     name = "Rating of prior belief in the embedded content") 
+ggsave("./graphs/threshold_cg/PL_empirical-predicted-smallTest.pdf", width=8,height=3)
+

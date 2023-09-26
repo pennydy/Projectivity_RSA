@@ -30,6 +30,27 @@ belief_data <- behavioral_results %>%
          # itemType = ifelse(prior_condition == "low_prob", "L", "H"),
          polarity = case_when(str_detect(trigger, "neg") ~ "neg",
                               str_detect(trigger, "pos") ~ "pos",
-                              TRUE ~ "Polar")) %>% 
-  select(workerid, predicate, polarity, item, itemType, speaker_response, ah_response)
-write.csv(belief_data, "../../data/2_listenerSpeakerAH/main/belief_data.csv", row.names = FALSE)
+                              TRUE ~ "Polar"),
+         # to match the itemNr in the prior file
+         item_id = case_when(item == "frank" ~ 12,
+                             item == "isabella" ~ 7,
+                             item == "zoe" ~ 10,
+                             item == "emma" ~ 3,
+                             item == "tony" ~ 15,
+                             item == "jackson" ~ 13,
+                             item == "charley" ~ 20,
+                             item == "mary" ~ 1,
+                             item == "jayden" ~ 14,
+                             item == "grace" ~ 9,
+                             item == "mia" ~ 6,
+                             item == "emily" ~ 8,
+                             item == "danny" ~ 11,
+                             item == "julian" ~ 18,
+                             item == "josh" ~ 16,
+                             item == "olivia" ~ 4,
+                             item == "jon" ~ 19,
+                             item == "owen" ~ 17,
+                             item == "josie" ~ 2,
+                             item == "sophia" ~ 5)) %>% 
+  select(workerid, predicate, polarity, item, itemType, speaker_response, ah_response, item_id)
+write.csv(belief_data, "../../data/2_listenerSpeakerAH/main/belief_data.csv", row.names = TRUE)
