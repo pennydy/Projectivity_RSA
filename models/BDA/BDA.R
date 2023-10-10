@@ -980,17 +980,35 @@ df <- read.csv("../../data/2_listenerSpeakerAH/main/bda_data.csv") %>%
   filter(predicate %in% c("think", "know", "Polar")) %>% 
   filter(item %in% training_items)
 
-df_test <- head(df, 100)
+df_know <- df %>% 
+  filter(predicate == "know")
+
+df_bare <- df %>% 
+  filter(predicate == "Polar")
+
+# df_test <- head(df_know, 100)
 
 
 ## INFERENCE ----
 model <- makeModel("threshold_LL.txt", "threshold_LL")
 
-thresholdLLScript <- wrapInference(model,"threshold_LL", 100, 5, 10) 
+thresholdLLScript <- wrapInference(model,"threshold_LL", 1000, 5, 100) 
 
-thresholdLLPosteriors <- webppl(thresholdLLScript, data = df_test, data_var = "df", random_seed = 6789)
+### know ----
+thresholdLLPosteriors <- webppl(thresholdLLScript, data = df_know, data_var = "df", random_seed = 6789)
 
-saveRDS(thresholdLLPosteriors, "results/thresholdCgPosteriors_smallTest.RDS")
+saveRDS(thresholdLLPosteriors, "results/threshold_LL/thresholdLLPosteriors_know_smallTest.RDS")
+
+# plot the posterior
+graphPosteriors(thresholdLLPosteriors) + ggtitle("Posteriors")
+
+ggsave("graphs/thresholdLL_posteriors.pdf", width = 6, height = 3, units = "in")
+
+
+### bare ----
+thresholdLLPosteriors_bare <- webppl(thresholdLLScript, data = df_bare, data_var = "df", random_seed = 6789)
+
+saveRDS(thresholdLLPosteriors_bare, "results/threshold_LL/thresholdLLPosteriors_BARE.RDS")
 
 # plot the posterior
 graphPosteriors(thresholdLLPosteriors) + ggtitle("Posteriors")
@@ -999,8 +1017,10 @@ ggsave("graphs/thresholdLL_posteriors.pdf", width = 6, height = 3, units = "in")
 
 
 ## PREDICTIVES ----
+thresholdLLPosteriors <- readRDS("results/threshold_LL/thresholdLLPosteriors_smallTest.RDS")
 df <- read.csv("../../data/2_listenerSpeakerAH/main/bda_data.csv") %>% 
-  filter(predicate %in% c("think", "know", "Polar"))
+  # filter(predicate %in% c("think", "know", "Polar")) 
+  filter(predicate == "know")
 
 df_collapsed <- df %>% 
   group_by(predicate, item, polarity) %>%
@@ -1018,6 +1038,37 @@ thresholdLLPredictionScript <- wrapPrediction(model, "threshold_LL", thresholdLL
 
 thresholdLLPredictives <- webppl(thresholdLLPredictionScript, data = unique(df %>% select(utterance, item)), data_var = "df")
 
+predictivesTest <- thresholdLLPredictives %>% 
+  unnest("prob") %>% 
+  mutate(score = exp(score)) %>% # back to the prob space
+  group_by(utterance, item) %>% 
+  mutate(sum = sum(score)) %>% 
+  ungroup() %>% 
+  group_by(utterance, item, value) %>% 
+  summarize(value_score = sum(score),
+         prob = value_score/sum) %>% 
+  ungroup() %>% 
+  select(-value_score) %>%
+  unique()
+
+predictivesTest <- predictivesTest %>% 
+  mutate(value = value/10,
+         value_prob = value * prob) %>% 
+  group_by(utterance, item) %>% 
+  summarize(prob = sum(value_prob)) %>% 
+  ungroup()
+  
+knowPredictives <- predictivesTest %>% 
+  mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "Embedded: not p",
+                              TRUE ~ "Embedded: p"),
+         predicate = "know",
+         prob = case_when(str_detect(utterance, "doesnt") ~ 1 - prob,
+                          TRUE ~ prob),
+         polarity = fct_relevel(polarity, "Embedded: p", "Embedded: not p")) %>% 
+  select(-utterance)
+
+graphPredictives_test(knowPredictives, df_collapsed)
+
 thresholdLLPredictives <- thresholdLLPredictives %>% 
   mutate(polarity = case_when(str_detect(utterance, "doesnt") ~ "Embedded: not p",
                               str_detect(utterance, "BARE") ~ "Polar",
@@ -1032,7 +1083,6 @@ thresholdLLPredictives <- thresholdLLPredictives %>%
   select(-utterance)
 
 graphPredictives_test(thresholdLLPredictives, df_collapsed)
-
 
 ggsave("graphs/thresholdLL_predictive-empirical.pdf", width = 8, height = 4, units = "in")
 

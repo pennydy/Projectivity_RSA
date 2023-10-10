@@ -3,7 +3,7 @@ var predictives = map(function(d) {
 var m = extend(model(estimates))
 var speaker_belief = literalListener(d.utterance, d.item, m, estimates)
 
-console.log(speaker_belief)
+// console.log(speaker_belief)
 
 // get the probability of each state
 var belief_dist = speaker_belief.params.samples
