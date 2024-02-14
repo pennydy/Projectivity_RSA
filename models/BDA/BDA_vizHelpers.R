@@ -39,7 +39,8 @@ graphPosteriors <- function(posteriors) {
            facet_wrap(~Parameter, scales = "free") +
            # geom_histogram())
            # geom_density())
-           geom_density(alpha = 0.05))
+           geom_density(alpha = 0.05) +
+           xlab("Parameter value"))
 }
 
 graphJointPosteriors <- function(posteriors) {

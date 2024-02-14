@@ -4,6 +4,10 @@ var model = function(params) {
     // console.log("in model: "+stringify(params))
     return {
       beta_params: {
+        "know_alpha": params.know_alpha,
+        "know_beta": params.know_beta,
+        "think_alpha": params.think_alpha,
+        "think_beta": params.think_beta,
         "bare_alpha": params.bare_alpha,
         "bare_beta": params.bare_beta
       },
@@ -12,6 +16,7 @@ var model = function(params) {
         beliefs: [.1,.2,.3,.4,.5,.6,.7,.8,.9,1]
     }
   }
+
 
 
 var priors = {
@@ -58,15 +63,15 @@ var priors = {
   
   }
   
-// var predicate_thresholds = function(predicate, params) {
+// var predicate_thresholds = function(predicate, model) {
 //     if (predicate == "know") {
-//         return beta(params.know_alpha, params.know_beta)
+//         return beta(model.know_alpha, model.know_beta)
 //     } 
 //     else if (predicate == "think") {
-//         return beta(params.think_alpha, params.think_beta) 
+//         return beta(model.think_alpha, model.think_beta) 
 //     } 
 //     else {
-//       return beta(params.bare_alpha, params.bare_beta)
+//       return beta(model.bare_alpha, model.bare_beta)
 //     }
 //   }
 
@@ -88,35 +93,75 @@ var priors = {
 //     return flip(1-prob)
 //   }
 // }
-  
-var predicate_thresholds = function(model) {
-  // console.log("in predicate_thresholds: ", model.bare_alpha)
-    return beta(model.bare_alpha, model.bare_beta)
+
+// var literalListener = cache(function(utterance, item, model) {
+//   return Infer({method: 'MCMC', samples: 4000, lag: 0, burn: 100, model: function(){
+//       var speaker_belief = categorical({ps:priors[item], 
+//                                       vs:model.beliefs})
+//       factor(meaning(utterance, speaker_belief, model) ? 1 : 0)
+//     // flip(0.1) ? null : condition(meaning(utterance, speaker_belief, params))
+//     // var speaker_belief = speaker_belief==1?10:Math.trunc(Math.trunc(speaker_belief * 100)/10)+1
+//     // return speaker_belief
+//     return speaker_belief * 10
+//   }})
+// })
+
+
+var threshold = function(predicate, model) {
+  if ("predicates_thresholds" in model) {
+    if (predicate == "know") {
+      return model.predicates_thresholds["know"]
+    } else if (predicate == "think") {
+      return model.predicates_thresholds["think"]
+    } else { // BARE
+      return model.predicates_thresholds["bare"]
+    }
+  } else {
+    if (predicate == "know") {
+      return beta({a:model.beta_params["know_alpha"], b:model.beta_params["know_beta"]}) 
+    } else if (predicate == "think") {
+      return beta({a:model.beta_params["think_alpha"], b:model.beta_params["think_beta"]}) 
+    } else { // BARE
+      return beta({a:model.beta_params["bare_alpha"], b:model.beta_params["bare_beta"]})
+    }
+  }
 }
+
 
 var meaning = function(utterance, speaker_belief, model) {
   var splitutt = utterance.split('-')
   var predicate = splitutt[0]
   var content = splitutt[1]
   
-  var speaker_threshold = predicate_thresholds(model)
- // BARE
-  var prob = Math.abs(speaker_threshold - speaker_belief) 
-  return flip(1-prob)
+  var speaker_threshold = threshold(predicate, model)
+  // console.log(predicate, speaker_threshold)
+
+  if (predicate != "BARE") {
+    if (!_.includes(content, "doesnt")) {
+      return speaker_belief > speaker_threshold 
+    } else {
+      return speaker_belief < 1 - speaker_threshold
+    }
+  } else { // BARE
+     var prob = Math.abs(speaker_threshold - speaker_belief) 
+    return flip(1-prob)
+  }
 }
 
-var literalListener = cache(function(utterance, item, model, params) {
-    return Infer({method: 'MCMC', samples: 4000, lag: 0, burn: 100, model: function(){
-        var speaker_belief = categorical({ps:priors[item], 
-                                        vs:model.beliefs})
-        factor(meaning(utterance, speaker_belief, params) ? 1 : 0)
-      // flip(0.1) ? null : condition(meaning(utterance, speaker_belief, params))
-      // var speaker_belief = speaker_belief==1?10:Math.trunc(Math.trunc(speaker_belief * 100)/10)+1
-      // return speaker_belief
-      return speaker_belief * 10
-    }})
-    
-  })
+// if we were to combine threshold function and the meaning function
+// var speaker_threshold = ("bare_threshold" in model) ? model.bare_threshold : beta({a:model.beta_params["bare_alpha"], b:model.beta_params["bare_beta"]})
+//  var prob = Math.abs(speaker_threshold - speaker_belief) 
 
-
+var literalListener = cache(function(utterance, item, model) {
+  return Infer({model: function(){
+      var speaker_belief = categorical({ps:priors[item], 
+                                      vs:model.beliefs})
+      factor(meaning(utterance, speaker_belief, model) ? 1 : 0)
+    // flip(0.1) ? null : condition(meaning(utterance, speaker_belief, params))
+    // var speaker_belief = speaker_belief==1?10:Math.trunc(Math.trunc(speaker_belief * 100)/10)+1
+    // return speaker_belief
+    return speaker_belief * 10
+  }})
+  
+})
 

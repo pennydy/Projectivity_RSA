@@ -77,13 +77,14 @@ for (p in predicates) {
   }
 }
 
-ggplot(thresholds %>% 
-         filter(predicate != "BARE"), aes(x=value)) +
+
+ggplot(thresholds, aes(x=value)) +
   theme_bw() +
   facet_wrap(~predicate, scales="free") +
+  geom_histogram(aes(y=..density..),alpha=0.7) +
   geom_density(alpha=0.05) +
   scale_x_continuous(limits=c(0,1), breaks=seq(0,1,by=0.2), "Threshold value")
-# ggsave("../graphs/threshold_mix_threshold.pdf",width=6,height=2)
+ggsave("../graphs/threshold_mix/threshold_mix_threshold_histogram.pdf",width=6,height=2)
 
 # literal listener ----
 # # testing literal listener
@@ -315,6 +316,7 @@ for (u in utterances) {
 }
 # save the dataframe
 # write.csv(PL, "../results/threshold_mix/PL_bda.csv", row.names=FALSE)
+# PL <- read.csv("../results/threshold_mix/PL_bda.csv")
 
 PL_summary = PL %>% 
   left_join(priors_by_condition, by=c("prior")) %>% 

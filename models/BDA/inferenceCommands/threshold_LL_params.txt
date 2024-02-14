@@ -4,26 +4,28 @@ var stringify = function(x){return JSON.stringify(x)}
 var posteriors = Infer({method: "MCMC", samples: NUM_SAMPLES, lag: LAG, burn: BURN_IN, model: function(){
 
     var p = {
-        // know_alpha: uniformDrift({a: 5, b: 10, w: 0.5}),
-        // know_beta: uniformDrift({a: 0.8, b: 5, w: 0.5}),
-        // think_alpha: uniformDrift({a: 0.8, b: 20, w: 0.2}),
-        // think_beta: uniformDrift({a: 0.8, b: 20, w: 0.2}),
+        know_alpha: uniformDrift({a: 0.8, b: 20, w: 0.2}),
+        know_beta: uniformDrift({a: 0.8, b: 20, w: 0.2}),
+        think_alpha: uniformDrift({a: 0.8, b: 20, w: 0.2}),
+        think_beta: uniformDrift({a: 0.8, b: 20, w: 0.2}),
         bare_alpha: uniformDrift({a: 0.8, b: 20, w: 0.2}),
         bare_beta: uniformDrift({a: 0.8, b: 20, w: 0.2})
     }
-    var m = extend(model(p)) 
+    // var m = extend(model(p)) 
 
-    // var bare_thresholds = function(p) {
-    //   return beta(p.bare_alpha, p.bare_beta)
-    // }
-    // console.log("bare thresholds: ", bare_thresholds)
+    // use the mode of the beta distributions as the threshold (assume a threshold that is shared by the group)
+    var predicates_thresholds = {
+      know: (p.know_alpha < 1) ? 0 : ((p.know_beta < 1) ? 1 : (p.know_alpha - 1) / (p.know_alpha + p.know_beta - 2)),
+      think: (p.think_alpha < 1) ? 0 : ((p.think_beta < 1) ? 1 : (p.think_alpha - 1) / (p.think_alpha + p.think_beta - 2)),
+      bare: (p.bare_alpha < 1) ? 0 : ((p.bare_beta < 1) ? 1 :(p.bare_alpha - 1) / (p.bare_alpha + p.bare_beta - 2))
+    }
+    // console.log(p.bare_alpha, p.bare_beta)
 
-    // var m = extend(model(bare_thresholds(p)))
-    //   console.log(m)
+    var m = extend(model(p), {predicates_thresholds: predicates_thresholds})
 
     mapData({data: df}, function(d){
       // loop through the df dataframe. d: a row of the long-form empirical data
-      var L0 = literalListener(d.utterance, d.item, m, p)
+      var L0 = literalListener(d.utterance, d.item, m)
       // console.log("before sampling from the listenerDist ")
       observe(L0, d.speaker_response_bin)
       // console.log("done sampling from the listenerDist ")
